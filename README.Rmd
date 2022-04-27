@@ -1,0 +1,42 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# PCAoneR
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+PCAoneR brings PCAone algorithms in R by RcppEigen!
+
+## Installation
+
+You can install the development version of PCAoneR from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("Zilong-Li/PCAoneR")
+```
+
+## Example
+
+This is a basic example which shows you how to use PCAoneH:
+
+```{r example}
+library(PCAoneR)
+mat <- matrix(rnorm(100*100), 100, 100)
+res <- PCAoneH(mat, k = 10, l = 10, p = 3)
+str(res)
+```
+

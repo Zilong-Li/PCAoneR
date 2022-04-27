@@ -5,8 +5,9 @@
 
 using Rcpp::List;
 
-//' one pass randomized svd in PCAone, adopted from Yu's paer.
-//'
+using namespace Eigen;
+
+//' one pass randomized svd in PCAone, modified from Yu et al 2017.
 //' @param mat the input matrix.
 //' @param k top k singular values, k << any(dim(mat)).
 //' @param l oversampling.
