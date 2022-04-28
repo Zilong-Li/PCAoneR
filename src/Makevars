@@ -1,6 +1,9 @@
 ## -*- mode: makefile; -*-
 
-PKG_CXXFLAGS = -I../inst/include
+os    := $(shell uname -s)
+ifeq ($(os),Linux)
+	PKG_CXXFLAGS = -fopenmp
+endif
 
 ## With Rcpp 0.11.0 and later, we no longer need to set PKG_LIBS for
 ## Rcpp as there is no user-facing library.

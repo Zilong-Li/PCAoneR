@@ -11,23 +11,24 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// PCAoneH
-List PCAoneH(Eigen::Map<Eigen::MatrixXd> mat, int k, int l, int p);
-RcppExport SEXP _PCAoneR_PCAoneH(SEXP matSEXP, SEXP kSEXP, SEXP lSEXP, SEXP pSEXP) {
+// PCAoneY
+List PCAoneY(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int l, int p, int rand);
+RcppExport SEXP _PCAoneR_PCAoneY(SEXP matSEXP, SEXP kSEXP, SEXP lSEXP, SEXP pSEXP, SEXP randSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd>& >::type mat(matSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< int >::type l(lSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
-    rcpp_result_gen = Rcpp::wrap(PCAoneH(mat, k, l, p));
+    Rcpp::traits::input_parameter< int >::type rand(randSEXP);
+    rcpp_result_gen = Rcpp::wrap(PCAoneY(mat, k, l, p, rand));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_PCAoneR_PCAoneH", (DL_FUNC) &_PCAoneR_PCAoneH, 4},
+    {"_PCAoneR_PCAoneY", (DL_FUNC) &_PCAoneR_PCAoneY, 5},
     {NULL, NULL, 0}
 };
 

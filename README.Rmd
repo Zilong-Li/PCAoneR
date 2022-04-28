@@ -36,7 +36,7 @@ This is a basic example which shows you how to use PCAoneH:
 ```{r example}
 library(PCAoneR)
 mat <- matrix(rnorm(100*100), 100, 100)
-res <- PCAoneH(mat, k = 10, l = 10, p = 3)
+res <- PCAoneY(mat, k = 10, l = 10, p = 3)
 str(res)
 ```
 
