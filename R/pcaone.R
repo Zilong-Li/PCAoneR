@@ -88,8 +88,8 @@ pcaone <- function(A, k=NULL, p=10, q=2, sdist="normal", method = "li") UseMetho
 #' @export
 pcaone.default <- function(A, k=NULL, p=10, q=2, sdist="normal", method = "li")
     {
-        rand <- switch(sdist, normal = 2,  unif = 1, stop("Selected sampling distribution is not supported!"))
-        pcaoneObj <- switch(method, yu = PCAoneY(mat = A, k = k, p = p, l = q, rand = rand))
+        rand <- switch(sdist, normal = 1,  unif = 2, stop("Selected sampling distribution is not supported!"))
+        pcaoneObj <- switch(method, yu = PCAoneYu(mat = A, k = k, p = p, q = q, rand = rand), stop("Method is not supported!"))
         class(pcaoneObj) <- "pcaone"
         return(pcaoneObj)
     }

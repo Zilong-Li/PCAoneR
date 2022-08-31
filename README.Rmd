@@ -30,12 +30,12 @@ devtools::install_github("Zilong-Li/PCAoneR")
 
 ## Example
 
-This is a basic example which shows you how to use PCAoneH:
+This is a basic example which shows you how to use pcaone:
 
 ```{r example}
 library(pcaone)
-mat <- matrix(rnorm(100*100), 100, 100)
-res <- PCAoneY(mat, k = 10, l = 10, p = 3)
+mat <- matrix(rnorm(100*200), 200, 100)
+res <- pcaone(mat, k = 20, method = "yu")
 str(res)
 ```
 

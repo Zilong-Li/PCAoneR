@@ -82,15 +82,19 @@ private:
     using ConstGenericMatrix = const Eigen::Ref<const MatrixType>;
 
     ConstGenericMatrix mat;
-    const Index nrow, ncol, nk, os, size;
+    const Index nrow, ncol;
     MatrixType Omg;
+    int k, os, size, rand;
 
 public:
-    RsvdOpTallMat(ConstGenericMatrix& mat_, int k_, int os_ = 10) : mat(mat_), nrow(mat_.rows()), ncol(mat_.cols()), nk(k_), os(os_), size(k_ + os_)
+    RsvdOpTallMat(ConstGenericMatrix& mat_, int k_, int os_ = 10, int rand_ =  1) : mat(mat_), nrow(mat_.rows()), ncol(mat_.cols()), k(k_), os(os_), size(k_ + os_), rand(rand_)
     {
-        std::mt19937_64 randomEngine{};
-        randomEngine.seed(111);
-        Omg = StandardNormalRandom<MatrixType, std::mt19937_64>(ncol, size, randomEngine);
+        auto randomEngine = std::default_random_engine{};
+        if (rand == 1) {
+            Omg = StandardNormalRandom<MatrixType, std::default_random_engine>(ncol, size, randomEngine);
+        } else {
+            Omg = UniformRandom<MatrixType, std::default_random_engine>(ncol, size, randomEngine);
+        }
     }
 
     ~RsvdOpTallMat()
@@ -107,7 +111,7 @@ public:
     }
     Index ranks() const
     {
-        return nk;
+        return k;
     }
     Index oversamples() const
     {
@@ -130,6 +134,7 @@ public:
             }
         }
     }
+
 };
 
 template <typename MatrixType>
@@ -140,15 +145,21 @@ private:
     using ConstGenericMatrix = const Eigen::Ref<const MatrixType>;
 
     ConstGenericMatrix mat;
-    const Index nrow, ncol, nk, os, size;
+    const Index nrow, ncol;
     MatrixType Omg;
+    int k, os, size, rand;
 
 public:
-    RsvdOpWideMat(ConstGenericMatrix& mat_, int k_, int os_ = 10) : mat(mat_), nrow(mat_.cols()), ncol(mat_.rows()), nk(k_), os(os_), size(k_ + os_)
+    RsvdOpWideMat(ConstGenericMatrix& mat_, int k_, int os_ = 10, int rand_ = 1) : mat(mat_), nrow(mat_.cols()), ncol(mat_.rows()), k(k_), os(os_), size(k_ + os_), rand(rand_)
     {
-        std::mt19937_64 randomEngine{};
-        randomEngine.seed(111);
-        Omg = StandardNormalRandom<MatrixType, std::mt19937_64>(ncol, size, randomEngine);
+        // std::mt19937_64 randomEngine{};
+        // randomEngine.seed(111);
+        auto randomEngine = std::default_random_engine{};
+        if (rand == 1) {
+            Omg = StandardNormalRandom<MatrixType, std::default_random_engine>(ncol, size, randomEngine);
+        } else {
+            Omg = UniformRandom<MatrixType, std::default_random_engine>(ncol, size, randomEngine);
+        }
     }
 
     ~RsvdOpWideMat()
@@ -165,7 +176,7 @@ public:
     }
     Index ranks() const
     {
-        return nk;
+        return k;
     }
     Index oversamples() const
     {
@@ -273,38 +284,42 @@ private:
 };
 
 template <typename MatrixType>
-class Rsvd
+class RsvdOne
 {
 private:
     using ConstGenericMatrix = const Eigen::Ref<const MatrixType>;
 
     ConstGenericMatrix mat;
-    int k, p, os;
+    int k, os, rand;
     bool trans = false;
 
     RsvdOpOnePass<MatrixType>* op;
     RsvdOnePass<MatrixType, RsvdOpOnePass<MatrixType>>* rsvd;
 
 public:
-    Rsvd(ConstGenericMatrix& mat_, int k_, int p_, int os_ = 10) : mat(mat_), k(k_), p(p_), os(os_)
+    RsvdOne(ConstGenericMatrix& mat_, int k_, int os_ = 10, int rand_ = 1) : mat(mat_), k(k_), os(os_), rand(rand_)
     {
         if (mat.rows() >= mat.cols())
         {
-            op = new RsvdOpTallMat<MatrixType>(mat, k, os);
+            op = new RsvdOpTallMat<MatrixType>(mat, k, os, rand);
         }
         else
         {
-            op = new RsvdOpWideMat<MatrixType>(mat, k, os);
+            op = new RsvdOpWideMat<MatrixType>(mat, k, os, rand);
             trans = true;
         }
         rsvd = new RsvdOnePass<MatrixType, RsvdOpOnePass<MatrixType>>(*op);
-        rsvd->computeUSV(p);
     }
 
-    ~Rsvd()
+    ~RsvdOne()
     {
         delete op;
         delete rsvd;
+    }
+
+    inline void compute(int p)
+    {
+        rsvd->computeUSV(p);
     }
 
     inline MatrixType matrixU() const
