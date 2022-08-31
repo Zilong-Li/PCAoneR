@@ -8,7 +8,7 @@
 #' @param q oversampling.
 #' @param rand distribution of random matrix. 1: standard noraml distribution. 2: uniform distribution
 #' @export
-PCAoneY <- function(mat, k, p = 3L, q = 10L, rand = 1L) {
-    .Call(`_pcaone_PCAoneY`, mat, k, p, q, rand)
+PCAoneYu <- function(mat, k, p = 3L, q = 10L, rand = 1L) {
+    .Call(`_pcaone_PCAoneYu`, mat, k, p, q, rand)
 }
 
