@@ -9,6 +9,6 @@
 #' @param rand distribution of random matrix. 1: standard noraml distribution. 2: uniform distribution
 #' @export
 PCAoneY <- function(mat, k, l = 10L, p = 3L, rand = 1L) {
-    .Call(`_PCAoneR_PCAoneY`, mat, k, l, p, rand)
+    .Call(`_pcaone_PCAoneY`, mat, k, l, p, rand)
 }
 

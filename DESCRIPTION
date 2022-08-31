@@ -1,10 +1,10 @@
-Package: PCAoneR
+Package: pcaone
 Title: PCAone algorithms in R
 Version: 0.0.1
 Authors@R: 
     person("Zilong", "Li", , "zilong.dk@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5859-2078"))
-Description: Two new randomized SVD methods originally proposed in PCAone paper.
+Description: Three randomized SVD methods including one originally proposed in PCAone paper.
 License: GPL (>= 3)
 Encoding: UTF-8
 Depends: R (>= 3.6.0)

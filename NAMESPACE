@@ -2,4 +2,4 @@
 
 export(PCAoneY)
 importFrom(Rcpp,sourceCpp)
-useDynLib(PCAoneR, .registration = TRUE)
+useDynLib(pcaone, .registration = TRUE)

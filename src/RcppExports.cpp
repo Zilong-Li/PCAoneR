@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // PCAoneY
 List PCAoneY(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int l, int p, int rand);
-RcppExport SEXP _PCAoneR_PCAoneY(SEXP matSEXP, SEXP kSEXP, SEXP lSEXP, SEXP pSEXP, SEXP randSEXP) {
+RcppExport SEXP _pcaone_PCAoneY(SEXP matSEXP, SEXP kSEXP, SEXP lSEXP, SEXP pSEXP, SEXP randSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -28,11 +28,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_PCAoneR_PCAoneY", (DL_FUNC) &_PCAoneR_PCAoneY, 5},
+    {"_pcaone_PCAoneY", (DL_FUNC) &_pcaone_PCAoneY, 5},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_PCAoneR(DllInfo *dll) {
+RcppExport void R_init_pcaone(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

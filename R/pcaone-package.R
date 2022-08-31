@@ -1,5 +1,5 @@
 ## usethis namespace: start
 #' @importFrom Rcpp sourceCpp
-#' @useDynLib PCAoneR, .registration = TRUE
+#' @useDynLib pcaone, .registration = TRUE
 ## usethis namespace: end
 NULL

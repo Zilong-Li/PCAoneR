@@ -13,19 +13,18 @@ knitr::opts_chunk$set(
 )
 ```
 
-# PCAoneR
+# PCAone algorithms in R with RcppEigen!
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-PCAoneR brings PCAone algorithms in R by RcppEigen!
 
 ## Installation
 
 You can install the development version of PCAoneR from [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
+install.packages("devtools") # if not installed
 devtools::install_github("Zilong-Li/PCAoneR")
 ```
 
@@ -34,7 +33,7 @@ devtools::install_github("Zilong-Li/PCAoneR")
 This is a basic example which shows you how to use PCAoneH:
 
 ```{r example}
-library(PCAoneR)
+library(pcaone)
 mat <- matrix(rnorm(100*100), 100, 100)
 res <- PCAoneY(mat, k = 10, l = 10, p = 3)
 str(res)
