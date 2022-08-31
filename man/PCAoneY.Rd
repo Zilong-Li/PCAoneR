@@ -2,21 +2,21 @@
 % Please edit documentation in R/RcppExports.R
 \name{PCAoneY}
 \alias{PCAoneY}
-\title{one pass randomized svd in PCAone, modified from Yu et al 2017.}
+\title{The one pass randomized svd in PCAone, modified from Yu et al 2017.}
 \usage{
-PCAoneY(mat, k, l = 10L, p = 3L, rand = 1L)
+PCAoneY(mat, k, p = 3L, q = 10L, rand = 1L)
 }
 \arguments{
 \item{mat}{the input matrix.}
 
 \item{k}{top k singular values, k << any(dim(mat)).}
 
-\item{l}{oversampling.}
-
 \item{p}{number of power iterations.}
+
+\item{q}{oversampling.}
 
 \item{rand}{distribution of random matrix. 1: standard noraml distribution. 2: uniform distribution}
 }
 \description{
-one pass randomized svd in PCAone, modified from Yu et al 2017.
+The one pass randomized svd in PCAone, modified from Yu et al 2017.
 }

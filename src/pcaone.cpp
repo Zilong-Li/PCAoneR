@@ -1,43 +1,29 @@
-#include <RcppEigen.h>
-#include <random>
+#include "RsvdEigen.hpp"
 
 using Rcpp::List;
 
 using namespace Eigen;
 
-MatrixXd UniformDist(Eigen::Index n, Eigen::Index m) {
-  auto rng = std::default_random_engine {};
-  std::uniform_real_distribution<double> dist{0,1};
-  const auto uniform{[&](double) { return dist( rng ); }};
-  return MatrixXd::NullaryExpr(n, m, uniform);
-}
-
-MatrixXd StandardNorm(Eigen::Index n, Eigen::Index m) {
-  auto rng = std::default_random_engine {};
-  std::normal_distribution<double> dist{0, 1};
-  const auto normal{[&](double) { return dist( rng ); }};
-  return MatrixXd::NullaryExpr(n, m, normal);
-}
-
-//' one pass randomized svd in PCAone, modified from Yu et al 2017.
+//' @title The one pass randomized svd in PCAone, modified from Yu et al 2017.
 //' @param mat the input matrix.
 //' @param k top k singular values, k << any(dim(mat)).
-//' @param l oversampling.
 //' @param p number of power iterations.
+//' @param q oversampling.
 //' @param rand distribution of random matrix. 1: standard noraml distribution. 2: uniform distribution
 //' @export
 // [[Rcpp::export]]
-List PCAoneY(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int l = 10,
-             int p = 3, int rand = 1) {
+List PCAoneY(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p = 3,
+             int q = 10, int rand = 1) {
   Eigen::Index ncol{mat.cols()};
   Eigen::Index nrow{mat.rows()};
-  Eigen::Index size = l + k;
+  Eigen::Index size = q + k;
   Eigen::MatrixXd Omg(ncol, size), H(ncol, size), G(nrow, size), R(size, size),
       Rt(size, size);
+  auto rng = std::default_random_engine{};
   if (rand == 1) {
-    Omg = StandardNorm(ncol, size);
+    Omg = PCAone::StandardNormalRandom<Eigen::MatrixXd, std::default_random_engine>(ncol, size, rng);
   } else {
-    Omg = UniformDist(ncol, size);
+    Omg = PCAone::UniformRandom<Eigen::MatrixXd, std::default_random_engine>(ncol, size, rng);
   }
   G.noalias() = mat * Omg;
   H.noalias() = mat.transpose() * G;
@@ -64,8 +50,7 @@ List PCAoneY(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int l = 10,
 
   R = Rt * R;
   Eigen::MatrixXd B = R.transpose().colPivHouseholderQr().solve(H.transpose());
-  Eigen::JacobiSVD<Eigen::MatrixXd> svd(B, Eigen::ComputeThinU |
-                                               Eigen::ComputeThinV);
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(B, Eigen::ComputeThinU | Eigen::ComputeThinV);
   Eigen::MatrixXd U = G * svd.matrixU().leftCols(k);
   Eigen::MatrixXd V = svd.matrixV().leftCols(k);
   Eigen::VectorXd S = svd.singularValues().head(k);
