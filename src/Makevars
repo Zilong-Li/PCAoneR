@@ -1,6 +1,6 @@
 ## -*- mode: makefile; -*-
 
-PKG_CPPFLAGS = -I./
+PKG_CPPFLAGS = -DNDEBUG -I./
 
 os    := $(shell uname -s)
 ifeq ($(os),Linux)

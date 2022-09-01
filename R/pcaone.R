@@ -35,10 +35,13 @@
 #'                specifies the target rank of the low-rank decomposition. \eqn{k} should satisfy \eqn{k << min(m,n)}.
 #'
 #' @param p       integer, optional; \cr
-#'                oversampling parameter (by default \eqn{p=10}).
+#'                number of additional power iterations (by default \eqn{p=3}).
 #'
 #' @param q       integer, optional; \cr
-#'                number of additional power iterations (by default \eqn{q=2}).
+#'                oversampling parameter (by default \eqn{q=10}).
+#'
+#' @param windows integer; \cr
+#'                the number of windows for 'li' method. must be a power of 2 (by default \eqn{windows=2^{p+2}}).
 #'
 #' @param sdist   string \eqn{c( 'unif', 'normal')}, optional; \cr
 #'                specifies the sampling distribution of the random test matrix: \cr
@@ -82,14 +85,31 @@
 #'
 #' @examples
 #'library('pcaone')
+#' mat <- matrix(rnorm(100*20000), 100, 20000)
+#' res <- pcaone(mat, k = 10, p = 5, windows = 32, method = "li")
+#' str(res)
+#' res <- pcaone(mat, k = 10, p = 5, method = "yu")
+#' str(res)
 #' @export
-pcaone <- function(A, k=NULL, p=10, q=2, sdist="normal", method = "li") UseMethod("pcaone")
+pcaone <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "li") UseMethod("pcaone")
 
 #' @export
-pcaone.default <- function(A, k=NULL, p=10, q=2, sdist="normal", method = "li")
+pcaone.default <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "li")
 {
-    rand <- switch(sdist, normal = 1,  unif = 2, stop("Selected sampling distribution is not supported!"))
-    pcaoneObj <- switch(method, yu = PCAoneYu(mat = A, k = k, p = p, q = q, rand = rand), stop("Method is not supported!"))
+    rand <- switch(sdist,
+                   normal = 1,
+                   unif = 2,
+                   stop("Selected sampling distribution is not supported!"))
+    if(is.null(windows)) {
+        windows <- 2**(p+2)
+    }
+    stopifnot(windows %% 2 == 0)
+
+    pcaoneObj <- switch(method,
+                        yu = PCAoneYu(mat = A, k = k, p = p, q = q, rand = rand),
+                        li = PCAoneLi(mat = A, k = k, p = p, q = q, rand = rand, windows = windows),
+                        stop("Method is not supported!"))
+
     class(pcaoneObj) <- "pcaone"
     return(pcaoneObj)
 }

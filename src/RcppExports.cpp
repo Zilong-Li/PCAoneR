@@ -26,9 +26,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// PCAoneLi
+List PCAoneLi(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand, int windows);
+RcppExport SEXP _pcaone_PCAoneLi(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP qSEXP, SEXP randSEXP, SEXP windowsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd>& >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    Rcpp::traits::input_parameter< int >::type rand(randSEXP);
+    Rcpp::traits::input_parameter< int >::type windows(windowsSEXP);
+    rcpp_result_gen = Rcpp::wrap(PCAoneLi(mat, k, p, q, rand, windows));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pcaone_PCAoneYu", (DL_FUNC) &_pcaone_PCAoneYu, 5},
+    {"_pcaone_PCAoneLi", (DL_FUNC) &_pcaone_PCAoneLi, 6},
     {NULL, NULL, 0}
 };
 

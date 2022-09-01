@@ -8,7 +8,19 @@
 #' @param q oversampling.
 #' @param rand distribution of random matrix. 1: standard noraml distribution. 2: uniform distribution
 #' @export
-PCAoneYu <- function(mat, k, p = 3L, q = 10L, rand = 1L) {
+PCAoneYu <- function(mat, k, p, q, rand) {
     .Call(`_pcaone_PCAoneYu`, mat, k, p, q, rand)
+}
+
+#' @title PCAone: the window-based one pass randomized svd, Li et al 2022.
+#' @param mat the input matrix.
+#' @param k top k singular values, k << any(dim(mat)).
+#' @param p number of power iterations.
+#' @param q oversampling.
+#' @param rand distribution of random matrix. 1: standard noraml distribution. 2: uniform distribution
+#' @param windows the number of windows. must be a power of 2
+#' @export
+PCAoneLi <- function(mat, k, p, q, rand, windows) {
+    .Call(`_pcaone_PCAoneLi`, mat, k, p, q, rand, windows)
 }
 

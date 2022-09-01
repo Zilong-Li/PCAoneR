@@ -4,7 +4,15 @@
 \alias{pcaone}
 \title{Randomized Singular Value Decomposition of PCAone (pcaone).}
 \usage{
-pcaone(A, k = NULL, p = 10, q = 2, sdist = "normal", method = "li")
+pcaone(
+  A,
+  k = NULL,
+  windows = NULL,
+  p = 2,
+  q = 10,
+  sdist = "normal",
+  method = "li"
+)
 }
 \arguments{
 \item{A}{array_like; \cr
@@ -13,11 +21,14 @@ a real/complex \eqn{(m, n)} input matrix (or data frame) to be decomposed.}
 \item{k}{integer; \cr
 specifies the target rank of the low-rank decomposition. \eqn{k} should satisfy \eqn{k << min(m,n)}.}
 
+\item{windows}{integer; \cr
+the number of windows for 'li' method. must be a power of 2 (by default \eqn{windows=2^{p+2}}).}
+
 \item{p}{integer, optional; \cr
-oversampling parameter (by default \eqn{p=10}).}
+number of additional power iterations (by default \eqn{p=2}).}
 
 \item{q}{integer, optional; \cr
-number of additional power iterations (by default \eqn{q=2}).}
+oversampling parameter (by default \eqn{q=10}).}
 
 \item{sdist}{string \eqn{c( 'unif', 'normal')}, optional; \cr
 specifies the sampling distribution of the random test matrix: \cr
