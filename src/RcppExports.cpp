@@ -12,7 +12,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // PCAoneYu
-List PCAoneYu(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand);
+Rcpp::List PCAoneYu(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand);
 RcppExport SEXP _pcaone_PCAoneYu(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP qSEXP, SEXP randSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -27,7 +27,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // PCAoneLi
-List PCAoneLi(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand, int windows);
+Rcpp::List PCAoneLi(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand, int windows);
 RcppExport SEXP _pcaone_PCAoneLi(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP qSEXP, SEXP randSEXP, SEXP windowsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

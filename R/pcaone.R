@@ -109,6 +109,9 @@ pcaone.default <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal",
                         yu = PCAoneYu(mat = A, k = k, p = p, q = q, rand = rand),
                         li = PCAoneLi(mat = A, k = k, p = p, q = q, rand = rand, windows = windows),
                         stop("Method is not supported!"))
+    pcaoneObj$d <- as.vector(pcaoneObj$d)
+    pcaoneObj$u <- as.matrix(pcaoneObj$u)
+    pcaoneObj$v <- as.matrix(pcaoneObj$v)
 
     class(pcaoneObj) <- "pcaone"
     return(pcaoneObj)

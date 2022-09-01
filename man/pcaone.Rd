@@ -8,7 +8,7 @@ pcaone(
   A,
   k = NULL,
   windows = NULL,
-  p = 2,
+  p = 3,
   q = 10,
   sdist = "normal",
   method = "li"
@@ -25,7 +25,7 @@ specifies the target rank of the low-rank decomposition. \eqn{k} should satisfy 
 the number of windows for 'li' method. must be a power of 2 (by default \eqn{windows=2^{p+2}}).}
 
 \item{p}{integer, optional; \cr
-number of additional power iterations (by default \eqn{p=2}).}
+number of additional power iterations (by default \eqn{p=3}).}
 
 \item{q}{integer, optional; \cr
 oversampling parameter (by default \eqn{q=10}).}
@@ -93,6 +93,11 @@ gives an equivalent decomposition.
 }
 \examples{
 library('pcaone')
+mat <- matrix(rnorm(100*20000), 100, 20000)
+res <- pcaone(mat, k = 10, p = 5, windows = 32, method = "li")
+str(res)
+res <- pcaone(mat, k = 10, p = 5, method = "yu")
+str(res)
 }
 \references{
 \itemize{
