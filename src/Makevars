@@ -2,10 +2,10 @@
 
 PKG_CPPFLAGS = -DNDEBUG -I./
 
-os    := $(shell uname -s)
-ifeq ($(os),Linux)
-	PKG_CXXFLAGS += -fopenmp
-endif
+# os    := $(shell uname -s)
+# ifeq ($(os),Linux)
+# 	PKG_CXXFLAGS += -fopenmp
+# endif
 
 .PHONY: all
 

@@ -59,3 +59,4 @@ testthat::test_that("Test 2: PCAoneYu k=k", {
               testthat::expect_equal(testMat, testMat.re)
           })
 
+
