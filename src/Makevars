@@ -1,15 +1,19 @@
 ## -*- mode: makefile; -*-
 
-PKG_CPPFLAGS = -DNDEBUG -I./
+PKG_CPPFLAGS = -O3 -I. -DNDEBUG
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
-# os    := $(shell uname -s)
-# ifeq ($(os),Linux)
-# 	PKG_CXXFLAGS += -fopenmp
-# endif
+os    := $(shell uname -s)
+ifeq ($(os),Linux)
+	PKG_CXXFLAGS += -DEIGEN_USE_BLAS
+endif
 
-.PHONY: all
+.PHONY: all clean
 
-CC=$(shell "R CMD config CC")
-CXX=$(shell "R CMD config CXX")
-CPPFLAGS=$(shell "R CMD config CPPFLAGS")
-LDFLAGS=$(shell "R CMD config LDFLAGS")
+all: $(SHLIB)
+
+clean:
+	$(RM) *.o
+	$(RM) *.dll
+	$(RM) *.so
+	$(RM) *.dylib
