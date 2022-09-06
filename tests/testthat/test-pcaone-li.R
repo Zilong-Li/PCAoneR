@@ -12,6 +12,7 @@ m = 50
 n = 30
 k = 10
 testMat <- matrix(runif(m*k), m, k)
+testMat <- matrix(rnorm(m*k), m, k)
 testMat <- testMat %*% t(testMat)
 testMat <- testMat[,1:n]
 

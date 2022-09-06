@@ -135,7 +135,7 @@ namespace PCAone
                 for (int i = 0; i < p; i++)
                 {
                     Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(H);
-                    H.noalias() = qr.householderQ() * MatrixType::Identity(cols(), size);
+                    Omg.noalias() = qr.householderQ() * MatrixType::Identity(cols(), size);
                     if (trans)
                     {
                         G.noalias() = mat.transpose() * Omg;
