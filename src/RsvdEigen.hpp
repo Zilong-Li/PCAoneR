@@ -266,19 +266,11 @@ namespace PCAone
             else
                 b_op.computeGandH(G, H, p);
 
-            {
-                Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(G);
-                R.noalias() = MatrixType::Identity(size, nrow) * qr.matrixQR().template triangularView<Eigen::Upper>();
-                G.noalias() = qr.householderQ() * MatrixType::Identity(nrow, size);
-            }
+            Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(G);
+            R.noalias() = MatrixType::Identity(size, nrow) *
+                          qr.matrixQR().template triangularView<Eigen::Upper>();
+            G.noalias() = qr.householderQ() * MatrixType::Identity(nrow, size);
 
-            {
-                Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(G);
-                Rt.noalias() = MatrixType::Identity(size, nrow) * qr.matrixQR().template triangularView<Eigen::Upper>();
-                G.noalias() = qr.householderQ() * MatrixType::Identity(nrow, size);
-            }
-
-            R = Rt * R;
             // R.T * B = H.T => lapack dtrtrs()
             MatrixType B = R.transpose().colPivHouseholderQr().solve(H.transpose());
             Eigen::JacobiSVD<MatrixType> svd(B, Eigen::ComputeThinU | Eigen::ComputeThinV);
