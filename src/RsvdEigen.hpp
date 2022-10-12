@@ -71,6 +71,7 @@ namespace PCAone
         bool trans; // if matrix is wide then flip the matrix dimension
 
     public:
+        int finder = 1;
         RsvdOpOnePass(ConstGenericMatrix& mat_, int k_, int os_ = 10, int rand_ = 1) : mat(mat_), k(k_), os(os_), size(k_ + os_), rand(rand_)
         {
             if (mat.rows() >= mat.cols())
@@ -134,8 +135,17 @@ namespace PCAone
             {
                 for (int i = 0; i < p; i++)
                 {
-                    Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(H);
-                    Omg.noalias() = qr.householderQ() * MatrixType::Identity(cols(), size);
+                    if (finder == 1) {
+                      Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(H);
+                      Omg.noalias() = qr.householderQ() *
+                                      MatrixType::Identity(cols(), size);
+                    } else if (finder == 2) {
+                      Eigen::FullPivLU<Eigen::Ref<MatrixType>> lu(H);
+                      Omg.setIdentity(cols(), size);
+                      Omg.template triangularView<Eigen::StrictlyLower>() = lu.matrixLU();
+                    } else {
+                        throw std::invalid_argument("finder must be 1 or 2");
+                    }
                     if (trans)
                     {
                         G.noalias() = mat.transpose() * Omg;
@@ -195,7 +205,7 @@ namespace PCAone
                             H = H1 + H2;
                             Eigen::HouseholderQR<MatrixType> qr(H);
                             Omg.noalias() = qr.householderQ() * MatrixType::Identity(cols(), size);
-                            H1 = MatrixType::Zero(cols(), size);
+                            H1.setZero();
                             i = 0;
                         }
                         else if (i == band / 2)
@@ -203,7 +213,7 @@ namespace PCAone
                             H = H1 + H2;
                             Eigen::HouseholderQR<MatrixType> qr(H);
                             Omg.noalias() = qr.householderQ() * MatrixType::Identity(cols(), size);
-                            H2 = MatrixType::Zero(cols(), size);
+                            H2.setZero();
                         }
                     }
                 }
@@ -266,13 +276,27 @@ namespace PCAone
             else
                 b_op.computeGandH(G, H, p);
 
-            Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(G);
-            R.noalias() = MatrixType::Identity(size, nrow) *
-                          qr.matrixQR().template triangularView<Eigen::Upper>();
-            G.noalias() = qr.householderQ() * MatrixType::Identity(nrow, size);
+            {
+              Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(G);
+              R.noalias() =
+                  MatrixType::Identity(size, nrow) *
+                  qr.matrixQR().template triangularView<Eigen::Upper>();
+              G.noalias() =
+                  qr.householderQ() * MatrixType::Identity(nrow, size);
+            }
+            {
+              Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(G);
+              Rt.noalias() =
+                  MatrixType::Identity(size, nrow) *
+                  qr.matrixQR().template triangularView<Eigen::Upper>();
+              G.noalias() =
+                  qr.householderQ() * MatrixType::Identity(nrow, size);
+            }
+
+            R = Rt * R;
 
             // R.T * B = H.T => lapack dtrtrs()
-            MatrixType B = R.transpose().colPivHouseholderQr().solve(H.transpose());
+            MatrixType B = R.transpose().fullPivHouseholderQr().solve(H.transpose());
             Eigen::JacobiSVD<MatrixType> svd(B, Eigen::ComputeThinU | Eigen::ComputeThinV);
             b_leftSingularVectors.noalias() = G * svd.matrixU().leftCols(k);
             b_rightSingularVectors = svd.matrixV().leftCols(k);
@@ -316,6 +340,8 @@ namespace PCAone
             delete op;
             delete rsvd;
         }
+
+        inline void setRangeFinder(int flag) { op->finder = flag; }
 
         inline void compute(int p, int windows = 0)
         {

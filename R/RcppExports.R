@@ -8,8 +8,8 @@
 #' @param q oversampling.
 #' @param rand distribution of random matrix. 1: standard noraml distribution. 2: uniform distribution
 #' @export
-PCAoneYu <- function(mat, k, p, q, rand) {
-    .Call(`_pcaone_PCAoneYu`, mat, k, p, q, rand)
+PCAoneYu <- function(mat, k, p, q, rand, finder) {
+    .Call(`_pcaone_PCAoneYu`, mat, k, p, q, rand, finder)
 }
 
 #' @title PCAone: the window-based one pass randomized svd, Li et al 2022.

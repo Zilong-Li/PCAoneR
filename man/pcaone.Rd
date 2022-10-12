@@ -11,7 +11,8 @@ pcaone(
   p = 3,
   q = 10,
   sdist = "normal",
-  method = "li"
+  method = "li",
+  finder = 1
 )
 }
 \arguments{

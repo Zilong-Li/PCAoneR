@@ -8,12 +8,14 @@ n <- 2000
 m <- 2000
 k <- 50
 mat <- matrix(rnorm(n*m), n, m)
-res <- pcaone(mat, k = k, p = 3, q = 10, method = "li")
+
+res <- pcaone(mat, k = k, p = 3, q = 10, method = "yu", finder = 2)
 
 timing <- microbenchmark(
     'SVD' = svd(mat, nu = k, nv = k),
     'rSVD' = rsvd(mat, k = k, q = 3, p = 10),
-    'PCAoneYu' = pcaone(mat, k = k, p = 3, q = 10, method = "yu"),
-    'PCAoneLi' = pcaone(mat, k = k, p = 3, q = 10, method = "li"),
+    'PCAoneYu-QR' = pcaone(mat, k = k, p = 3, q = 10, method = "yu"),
+    'PCAoneYu-LU' = pcaone(mat, k = k, p = 3, q = 10, method = "yu", finder = 2),
+    ## 'PCAoneLi' = pcaone(mat, k = k, p = 3, q = 10, method = "li"),
     times = 3)
 print(timing, unit = 's' )

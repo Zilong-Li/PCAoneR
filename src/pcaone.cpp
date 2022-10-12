@@ -9,9 +9,10 @@
 //' @param rand distribution of random matrix. 1: standard noraml distribution. 2: uniform distribution
 //' @export
 // [[Rcpp::export]]
-Rcpp::List PCAoneYu(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int q, int rand) {
+Rcpp::List PCAoneYu(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int q, int rand, int finder) {
 
   PCAone::RsvdOne<Eigen::MatrixXd> rsvd(mat, k, q, rand);
+  rsvd.setRangeFinder(finder);
   rsvd.compute(p);
   // Eigen::VectorXd d = rsvd.singularValues();
   // Rcpp::NumericMatrix u = Rcpp::wrap(rsvd.matrixU());

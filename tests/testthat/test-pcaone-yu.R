@@ -19,7 +19,7 @@ testMat <- testMat[,1:n]
 svd_out <- svd(testMat)
 
 #Randomized SVD k=n
-rsvd_out <- pcaone(testMat, k = n, method = "yu")
+rsvd_out <- pcaone(testMat, k = n, p = 0, method = "yu")
 testMat.re = rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
 testthat::test_that("Test 1: PCAoneYu k=n", {
               testthat::expect_equal(svd_out$d, rsvd_out$d)

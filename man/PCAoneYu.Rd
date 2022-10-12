@@ -4,7 +4,7 @@
 \alias{PCAoneYu}
 \title{The one pass randomized svd in PCAone, modified from Yu et al 2017.}
 \usage{
-PCAoneYu(mat, k, p, q, rand)
+PCAoneYu(mat, k, p, q, rand, finder)
 }
 \arguments{
 \item{mat}{the input matrix.}
