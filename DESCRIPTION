@@ -1,6 +1,6 @@
 Package: pcaone
 Title: PCAone algorithms in R
-Version: 0.0.1
+Version: 1.0.0
 Authors@R: 
     person("Zilong", "Li", , "zilong.dk@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5859-2078"))
@@ -13,9 +13,9 @@ Imports:
 LinkingTo:
     Rcpp,
     RcppEigen (>= 0.3.3.3.0)
-SystemRequirements: C++11
+SystemRequirements: C++17
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

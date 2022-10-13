@@ -8,8 +8,8 @@ set.seed(1234)
 # Test: pcaone using real random test matrix
 #*************************************************************************************
 #Create real random test matrix of dimension m x n with target rank k
-m = 50
-n = 30
+m = 500
+n = 100
 k = 10
 p <- min(c(m, n))
 
