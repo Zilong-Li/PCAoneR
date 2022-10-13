@@ -35,7 +35,7 @@ This is a basic example which shows you how to use pcaone:
 ```{r example}
 library(pcaone)
 mat <- matrix(rnorm(100*20000), 100, 20000)
-res <- pcaone(mat, k = 10, method = "li")
+res <- pcaone(mat, k = 10)
 str(res)
 ```
 
