@@ -2,7 +2,7 @@
 % Please edit documentation in R/pcaone.R
 \name{pcaone}
 \alias{pcaone}
-\title{Randomized Singular Value Decomposition of PCAone (pcaone).}
+\title{Randomized Singular Value Decomposition Algorithms in PCAone (pcaone).}
 \usage{
 pcaone(
   A,
@@ -11,7 +11,7 @@ pcaone(
   p = 3,
   q = 10,
   sdist = "normal",
-  method = "li",
+  method = "alg2",
   finder = 1
 )
 }
@@ -23,7 +23,7 @@ a real/complex \eqn{(m, n)} input matrix (or data frame) to be decomposed.}
 specifies the target rank of the low-rank decomposition. \eqn{k} should satisfy \eqn{k << min(m,n)}.}
 
 \item{windows}{integer; \cr
-the number of windows for 'li' method. must be a power of 2 (by default \eqn{windows=2^{p+2}}).}
+the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=2^{p+2}}).}
 
 \item{p}{integer, optional; \cr
 number of additional power iterations (by default \eqn{p=3}).}
@@ -36,11 +36,10 @@ specifies the sampling distribution of the random test matrix: \cr
 \eqn{'unif'} :  Uniform \verb{[-1,1]}. \cr
 \eqn{'normal'} (default) : Normal \code{~N(0,1)}. \cr}
 
-\item{method}{string \eqn{c( 'li', 'yu', 'halko')}, optional; \cr
+\item{method}{string \eqn{c( 'alg1', 'agl2')}, optional; \cr
 specifies the different variation of the randomized singular value decomposition : \cr
-\eqn{'li'} (default): PCAone: fast and accurate out-of-core PCA framework for large scale biobank data (2022). \cr
-\eqn{'yu'} : Single-Pass PCA of Large High-Dimensional Data (2017). \cr
-\eqn{'halko'} : Finding structure with randomness: probabilistic algorithms for constructing approximate matrix decompositions (2011). \cr}
+\eqn{'alg2'} (default): PCAone: fast and accurate out-of-core PCA framework for large scale biobank data (2022). \cr
+\eqn{'alg1'} : Single-Pass PCA of Large High-Dimensional Data (2017). \cr}
 }
 \value{
 \code{pcaone} returns a list containing the following three components:

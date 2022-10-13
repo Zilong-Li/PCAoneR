@@ -1,4 +1,4 @@
-#' @title  Randomized Singular Value Decomposition of PCAone (pcaone).
+#' @title  Randomized Singular Value Decomposition Algorithms in PCAone (pcaone).
 #
 #' @description The randomized SVD computes the near-optimal low-rank approximation of a rectangular matrix
 #' using a fast probablistic algorithm.
@@ -41,18 +41,17 @@
 #'                oversampling parameter (by default \eqn{q=10}).
 #'
 #' @param windows integer; \cr
-#'                the number of windows for 'li' method. must be a power of 2 (by default \eqn{windows=2^{p+2}}).
+#'                the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=2^{p+2}}).
 #'
 #' @param sdist   string \eqn{c( 'unif', 'normal')}, optional; \cr
 #'                specifies the sampling distribution of the random test matrix: \cr
 #'                		\eqn{'unif'} :  Uniform `[-1,1]`. \cr
 #'                		\eqn{'normal'} (default) : Normal `~N(0,1)`. \cr
 #'
-#' @param method  string \eqn{c( 'li', 'yu', 'halko')}, optional; \cr
+#' @param method  string \eqn{c( 'alg1', 'agl2')}, optional; \cr
 #'                specifies the different variation of the randomized singular value decomposition : \cr
-#'                		\eqn{'li'} (default): PCAone: fast and accurate out-of-core PCA framework for large scale biobank data (2022). \cr
-#'                		\eqn{'yu'} : Single-Pass PCA of Large High-Dimensional Data (2017). \cr
-#'                		\eqn{'halko'} : Finding structure with randomness: probabilistic algorithms for constructing approximate matrix decompositions (2011). \cr
+#'                		\eqn{'alg2'} (default): PCAone: fast and accurate out-of-core PCA framework for large scale biobank data (2022). \cr
+#'                		\eqn{'alg1'} : Single-Pass PCA of Large High-Dimensional Data (2017). \cr
 #'
 #'@return \code{pcaone} returns a list containing the following three components:
 #'\describe{
@@ -91,10 +90,10 @@
 #' res <- pcaone(mat, k = 10, p = 5, method = "yu")
 #' str(res)
 #' @export
-pcaone <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "li", finder = 1) UseMethod("pcaone")
+pcaone <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "alg2", finder = 1) UseMethod("pcaone")
 
 #' @export
-pcaone.default <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "li", finder = 1)
+pcaone.default <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "alg2", finder = 1)
 {
     rand <- switch(sdist,
                    normal = 1,
@@ -106,8 +105,8 @@ pcaone.default <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal",
     stopifnot(windows %% 2 == 0)
 
     pcaoneObj <- switch(method,
-                        yu = PCAoneYu(mat = A, k = k, p = p, q = q, rand = rand, finder),
-                        li = PCAoneLi(mat = A, k = k, p = p, q = q, rand = rand, windows = windows),
+                        alg1 = PCAoneAlg1(mat = A, k = k, p = p, q = q, rand = rand, finder),
+                        alg2 = PCAoneAlg2(mat = A, k = k, p = p, q = q, rand = rand, windows = windows),
                         stop("Method is not supported!"))
     pcaoneObj$d <- as.vector(pcaoneObj$d)
     pcaoneObj$u <- as.matrix(pcaoneObj$u)

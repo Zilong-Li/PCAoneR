@@ -11,9 +11,9 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// PCAoneYu
-Rcpp::List PCAoneYu(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand, int finder);
-RcppExport SEXP _pcaone_PCAoneYu(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP qSEXP, SEXP randSEXP, SEXP finderSEXP) {
+// PCAoneAlg1
+Rcpp::List PCAoneAlg1(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand, int finder);
+RcppExport SEXP _pcaone_PCAoneAlg1(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP qSEXP, SEXP randSEXP, SEXP finderSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -23,13 +23,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type q(qSEXP);
     Rcpp::traits::input_parameter< int >::type rand(randSEXP);
     Rcpp::traits::input_parameter< int >::type finder(finderSEXP);
-    rcpp_result_gen = Rcpp::wrap(PCAoneYu(mat, k, p, q, rand, finder));
+    rcpp_result_gen = Rcpp::wrap(PCAoneAlg1(mat, k, p, q, rand, finder));
     return rcpp_result_gen;
 END_RCPP
 }
-// PCAoneLi
-Rcpp::List PCAoneLi(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand, int windows);
-RcppExport SEXP _pcaone_PCAoneLi(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP qSEXP, SEXP randSEXP, SEXP windowsSEXP) {
+// PCAoneAlg2
+Rcpp::List PCAoneAlg2(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand, int windows);
+RcppExport SEXP _pcaone_PCAoneAlg2(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP qSEXP, SEXP randSEXP, SEXP windowsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -39,14 +39,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type q(qSEXP);
     Rcpp::traits::input_parameter< int >::type rand(randSEXP);
     Rcpp::traits::input_parameter< int >::type windows(windowsSEXP);
-    rcpp_result_gen = Rcpp::wrap(PCAoneLi(mat, k, p, q, rand, windows));
+    rcpp_result_gen = Rcpp::wrap(PCAoneAlg2(mat, k, p, q, rand, windows));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_pcaone_PCAoneYu", (DL_FUNC) &_pcaone_PCAoneYu, 6},
-    {"_pcaone_PCAoneLi", (DL_FUNC) &_pcaone_PCAoneLi, 6},
+    {"_pcaone_PCAoneAlg1", (DL_FUNC) &_pcaone_PCAoneAlg1, 6},
+    {"_pcaone_PCAoneAlg2", (DL_FUNC) &_pcaone_PCAoneAlg2, 6},
     {NULL, NULL, 0}
 };
 
