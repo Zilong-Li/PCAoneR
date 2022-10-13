@@ -1,4 +1,4 @@
-#' @title  Randomized Singular Value Decomposition Algorithms in PCAone (pcaone).
+#' @title  Randomized Singular Value Decomposition Algorithms in PCAone (Li et al 2022).
 #
 #' @description The randomized SVD computes the near-optimal low-rank approximation of a rectangular matrix
 #' using a fast probablistic algorithm.
@@ -50,8 +50,8 @@
 #'
 #' @param method  string \eqn{c( 'alg1', 'agl2')}, optional; \cr
 #'                specifies the different variation of the randomized singular value decomposition : \cr
-#'                		\eqn{'alg2'} (default): PCAone: fast and accurate out-of-core PCA framework for large scale biobank data (2022). \cr
-#'                		\eqn{'alg1'} : Single-Pass PCA of Large High-Dimensional Data (2017). \cr
+#'                		\eqn{'alg1'} : single pass RSVD with power iterations in PCAone refered to algorithm1. \cr
+#'                		\eqn{'alg2'} (default): window based RSVD in PCAone refered to algorithm2. \cr
 #'
 #'@return \code{pcaone} returns a list containing the following three components:
 #'\describe{
@@ -85,9 +85,9 @@
 #' @examples
 #'library('pcaone')
 #' mat <- matrix(rnorm(100*20000), 100, 20000)
-#' res <- pcaone(mat, k = 10, p = 5, windows = 32, method = "li")
+#' res <- pcaone(mat, k = 10, p = 5, windows = 32)
 #' str(res)
-#' res <- pcaone(mat, k = 10, p = 5, method = "yu")
+#' res <- pcaone(mat, k = 10, p = 5, method = "alg1")
 #' str(res)
 #' @export
 pcaone <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "alg2", finder = 1) UseMethod("pcaone")
