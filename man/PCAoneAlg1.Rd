@@ -4,7 +4,7 @@
 \alias{PCAoneAlg1}
 \title{The algorithm1 in PCAone paper.}
 \usage{
-PCAoneAlg1(mat, k, p, q, rand, finder)
+PCAoneAlg1(mat, k, p, q, rand, finder = 1L)
 }
 \arguments{
 \item{mat}{the input matrix.}
@@ -16,6 +16,8 @@ PCAoneAlg1(mat, k, p, q, rand, finder)
 \item{q}{oversampling.}
 
 \item{rand}{distribution of random matrix. 1: standard noraml distribution. 2: uniform distribution}
+
+\item{finder}{method to find othogonal matrix. 1: QR. 2: LU}
 }
 \description{
 The algorithm1 in PCAone paper.

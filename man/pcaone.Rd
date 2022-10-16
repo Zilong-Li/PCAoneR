@@ -11,8 +11,7 @@ pcaone(
   p = 3,
   q = 10,
   sdist = "normal",
-  method = "alg2",
-  finder = 1
+  method = "alg2"
 )
 }
 \arguments{

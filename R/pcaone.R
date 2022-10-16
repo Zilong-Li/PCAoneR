@@ -90,10 +90,10 @@
 #' res <- pcaone(mat, k = 10, p = 5, method = "alg1")
 #' str(res)
 #' @export
-pcaone <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "alg2", finder = 1) UseMethod("pcaone")
+pcaone <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "alg2") UseMethod("pcaone")
 
 #' @export
-pcaone.default <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "alg2", finder = 1)
+pcaone.default <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "alg2")
 {
     rand <- switch(sdist,
                    normal = 1,
@@ -105,7 +105,7 @@ pcaone.default <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal",
     stopifnot(windows %% 2 == 0)
 
     pcaoneObj <- switch(method,
-                        alg1 = PCAoneAlg1(mat = A, k = k, p = p, q = q, rand = rand, finder),
+                        alg1 = PCAoneAlg1(mat = A, k = k, p = p, q = q, rand = rand),
                         alg2 = PCAoneAlg2(mat = A, k = k, p = p, q = q, rand = rand, windows = windows),
                         stop("Method is not supported!"))
     pcaoneObj$d <- as.vector(pcaoneObj$d)

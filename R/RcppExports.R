@@ -7,8 +7,9 @@
 #' @param p number of power iterations.
 #' @param q oversampling.
 #' @param rand distribution of random matrix. 1: standard noraml distribution. 2: uniform distribution
+#' @param finder method to find othogonal matrix. 1: QR. 2: LU
 #' @export
-PCAoneAlg1 <- function(mat, k, p, q, rand, finder) {
+PCAoneAlg1 <- function(mat, k, p, q, rand, finder = 1L) {
     .Call(`_pcaone_PCAoneAlg1`, mat, k, p, q, rand, finder)
 }
 
