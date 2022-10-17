@@ -30,12 +30,12 @@ Rcpp::List PCAoneAlg1(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int 
 //' @param windows the number of windows. must be a power of 2
 //' @export
 // [[Rcpp::export]]
-Rcpp::List PCAoneAlg2(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int q, int rand, int windows) {
+Rcpp::List PCAoneAlg2(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int q, int rand, int windows = 64) {
 
   if (windows % 2 != 0)
     std::cout << "windows %% 2 == 0 has to be met\n";
   if (std::pow(2, p) < windows)
-    std::cout << "2^p >= windows has to be met\n";
+    std::cout << "2^p >= windows has to be met. suggesting p > 6 for windows=64\n";
 
   PCAone::RsvdOne<Eigen::MatrixXd> rsvd(mat, k, q, rand);
   rsvd.compute(p, windows);

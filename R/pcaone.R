@@ -40,9 +40,6 @@
 #' @param q       integer, optional; \cr
 #'                oversampling parameter (by default \eqn{q=10}).
 #'
-#' @param windows integer; \cr
-#'                the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=2^{p+2}}).
-#'
 #' @param sdist   string \eqn{c( 'unif', 'normal')}, optional; \cr
 #'                specifies the sampling distribution of the random test matrix: \cr
 #'                		\eqn{'unif'} :  Uniform `[-1,1]`. \cr
@@ -52,6 +49,9 @@
 #'                specifies the different variation of the randomized singular value decomposition : \cr
 #'                		\eqn{'alg1'} : single pass RSVD with power iterations in PCAone refered to algorithm1. \cr
 #'                		\eqn{'alg2'} (default): window based RSVD in PCAone refered to algorithm2. \cr
+#'
+#' @param windows integer; \cr
+#'                the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=64}).
 #'
 #'@return \code{pcaone} returns a list containing the following three components:
 #'\describe{
@@ -90,18 +90,15 @@
 #' res <- pcaone(mat, k = 10, p = 5, method = "alg1")
 #' str(res)
 #' @export
-pcaone <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "alg2") UseMethod("pcaone")
+pcaone <- function(A, k=NULL, p=3, q=10, sdist="normal", method = "alg2", windows = 64) UseMethod("pcaone")
 
 #' @export
-pcaone.default <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal", method = "alg2")
+pcaone.default <- function(A, k=NULL, p=3, q=10, sdist="normal", method = "alg2", windows = 64)
 {
     rand <- switch(sdist,
                    normal = 1,
                    unif = 2,
                    stop("Selected sampling distribution is not supported!"))
-    if(is.null(windows))
-        windows <- 2**p
-
     pcaoneObj <- switch(method,
                         alg1 = PCAoneAlg1(mat = A, k = k, p = p, q = q, rand = rand),
                         alg2 = PCAoneAlg2(mat = A, k = k, p = p, q = q, rand = rand, windows = windows),
