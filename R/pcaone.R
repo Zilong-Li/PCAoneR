@@ -99,10 +99,8 @@ pcaone.default <- function(A, k=NULL, windows = NULL, p=3, q=10, sdist="normal",
                    normal = 1,
                    unif = 2,
                    stop("Selected sampling distribution is not supported!"))
-    if(is.null(windows)) {
-        windows <- 2**(p+2)
-    }
-    stopifnot(windows %% 2 == 0)
+    if(is.null(windows))
+        windows <- 2**p
 
     pcaoneObj <- switch(method,
                         alg1 = PCAoneAlg1(mat = A, k = k, p = p, q = q, rand = rand),
