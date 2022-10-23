@@ -1,6 +1,5 @@
 
 library(pcaone)
-library(devtools)
 
 #Set seed
 set.seed(1234)

@@ -18,14 +18,6 @@ namespace PCAone
     };
 
     template <typename MatrixType, typename RandomEngineType>
-    inline MatrixType UniformRandom(const Eigen::Index numRows, const Eigen::Index numCols, RandomEngineType& engine)
-    {
-        std::uniform_real_distribution<typename MatrixType::Scalar> uniform_real_distribution{-1, 1};
-        const auto uniform{[&](typename MatrixType::Scalar) { return uniform_real_distribution(engine); }};
-        return MatrixType::NullaryExpr(numRows, numCols, uniform);
-    };
-
-    template <typename MatrixType, typename RandomEngineType>
     struct StandardNormalRandomHelper<MatrixType, RealType<MatrixType>, RandomEngineType>
     {
         static inline MatrixType generate(const Eigen::Index numRows, const Eigen::Index numCols, RandomEngineType& engine)
@@ -50,10 +42,18 @@ namespace PCAone
     };
 
     template <typename MatrixType, typename RandomEngineType>
+    inline MatrixType UniformRandom(const Eigen::Index numRows, const Eigen::Index numCols, RandomEngineType& engine)
+    {
+        std::uniform_real_distribution<typename MatrixType::Scalar> uniform_real_distribution{-1, 1};
+        const auto uniform{[&](typename MatrixType::Scalar) { return uniform_real_distribution(engine); }};
+        return MatrixType::NullaryExpr(numRows, numCols, uniform);
+    }
+
+    template <typename MatrixType, typename RandomEngineType>
     inline MatrixType StandardNormalRandom(const Eigen::Index numRows, const Eigen::Index numCols, RandomEngineType& engine)
     {
         return StandardNormalRandomHelper<MatrixType, typename MatrixType::Scalar, RandomEngineType>::generate(numRows, numCols, engine);
-    };
+    }
 
     template <typename MatrixType>
     void flipOmg(MatrixType& Omg2, MatrixType& Omg)
@@ -132,7 +132,7 @@ namespace PCAone
             return os;
         }
 
-        void computeGandH(MatrixType& G, MatrixType& H, int p)
+        void computeGandH(MatrixType& G, MatrixType& H, uint32_t p)
         {
             if (trans)
             {
@@ -146,7 +146,7 @@ namespace PCAone
             }
             if (p > 0)
             {
-                for (int i = 0; i < p; i++)
+                for (uint32_t pi = 0; pi < p; pi++)
                 {
                     if (finder == 1) {
                       Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(H);
@@ -173,13 +173,13 @@ namespace PCAone
             }
         }
 
-        void computeGandH(MatrixType& G, MatrixType& H, int p, int windows)
+        void computeGandH(MatrixType& G, MatrixType& H, uint32_t p, uint32_t windows)
         {
             if (windows % 2 != 0)
                 throw std::runtime_error("windows must be a power of 2, ie. windows=2^x.\n");
             if (std::pow(2, p) < windows)
                 throw std::runtime_error("pow(2, p) >= windows has to be met\n");
-            uint blocksize = (unsigned int)std::ceil((double)nrow / windows);
+            uint32_t blocksize = (unsigned int)std::ceil((double)nrow / windows);
             if (blocksize < windows)
                 throw std::runtime_error("window size is smaller than number of windows because given matrix is too small. please consider other methods or adjust parameter windows.\n");
             if (trans)
@@ -192,12 +192,12 @@ namespace PCAone
                 G.noalias() = mat * Omg;
                 H.noalias() = mat.transpose() * G;
             }
-            uint start_idx, stop_idx, actual_block_size;
+            uint32_t start_idx, stop_idx, actual_block_size;
             MatrixType H1 = MatrixType::Zero(ncol, size);
             MatrixType H2 = MatrixType::Zero(ncol, size);
             MatrixType Omg2;
-            uint band = 1;
-            for (int pi = 0; pi <= p; pi++)
+            uint32_t band = 1;
+            for (uint32_t pi = 0; pi <= p; pi++)
             {
                 if (pi == 0)
                     Omg2 = Omg;
@@ -208,7 +208,7 @@ namespace PCAone
                     H2.setZero();
                 }
                 band = std::fmin(band * 2, windows);
-                for (uint b = 0, i = 1, j = 1; b < windows; ++b, ++i, ++j)
+                for (uint32_t b = 0, i = 1, j = 1; b < windows; ++b, ++i, ++j)
                 {
                     start_idx = b * blocksize;
                     stop_idx = (b + 1) * blocksize >= nrow ? nrow - 1 : (b + 1) * blocksize - 1;
@@ -313,7 +313,7 @@ namespace PCAone
         }
 
         // G = D * Omega; H = D.transpose() * G;
-        void computeUSV(int p, int windows = 0)
+        void computeUSV(uint32_t p, uint32_t windows = 0)
         {
             const Eigen::Index nrow{b_op.rows()};
             const Eigen::Index ncol{b_op.cols()};
@@ -368,14 +368,14 @@ namespace PCAone
         using ConstGenericMatrix = const Eigen::Ref<const MatrixType>;
 
         ConstGenericMatrix mat;
-        uint k, os, rand;
+        uint32_t k, os, rand;
         bool trans;
 
         RsvdOpOnePass<MatrixType>* op;
         RsvdOnePass<MatrixType, RsvdOpOnePass<MatrixType>>* rsvd;
 
     public:
-        RsvdOne(ConstGenericMatrix& mat_, uint k_, uint os_ = 10, uint rand_ = 1) : mat(mat_), k(k_), os(os_), rand(rand_)
+        RsvdOne(ConstGenericMatrix& mat_, uint32_t k_, uint32_t os_ = 10, uint32_t rand_ = 1) : mat(mat_), k(k_), os(os_), rand(rand_)
         {
             if (mat.rows() >= mat.cols())
                 trans = false;
@@ -393,7 +393,7 @@ namespace PCAone
 
         inline void setRangeFinder(int flag) { op->finder = flag; }
 
-        inline void compute(int p, int windows = 0)
+        inline void compute(uint32_t p, uint32_t windows = 0)
         {
             rsvd->computeUSV(p, windows);
         }

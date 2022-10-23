@@ -76,8 +76,8 @@
 #'
 #' @references
 #' \itemize{
-#'  \item [1] Z. Li, J Meisner, A Albrechtsen. "PCAone: fast and accurate out-of-core PCA framework for large scale biobank data" (2022)
-#'        \url{https://doi.org/10.1101/2022.05.25.493261}.
+#'  \item Z. Li, J Meisner, A Albrechtsen. "PCAone: fast and accurate out-of-core PCA framework for large scale biobank data" (2022)
+#'        \doi{10.1101/2022.05.25.493261}.
 #' }
 #'
 #' @author Zilong Li \email{zilong.dk@gmail.com}
