@@ -39,3 +39,21 @@ res <- pcaone(mat, k = 10)
 str(res)
 ```
 
+## Benchmarking
+
+Let's see the performance of ```pcaone``` compared to the other rsvd packages
+
+```{r}
+library(microbenchmark)
+library(pcaone)
+library(rsvd)
+data(tiger)
+timing_svd <- microbenchmark(
+    'SVD' = svd(tiger, nu=150, nv=150),
+    'rSVD' = rsvd(tiger, k=150),
+    'pcaone.alg1' = pcaone(tiger, k=150, method = "alg1"),
+    'pcaone.alg2' = pcaone(tiger, k=150),
+    times=10)
+print(timing_svd, unit='s')
+```
+

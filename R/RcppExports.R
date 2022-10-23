@@ -21,7 +21,7 @@ PCAoneAlg1 <- function(mat, k, p, q, rand, finder = 1L) {
 #' @param rand distribution of random matrix. 1: standard noraml distribution. 2: uniform distribution
 #' @param windows the number of windows. must be a power of 2
 #' @export
-PCAoneAlg2 <- function(mat, k, p, q, rand, windows) {
+PCAoneAlg2 <- function(mat, k, p, q, rand, windows = 64L) {
     .Call(`_pcaone_PCAoneAlg2`, mat, k, p, q, rand, windows)
 }
 

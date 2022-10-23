@@ -4,7 +4,7 @@
 \alias{PCAoneAlg2}
 \title{The algorithm1 in PCAone paper.}
 \usage{
-PCAoneAlg2(mat, k, p, q, rand, windows)
+PCAoneAlg2(mat, k, p, q, rand, windows = 64L)
 }
 \arguments{
 \item{mat}{the input matrix.}

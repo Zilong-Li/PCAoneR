@@ -55,6 +55,19 @@ namespace PCAone
         return StandardNormalRandomHelper<MatrixType, typename MatrixType::Scalar, RandomEngineType>::generate(numRows, numCols, engine);
     };
 
+    template <typename MatrixType>
+    void flipOmg(MatrixType& Omg2, MatrixType& Omg)
+    {
+        for (Eigen::Index i = 0; i < Omg.cols(); ++i)
+        {
+            // if signs of half of values are flipped then correct signs.
+            if ((Omg2.col(i) - Omg.col(i)).array().abs().sum() > 2 * (Omg2.col(i) + Omg.col(i)).array().abs().sum())
+            {
+                Omg.col(i) *= -1;
+            }
+        }
+        Omg2 = Omg;
+    }
 
     // RsvdOp: rows, cols, ranks, oversamples, computeGandH()
     template <typename MatrixType>
@@ -164,18 +177,38 @@ namespace PCAone
         {
             if (windows % 2 != 0)
                 throw std::runtime_error("windows must be a power of 2, ie. windows=2^x.\n");
+            if (std::pow(2, p) < windows)
+                throw std::runtime_error("pow(2, p) >= windows has to be met\n");
             uint blocksize = (unsigned int)std::ceil((double)nrow / windows);
             if (blocksize < windows)
                 throw std::runtime_error("window size is smaller than number of windows because given matrix is too small. please consider other methods or adjust parameter windows.\n");
+            if (trans)
+            {
+                G.noalias() = mat.transpose() * Omg;
+                H.noalias() = mat * G;
+            }
+            else
+            {
+                G.noalias() = mat * Omg;
+                H.noalias() = mat.transpose() * G;
+            }
             uint start_idx, stop_idx, actual_block_size;
-            MatrixType H1, H2;
+            MatrixType H1 = MatrixType::Zero(ncol, size);
+            MatrixType H2 = MatrixType::Zero(ncol, size);
+            MatrixType Omg2;
             uint band = 1;
             for (int pi = 0; pi <= p; pi++)
             {
+                if (pi == 0)
+                    Omg2 = Omg;
+                if (std::pow(2, pi) >= windows)
+                {
+                    // reset H1, H2 to zero
+                    H1.setZero();
+                    H2.setZero();
+                }
                 band = std::fmin(band * 2, windows);
-                H1 = MatrixType::Zero(ncol, size);
-                H2 = MatrixType::Zero(ncol, size);
-                for (uint b = 0, i = 1, j = 0; b < windows; ++b, ++i, ++j)
+                for (uint b = 0, i = 1, j = 1; b < windows; ++b, ++i, ++j)
                 {
                     start_idx = b * blocksize;
                     stop_idx = (b + 1) * blocksize >= nrow ? nrow - 1 : (b + 1) * blocksize - 1;
@@ -195,10 +228,11 @@ namespace PCAone
                             H = H1 + H2;
                             Eigen::HouseholderQR<MatrixType> qr(H);
                             Omg.noalias() = qr.householderQ() * MatrixType::Identity(cols(), size);
-                            // flip_Omg(Omg2, Omg);
+                            H2.setZero();
+                            flipOmg(Omg2, Omg);
                         }
                     }
-                    if (i <= band / 2)
+                    else if (i <= band / 2)
                     {
                         if (trans)
                             H1.noalias() += mat.middleCols(start_idx, actual_block_size) * G.middleRows(start_idx, actual_block_size);
@@ -219,6 +253,7 @@ namespace PCAone
                             H = H1 + H2;
                             Eigen::HouseholderQR<MatrixType> qr(H);
                             Omg.noalias() = qr.householderQ() * MatrixType::Identity(cols(), size);
+                            flipOmg(Omg2, Omg);
                             H1.setZero();
                             i = 0;
                         }
@@ -227,6 +262,7 @@ namespace PCAone
                             H = H1 + H2;
                             Eigen::HouseholderQR<MatrixType> qr(H);
                             Omg.noalias() = qr.householderQ() * MatrixType::Identity(cols(), size);
+                            flipOmg(Omg2, Omg);
                             H2.setZero();
                         }
                     }

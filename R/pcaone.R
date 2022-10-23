@@ -90,10 +90,10 @@
 #' res <- pcaone(mat, k = 10, p = 5, method = "alg1")
 #' str(res)
 #' @export
-pcaone <- function(A, k=NULL, p=3, q=10, sdist="normal", method = "alg2", windows = 64) UseMethod("pcaone")
+pcaone <- function(A, k=NULL, p=3, q=10, sdist="normal", method = "alg2", windows = 8) UseMethod("pcaone")
 
 #' @export
-pcaone.default <- function(A, k=NULL, p=3, q=10, sdist="normal", method = "alg2", windows = 64)
+pcaone.default <- function(A, k=NULL, p=3, q=10, sdist="normal", method = "alg2", windows = 8)
 {
     rand <- switch(sdist,
                    normal = 1,

@@ -7,11 +7,11 @@
 pcaone(
   A,
   k = NULL,
-  windows = NULL,
   p = 3,
   q = 10,
   sdist = "normal",
-  method = "alg2"
+  method = "alg2",
+  windows = 8
 )
 }
 \arguments{
@@ -20,9 +20,6 @@ a real/complex \eqn{(m, n)} input matrix (or data frame) to be decomposed.}
 
 \item{k}{integer; \cr
 specifies the target rank of the low-rank decomposition. \eqn{k} should satisfy \eqn{k << min(m,n)}.}
-
-\item{windows}{integer; \cr
-the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=2^{p+2}}).}
 
 \item{p}{integer, optional; \cr
 number of additional power iterations (by default \eqn{p=3}).}
@@ -39,6 +36,9 @@ specifies the sampling distribution of the random test matrix: \cr
 specifies the different variation of the randomized singular value decomposition : \cr
 \eqn{'alg1'} : single pass RSVD with power iterations in PCAone refered to algorithm1. \cr
 \eqn{'alg2'} (default): window based RSVD in PCAone refered to algorithm2. \cr}
+
+\item{windows}{integer; \cr
+the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=64}).}
 }
 \value{
 \code{pcaone} returns a list containing the following three components:
