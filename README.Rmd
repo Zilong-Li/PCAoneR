@@ -34,7 +34,7 @@ This is a basic example which shows you how to use pcaone:
 
 ```{r example}
 library(pcaone)
-mat <- matrix(rnorm(100*20000), 100, 20000)
+mat <- matrix(rnorm(100*5000), 100, 5000)
 res <- pcaone(mat, k = 10)
 str(res)
 ```
@@ -48,13 +48,13 @@ library(microbenchmark)
 library(pcaone)
 library(rsvd)
 data(tiger)
-timing_svd <- microbenchmark(
+timing <- microbenchmark(
     'SVD' = svd(tiger, nu=150, nv=150),
     'rSVD' = rsvd(tiger, k=150, q = 3),
-    'pcaone.alg1' = pcaone(tiger, k=150, method = "alg1"),
-    'pcaone.alg2' = pcaone(tiger, k=150, method = "alg2"),
+    'pcaone.alg1' = pcaone(tiger, k=150, p = 3, method = "alg1"),
+    'pcaone.alg2' = pcaone(tiger, k=150, p = 3, windows = 8),
     times=10)
-print(timing_svd, unit='s')
+print(timing, unit='s')
 ```
 The above test is run on my MacBook Pro 2019 with processor 2.6 GHz 6-Core Intel Core i7. Note that the external BLAS or MKL routine is disabled by ```export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1```.
 

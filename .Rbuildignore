@@ -1,3 +1,7 @@
 ^LICENSE\.md$
 .ccls-cache
+.DS_Store
+tmp
+.Rhistory
+.clangd
 ^README\.Rmd$

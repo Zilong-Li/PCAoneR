@@ -1,7 +1,8 @@
 Package: pcaone
-Title: PCAone Algorithms in R
+Title: PCAone Algorithms in R with RcppEigen
 Version: 1.0.0
-Authors@R: 
+Date: 2022-10-24
+Authors@R:
     person("Zilong", "Li", , "zilong.dk@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5859-2078"))
 Description: Three randomized SVD methods including one originally proposed in PCAone paper.
@@ -19,3 +20,5 @@ RoxygenNote: 7.2.1
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Author: Zilong Li [aut, cre]
+Maintainer: Zilong Li <zilong.dk@gmail.com>

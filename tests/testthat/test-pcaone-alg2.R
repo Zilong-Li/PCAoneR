@@ -59,7 +59,7 @@ testMat <- t(testMat)
 svd_out <- svd(testMat)
 
 #Randomized SVD k=n
-rsvd_out <- pcaone(testMat, k = n, method = "alg2")
+rsvd_out <- pcaone(testMat, k = n, windows = 8, p = 3, method = "alg2")
 testMat.re = rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
 testthat::test_that("Test 1: PCAoneAlg2 k=n", {
               testthat::expect_equal(svd_out$d, rsvd_out$d)
@@ -67,7 +67,7 @@ testthat::test_that("Test 1: PCAoneAlg2 k=n", {
           })
 
 #Randomized SVD k=k
-rsvd_out <- pcaone(testMat, k = k, method = "alg2")
+rsvd_out <- pcaone(testMat, k = k, windows = 4, p = 3, method = "alg2")
 testMat.re = rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
 testthat::test_that("Test 2: PCAoneAlg2 k=k", {
               testthat::expect_equal(svd_out$d[1:k], rsvd_out$d[1:k])

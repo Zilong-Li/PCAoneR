@@ -1,4 +1,4 @@
-#' @title  Randomized Singular Value Decomposition Algorithms in PCAone (Li et al 2022).
+#' @title  Randomized Singular Value Decomposition Algorithm with Window-based Power Iterations in PCAone (Li et al 2022).
 #
 #' @description The randomized SVD computes the near-optimal low-rank approximation of a rectangular matrix
 #' using a fast probablistic algorithm.
@@ -15,14 +15,16 @@
 #' of the real or complex unitary matrix \eqn{V}. The \eqn{k} dominant singular values are the
 #' entries of \eqn{d}, and non-negative and real numbers.
 #'
-#' \eqn{p} is an oversampling parameter to improve the approximation.
-#' A value of at least 10 is recommended, and \eqn{p=10} is set by default.
+#' \eqn{q} is an oversampling parameter to improve the approximation.
+#' A value of at least 10 is recommended, and \eqn{q=10} is set by default.
 #'
-#' The parameter \eqn{q} specifies the number of power (subspace) iterations
+#' The parameter \eqn{p} specifies the number of power (subspace) iterations
 #' to reduce the approximation error. The power scheme is recommended,
-#' if the singular values decay slowly. In practice, 2 or 3 iterations
-#' achieve good results, however, computing power iterations increases the
-#' computational costs. The power scheme is set to \eqn{q=2} by default.
+#' especially when the singular values decay slowly. However, computing power iterations increases the
+#' computational costs. Even though most RSVD implementations recommend \eqn{p=3} power iterations by default,
+#' it's always sufficient to run only few power iterations where our window-based power iterations (\eqn{'alg2'})
+#' come to play. We recommend using \eqn{windows=64} and \eqn{p>=7} for pcaone algorithm2. As it is designed for large dataset,
+#' we recommend using \eqn{'alg2'} when \eqn{max(n,m) > 5000}.
 #'
 #' If \eqn{k > (min(n,m)/4)}, a deterministic partial or truncated \code{\link{svd}}
 #' algorithm might be faster.
@@ -35,7 +37,7 @@
 #'                specifies the target rank of the low-rank decomposition. \eqn{k} should satisfy \eqn{k << min(m,n)}.
 #'
 #' @param p       integer, optional; \cr
-#'                number of additional power iterations (by default \eqn{p=3}).
+#'                number of additional power iterations (by default \eqn{p=7}).
 #'
 #' @param q       integer, optional; \cr
 #'                oversampling parameter (by default \eqn{q=10}).
@@ -68,9 +70,8 @@
 #'}
 #'}
 #'
-#' @note The singular vectors are not unique and only defined up to sign
-#' (a constant of modulus one in the complex case). If a left singular vector
-#' has its sign changed, changing the sign of the corresponding right vector
+#' @note The singular vectors are not unique and only defined up to sign.
+#' If a left singular vector has its sign changed, changing the sign of the corresponding right vector
 #' gives an equivalent decomposition.
 #'
 #'
@@ -85,15 +86,15 @@
 #' @examples
 #'library('pcaone')
 #' mat <- matrix(rnorm(100*20000), 100, 20000)
-#' res <- pcaone(mat, k = 10, p = 5, windows = 32)
+#' res <- pcaone(mat, k = 10, p = 7, method = "alg2")
 #' str(res)
-#' res <- pcaone(mat, k = 10, p = 5, method = "alg1")
+#' res <- pcaone(mat, k = 10, p = 7, method = "alg1")
 #' str(res)
 #' @export
-pcaone <- function(A, k=NULL, p=3, q=10, sdist="normal", method = "alg2", windows = 8) UseMethod("pcaone")
+pcaone <- function(A, k=NULL, p=7, q=10, sdist="normal", method = "alg2", windows = 64) UseMethod("pcaone")
 
 #' @export
-pcaone.default <- function(A, k=NULL, p=3, q=10, sdist="normal", method = "alg2", windows = 8)
+pcaone.default <- function(A, k=NULL, p=7, q=10, sdist="normal", method = "alg2", windows = 64)
 {
     rand <- switch(sdist,
                    normal = 1,
