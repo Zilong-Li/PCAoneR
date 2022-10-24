@@ -5,7 +5,7 @@ PKG_CPPFLAGS = -I../inst/include
 PKG_CXXFLAGS = -Wno-ignored-attributes -DNDEBUG -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS
 PKG_LIBS     = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
-os    := $(shell uname -s)
-ifeq ($(os),Linux)
-	PKG_CXXFLAGS += -DEIGEN_USE_BLAS -DEIGEN_USE_LAPACKE
-endif
+# os    := $(shell uname -s)
+# ifeq ($(os),Linux)
+# 	PKG_CXXFLAGS += -DEIGEN_USE_BLAS -DEIGEN_USE_LAPACKE
+# endif
