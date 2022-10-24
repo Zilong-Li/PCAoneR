@@ -5,7 +5,7 @@ Date: 2022-10-24
 Authors@R:
     person("Zilong", "Li", , "zilong.dk@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5859-2078"))
-Description: Three randomized SVD methods including one originally proposed in PCAone paper.
+Description: Randomized SVD methods including one originally proposed in PCAone paper.
 License: GPL (>= 3)
 Encoding: UTF-8
 Depends: R (>= 3.6.0)

@@ -6,3 +6,4 @@ tmp
 .clangd
 ^README\.Rmd$
 ^cran-comments\.md$
+^CRAN-SUBMISSION$
