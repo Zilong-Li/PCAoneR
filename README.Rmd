@@ -41,7 +41,7 @@ str(res)
 
 ## Benchmarking
 
-Let's see the performance of ```pcaone``` compared to the other rsvd packages
+Let's see the performance of ```pcaone``` compared to the other rsvd packages. 
 
 ```{r}
 library(microbenchmark)
@@ -50,10 +50,14 @@ library(rsvd)
 data(tiger)
 timing_svd <- microbenchmark(
     'SVD' = svd(tiger, nu=150, nv=150),
-    'rSVD' = rsvd(tiger, k=150),
+    'rSVD' = rsvd(tiger, k=150, q = 3),
     'pcaone.alg1' = pcaone(tiger, k=150, method = "alg1"),
-    'pcaone.alg2' = pcaone(tiger, k=150),
+    'pcaone.alg2' = pcaone(tiger, k=150, method = "alg2"),
     times=10)
 print(timing_svd, unit='s')
 ```
+The above test is run on my MacBook Pro 2019 with processor 2.6 GHz 6-Core Intel Core i7. Note that the external BLAS or MKL routine is disabled by ```export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1```.
 
+## Todo
+
+* write ```configure``` to detect and use MKL

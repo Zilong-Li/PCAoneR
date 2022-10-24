@@ -10,12 +10,10 @@ m <- 2000
 k <- 50
 mat <- matrix(rnorm(n*m), n, m)
 
-res <- pcaone(mat, k = k, p = 3, q = 10, method = "yu", finder = 2)
-
 timing <- microbenchmark(
     'SVD' = svd(mat, nu=k, nv=k),
-    'rSVD' = rsvd(mat, k=k),
-    'pcaone.alg1' = pcaone(mat, k=k, method = "alg1"),
-    'pcaone.alg2' = pcaone(mat, k=k, method = "alg2"),
+    'rSVD' = rsvd(mat, k=k, q = 3),
+    'pcaone.alg1' = pcaone(mat, k=k, p = 3, method = "alg1"),
+    'pcaone.alg2' = pcaone(mat, k=k, p = 3, method = "alg2"),
     times=10)
 print(timing, unit = 's' )
