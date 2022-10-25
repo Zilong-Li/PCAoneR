@@ -1,10 +1,10 @@
 Package: pcaone
-Title: PCAone Algorithms in R with RcppEigen
+Title: 'Randomized SVD Algorithms with RcppEigen'
 Version: 1.0.0
-Date: 2022-10-24
+Date: 2022-10-25
 Author: Zilong Li [aut, cre]
 Maintainer: Zilong Li <zilong.dk@gmail.com>
-Description: Randomized SVD methods including one originally proposed in PCAone paper.
+Description: Randomized SVD methods proposed in the PCAone paper by Li (2022) <doi:10.1101/2022.05.25.493261>, where we implement and propose two RSVD methods. One is based on Yu (2017) <arXiv:1704.07669> single pass RSVD but with power iteration scheme. The other is our new window based RSVD.
 License: GPL (>= 3)
 Encoding: UTF-8
 Depends: R (>= 3.6.0)
@@ -19,3 +19,5 @@ RoxygenNote: 7.2.1
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+URL: https://github.com/Zilong-Li/PCAoneR
+BugReports: https://github.com/Zilong-Li/PCAoneR/issues

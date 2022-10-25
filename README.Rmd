@@ -58,6 +58,11 @@ print(timing, unit='s')
 ```
 The above test is run on my MacBook Pro 2019 with processor 2.6 GHz 6-Core Intel Core i7. Note that the external BLAS or MKL routine is disabled by ```export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1```.
 
+## References
+
+* [Zilong Li, Jonas Meisner, Anders Albrechtsen (2022). PCAone: fast and accurate out-of-core PCA framework for large scale biobank data](https://doi.org/10.1101/2022.05.25.493261)
+* [Wenjian Yu, Yu Gu, Jian Li, Shenghua Liu, Yaohang Li (2017). Single-Pass PCA of Large High-Dimensional Data](https://arxiv.org/abs/1704.07669)
+
 ## Todo
 
 * write ```configure``` to detect and use MKL
