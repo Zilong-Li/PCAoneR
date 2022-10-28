@@ -2,7 +2,7 @@
 % Please edit documentation in R/pcaone.R
 \name{pcaone}
 \alias{pcaone}
-\title{Randomized Singular Value Decomposition Algorithm with Window-based Power Iterations in PCAone (Li et al 2022).}
+\title{Randomized Singular Value Decomposition Algorithm with Window-based Power Iterations from PCAone (Li et al 2022).}
 \usage{
 pcaone(
   A,
@@ -11,7 +11,8 @@ pcaone(
   q = 10,
   sdist = "normal",
   method = "alg2",
-  windows = 64
+  windows = 64,
+  shuffle = FALSE
 )
 }
 \arguments{
@@ -37,8 +38,11 @@ specifies the different variation of the randomized singular value decomposition
 \eqn{'alg1'} : single pass RSVD with power iterations in PCAone refered to algorithm1. \cr
 \eqn{'alg2'} (default): window based RSVD in PCAone refered to algorithm2. \cr}
 
-\item{windows}{integer; \cr
+\item{windows}{integer, optional; \cr
 the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=64}).}
+
+\item{shuffle}{logical, optional; \cr
+if shuffle the rows of input tall matrix or not. recommended for algorithm 2 (by default \eqn{shuffle=FALSE}).}
 }
 \value{
 \code{pcaone} returns a list containing the following three components:
@@ -57,7 +61,7 @@ right singular vectors; \eqn{(n, k)} or \eqn{(n, nv)} dimensional array. \cr
 }
 }
 \description{
-The randomized SVD computes the near-optimal low-rank approximation of a rectangular matrix
+The Randomized Singular Value Decomposition (RSVD) computes the near-optimal low-rank approximation of a rectangular matrix
 using a fast probablistic algorithm.
 }
 \details{

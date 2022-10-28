@@ -1,6 +1,6 @@
-#' @title  Randomized Singular Value Decomposition Algorithm with Window-based Power Iterations in PCAone (Li et al 2022).
+#' @title  Randomized Singular Value Decomposition Algorithm with Window-based Power Iterations from PCAone (Li et al 2022).
 #
-#' @description The randomized SVD computes the near-optimal low-rank approximation of a rectangular matrix
+#' @description The Randomized Singular Value Decomposition (RSVD) computes the near-optimal low-rank approximation of a rectangular matrix
 #' using a fast probablistic algorithm.
 #
 #' @details
@@ -52,8 +52,11 @@
 #'                		\eqn{'alg1'} : single pass RSVD with power iterations in PCAone refered to algorithm1. \cr
 #'                		\eqn{'alg2'} (default): window based RSVD in PCAone refered to algorithm2. \cr
 #'
-#' @param windows integer; \cr
+#' @param windows integer, optional; \cr
 #'                the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=64}).
+#'
+#' @param shuffle logical, optional; \cr
+#'                if shuffle the rows of input tall matrix or not. recommended for algorithm 2 (by default \eqn{shuffle=FALSE}).
 #'
 #'@return \code{pcaone} returns a list containing the following three components:
 #'\describe{
@@ -91,18 +94,27 @@
 #' res <- pcaone(mat, k = 10, p = 7, method = "alg1")
 #' str(res)
 #' @export
-pcaone <- function(A, k=NULL, p=7, q=10, sdist="normal", method = "alg2", windows = 64) UseMethod("pcaone")
+pcaone <- function(A, k=NULL, p=7, q=10, sdist="normal", method = "alg2", windows = 64, shuffle = FALSE) UseMethod("pcaone")
 
 #' @export
-pcaone.default <- function(A, k=NULL, p=7, q=10, sdist="normal", method = "alg2", windows = 64)
+pcaone.default <- function(A, k=NULL, p=7, q=10, sdist="normal", method = "alg2", windows = 64, shuffle = FALSE)
 {
     rand <- switch(sdist,
                    normal = 1,
                    unif = 2,
                    stop("Selected sampling distribution is not supported!"))
+    if (shuffle) {
+        if (nrow(A) > ncol(A)) {
+            n <- nrow(A)
+            A <- A[sample(n),]
+        } else {
+            n <- ncol(A)
+            A <- A[,sample(n)]
+        }
+    }
     pcaoneObj <- switch(method,
-                        alg1 = PCAoneAlg1(mat = A, k = k, p = p, q = q, rand = rand),
-                        alg2 = PCAoneAlg2(mat = A, k = k, p = p, q = q, rand = rand, windows = windows),
+                        alg1 = .Call(`_pcaone_PCAoneAlg1`, A, k, p, q, rand),
+                        alg2 = .Call(`_pcaone_PCAoneAlg2`, A, k, p, q, rand, windows),
                         stop("Method is not supported!"))
     pcaoneObj$d <- as.vector(pcaoneObj$d)
     pcaoneObj$u <- as.matrix(pcaoneObj$u)
