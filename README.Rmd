@@ -21,10 +21,10 @@ knitr::opts_chunk$set(
 
 ## Installation
 
-You can install the development version of PCAoneR from [GitHub](https://github.com/) with:
-
 ``` r
-install.packages("devtools") # if not installed
+# For the CRAN version
+install.packages("pcaone")
+# For the latest developing version
 devtools::install_github("Zilong-Li/PCAoneR")
 ```
 
@@ -66,3 +66,4 @@ The above test is run on my MacBook Pro 2019 with processor 2.6 GHz 6-Core Intel
 ## Todo
 
 * write ```configure``` to detect and use MKL
+* add ```center``` and ```scale``` method
