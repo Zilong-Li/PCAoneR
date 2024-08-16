@@ -1,5 +1,10 @@
 #include "RsvdEigen.hpp"
 
+// [[Rcpp::depends(RcppEigen)]]
+
+#ifdef EIGEN_USE_MKL_ALL
+#include <Eigen/PardisoSupport>
+#endif
 
 // [[Rcpp::export]]
 Rcpp::List PCAoneAlg1(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int q, int rand) {

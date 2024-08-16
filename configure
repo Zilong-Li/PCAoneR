@@ -1,0 +1,43 @@
+#!/bin/sh
+
+R_HOME=$(R RHOME)
+
+# Function to detect BLAS library
+detect_blas() {
+    blas_info=$(${R_HOME}/bin/R --slave -e "si <- sessionInfo(); cat(si\$BLAS, '\n', si\$LAPACK)")
+    if echo "$blas_info" | grep -iq "mkl"; then
+        echo "mkl"
+    elif echo "$blas_info" | grep -iq "openblas"; then
+        echo "openblas"
+    else
+        echo "default"
+    fi
+}
+
+# Detect BLAS
+BLAS_TYPE=$(detect_blas)
+
+# OPENBLAS seems sub-optimal
+case $BLAS_TYPE in
+    mkl)
+        echo "Using MKL"
+        BLAS_LAPACK_LIBS="-lmkl_rt"
+        USE_MKL=true
+        USE_OPENBLAS=false
+        USE_LAPACKE=true
+        ;;
+    *)
+        echo "Using default BLAS and LAPACK"
+        BLAS_LAPACK_LIBS="-lblas -llapack"
+        USE_MKL=false
+        USE_OPENBLAS=false
+        USE_LAPACKE=false
+        ;;
+esac
+
+# Create Makevars
+sed -e "s|@BLAS_LAPACK_LIBS@|$BLAS_LAPACK_LIBS|" \
+    -e "s|@USE_MKL@|$USE_MKL|" \
+    -e "s|@USE_OPENBLAS@|$USE_OPENBLAS|" \
+    -e "s|@USE_LAPACKE@|$USE_LAPACKE|" \
+    src/Makevars.in > src/Makevars
