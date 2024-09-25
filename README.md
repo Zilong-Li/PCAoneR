@@ -1,9 +1,10 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# PCAone algorithms in R with RcppEigen!
+# PCAone algorithms in R with RcppEigen\!
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 ## Installation
@@ -12,7 +13,7 @@
 # For the CRAN version
 install.packages("pcaone")
 # For the latest developing version
-devtools::install_github("Zilong-Li/PCAoneR")
+## devtools::install_github("Zilong-Li/PCAoneR")
 ```
 
 ## Example
@@ -25,9 +26,9 @@ mat <- matrix(rnorm(100*5000), 100, 5000)
 res <- pcaone(mat, k = 10)
 str(res)
 #> List of 3
-#>  $ d: num [1:10] 80.3 79.7 79.2 79.1 78.6 ...
-#>  $ u: num [1:100, 1:10] -0.0815 0.0835 0.0976 0.1692 -0.0568 ...
-#>  $ v: num [1:5000, 1:10] 0.0283 -0.01188 0.01336 0.00234 -0.01061 ...
+#>  $ d: num [1:10] 80.1 79.3 78.8 78.5 78.4 ...
+#>  $ u: num [1:100, 1:10] -0.282 -0.106 -0.0348 -0.0219 0.0414 ...
+#>  $ v: num [1:5000, 1:10] -0.01971 0.00974 -0.02306 -0.00957 0.01311 ...
 #>  - attr(*, "class")= chr "pcaone"
 ```
 
@@ -57,20 +58,17 @@ print(timing, unit='s')
 ```
 
 The above test is run on my MacBook Pro 2019 with processor 2.6 GHz
-6-Core Intel Core i7. Note that the external BLAS or MKL routine is
-disabled by
-`export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1`.
+6-Core Intel Core i7. Note that the R is not linked to external BLAS or
+MKL routine. To proper benchmark the performance with single core, we
+can set the number of threads as one by `export OPENBLAS_NUM_THREADS=1
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1`.
 
 ## References
 
-- [Zilong Li, Jonas Meisner, Anders Albrechtsen (2022). PCAone: fast and
-  accurate out-of-core PCA framework for large scale biobank
-  data](https://doi.org/10.1101/2022.05.25.493261)
-- [Wenjian Yu, Yu Gu, Jian Li, Shenghua Liu, Yaohang Li (2017).
-  Single-Pass PCA of Large High-Dimensional
-  Data](https://arxiv.org/abs/1704.07669)
+  - [Zilong Li, Jonas Meisner, Anders Albrechtsen (2023). Fast and
+    accurate out-of-core PCA framework for large scale biobank
+    data](https://genome.cshlp.org/content/33/9/1599)
 
 ## Todo
 
-- write `configure` to detect and use MKL
-- add `center` and `scale` method
+  - [ ] add `center` and `scale` method

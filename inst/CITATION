@@ -1,0 +1,14 @@
+bibentry(
+  bibtype  = "Article",
+  title = "Fast and Accurate Out-of-Core PCA Framework for Large Scale Biobank Data",
+  author = "Li Zilong, Meisner Jonas and Albrechtsen Anders",
+  date = "2023-09-01",
+  journal = "Genome Research",
+  year   = "2023",
+  volume = "33",
+  number = "9",
+  pages = "1599--1608",
+  publisher = "Cold Spring Harbor Lab",
+  issn = "1088-9051, 1549-5469",
+  doi = "10.1101/gr.277525.122"
+)
