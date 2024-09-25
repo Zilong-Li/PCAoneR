@@ -7,6 +7,8 @@
 ^CRAN-SUBMISSION$
 \.github
 ^Makefile
+^src/Makevars
+^src/Makevars.win
 ^README.html
 .*\.tar\.gz$
 .*\.tbi$

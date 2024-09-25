@@ -2,8 +2,7 @@ Package: pcaone
 Title: Fast and Accurate Randomized Singular Value Decomposition Algorithms with 'PCAone'
 Version: 1.1.0
 Date: 2024-09-25
-Author: Zilong Li [aut, cre]
-Maintainer: Zilong Li <zilong.dk@gmail.com>
+Authors@R: person(given = "Zilong", family = "Li", role = c("aut", "cre"), email = "zilong.dk@gmail.com")
 Description: Fast and Accurate Randomized Singular Value Decomposition (RSVD) methods proposed in the 'PCAone' paper by Li (2023) <https://genome.cshlp.org/content/33/9/1599>.
 License: GPL (>= 3)
 Encoding: UTF-8

@@ -5,3 +5,5 @@
 tmp
 .Rhistory
 .clangd
+src/Makevars
+src/Makevars.win
