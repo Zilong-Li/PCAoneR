@@ -39,18 +39,18 @@
 #' @param p       integer, optional; \cr
 #'                number of additional power iterations (by default \eqn{p=7}).
 #'
-#' @param q       integer, optional; \cr
-#'                oversampling parameter (by default \eqn{q=10}).
+#' @param s       integer, optional; \cr
+#'                oversampling parameter (by default \eqn{s=10}).
 #'
 #' @param sdist   string \eqn{c( 'unif', 'normal')}, optional; \cr
 #'                specifies the sampling distribution of the random test matrix: \cr
 #'                		\eqn{'unif'} :  Uniform `[-1,1]`. \cr
 #'                		\eqn{'normal'} (default) : Normal `~N(0,1)`. \cr
 #'
-#' @param method  string \eqn{c( 'alg1', 'agl2')}, optional; \cr
+#' @param method  string \eqn{c( 'winsvd', 'rsvd')}, optional; \cr
 #'                specifies the different variation of the randomized singular value decomposition : \cr
-#'                		\eqn{'alg1'} : single pass RSVD with power iterations in PCAone refered to algorithm1. \cr
-#'                		\eqn{'alg2'} (default): window based RSVD in PCAone refered to algorithm2. \cr
+#'                		\eqn{'winsvd'} (default): window based RSVD in PCAone refered to algorithm2. \cr
+#'                		\eqn{'rsvd'} : single pass RSVD with power iterations in PCAone refered to algorithm1. \cr
 #'
 #' @param windows integer, optional; \cr
 #'                the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=64}).
@@ -94,10 +94,10 @@
 #' res <- pcaone(mat, k = 10, p = 7, method = "alg1")
 #' str(res)
 #' @export
-pcaone <- function(A, k=NULL, p=7, q=10, sdist="normal", method = "alg2", windows = 64, shuffle = FALSE) UseMethod("pcaone")
+pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", windows = 64, shuffle = FALSE) UseMethod("pcaone")
 
 #' @export
-pcaone.default <- function(A, k=NULL, p=7, q=10, sdist="normal", method = "alg2", windows = 64, shuffle = FALSE)
+pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", windows = 64, shuffle = FALSE)
 {
     rand <- switch(sdist,
                    normal = 1,
@@ -113,8 +113,8 @@ pcaone.default <- function(A, k=NULL, p=7, q=10, sdist="normal", method = "alg2"
         }
     }
     pcaoneObj <- switch(method,
-                        alg1 = .Call(`_pcaone_PCAoneAlg1`, A, k, p, q, rand),
-                        alg2 = .Call(`_pcaone_PCAoneAlg2`, A, k, p, q, rand, windows),
+                        rsvd = .Call(`_pcaone_PCAoneAlg1`, A, k, p, s, rand),
+                        winsvd = .Call(`_pcaone_PCAoneAlg2`, A, k, p, s, rand, windows),
                         stop("Method is not supported!"))
     pcaoneObj$d <- as.vector(pcaoneObj$d)
     pcaoneObj$u <- as.matrix(pcaoneObj$u)

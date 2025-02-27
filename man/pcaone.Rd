@@ -8,9 +8,9 @@ pcaone(
   A,
   k = NULL,
   p = 7,
-  q = 10,
+  s = 10,
   sdist = "normal",
-  method = "alg2",
+  method = "winsvd",
   windows = 64,
   shuffle = FALSE
 )
@@ -25,18 +25,18 @@ specifies the target rank of the low-rank decomposition. \eqn{k} should satisfy 
 \item{p}{integer, optional; \cr
 number of additional power iterations (by default \eqn{p=7}).}
 
-\item{q}{integer, optional; \cr
-oversampling parameter (by default \eqn{q=10}).}
+\item{s}{integer, optional; \cr
+oversampling parameter (by default \eqn{s=10}).}
 
 \item{sdist}{string \eqn{c( 'unif', 'normal')}, optional; \cr
 specifies the sampling distribution of the random test matrix: \cr
 \eqn{'unif'} :  Uniform \verb{[-1,1]}. \cr
 \eqn{'normal'} (default) : Normal \code{~N(0,1)}. \cr}
 
-\item{method}{string \eqn{c( 'alg1', 'agl2')}, optional; \cr
+\item{method}{string \eqn{c( 'winsvd', 'rsvd')}, optional; \cr
 specifies the different variation of the randomized singular value decomposition : \cr
-\eqn{'alg1'} : single pass RSVD with power iterations in PCAone refered to algorithm1. \cr
-\eqn{'alg2'} (default): window based RSVD in PCAone refered to algorithm2. \cr}
+\eqn{'winsvd'} (default): window based RSVD in PCAone refered to algorithm2. \cr
+\eqn{'rsvd'} : single pass RSVD with power iterations in PCAone refered to algorithm1. \cr}
 
 \item{windows}{integer, optional; \cr
 the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=64}).}
