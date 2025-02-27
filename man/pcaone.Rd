@@ -12,7 +12,7 @@ pcaone(
   sdist = "normal",
   method = "winsvd",
   windows = 64,
-  shuffle = FALSE
+  shuffle = TRUE
 )
 }
 \arguments{
@@ -35,14 +35,14 @@ specifies the sampling distribution of the random test matrix: \cr
 
 \item{method}{string \eqn{c( 'winsvd', 'rsvd')}, optional; \cr
 specifies the different variation of the randomized singular value decomposition : \cr
-\eqn{'winsvd'} (default): window based RSVD in PCAone refered to algorithm2. \cr
-\eqn{'rsvd'} : single pass RSVD with power iterations in PCAone refered to algorithm1. \cr}
+\eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
+\eqn{'rsvd'} : single pass RSVD with power iterations in PCAone paper. \cr}
 
 \item{windows}{integer, optional; \cr
 the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=64}).}
 
 \item{shuffle}{logical, optional; \cr
-if shuffle the rows of input tall matrix or not. recommended for algorithm 2 (by default \eqn{shuffle=FALSE}).}
+if shuffle the rows of input tall matrix or not for winsvd (by default \eqn{shuffle=TRUE}).}
 }
 \value{
 \code{pcaone} returns a list containing the following three components:
@@ -98,9 +98,9 @@ gives an equivalent decomposition.
 \examples{
 library('pcaone')
 mat <- matrix(rnorm(100*20000), 100, 20000)
-res <- pcaone(mat, k = 10, p = 7, method = "alg2")
+res <- pcaone(mat, k = 10, p = 7, method = "winsvd")
 str(res)
-res <- pcaone(mat, k = 10, p = 7, method = "alg1")
+res <- pcaone(mat, k = 10, p = 7, method = "rsvd")
 str(res)
 }
 \references{

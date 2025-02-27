@@ -49,14 +49,14 @@
 #'
 #' @param method  string \eqn{c( 'winsvd', 'rsvd')}, optional; \cr
 #'                specifies the different variation of the randomized singular value decomposition : \cr
-#'                		\eqn{'winsvd'} (default): window based RSVD in PCAone refered to algorithm2. \cr
-#'                		\eqn{'rsvd'} : single pass RSVD with power iterations in PCAone refered to algorithm1. \cr
+#'                		\eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
+#'                		\eqn{'rsvd'} : single pass RSVD with power iterations in PCAone paper. \cr
 #'
 #' @param windows integer, optional; \cr
 #'                the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=64}).
 #'
 #' @param shuffle logical, optional; \cr
-#'                if shuffle the rows of input tall matrix or not. recommended for algorithm 2 (by default \eqn{shuffle=FALSE}).
+#'                if shuffle the rows of input tall matrix or not for winsvd (by default \eqn{shuffle=TRUE}).
 #'
 #'@return \code{pcaone} returns a list containing the following three components:
 #'\describe{
@@ -87,23 +87,23 @@
 #' @author Zilong Li \email{zilong.dk@gmail.com}
 #'
 #' @examples
-#'library('pcaone')
+#' library('pcaone')
 #' mat <- matrix(rnorm(100*20000), 100, 20000)
-#' res <- pcaone(mat, k = 10, p = 7, method = "alg2")
+#' res <- pcaone(mat, k = 10, p = 7, method = "winsvd")
 #' str(res)
-#' res <- pcaone(mat, k = 10, p = 7, method = "alg1")
+#' res <- pcaone(mat, k = 10, p = 7, method = "rsvd")
 #' str(res)
 #' @export
-pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", windows = 64, shuffle = FALSE) UseMethod("pcaone")
+pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", windows = 64, shuffle = TRUE) UseMethod("pcaone")
 
 #' @export
-pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", windows = 64, shuffle = FALSE)
+pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", windows = 64, shuffle = TRUE)
 {
     rand <- switch(sdist,
                    normal = 1,
                    unif = 2,
                    stop("Selected sampling distribution is not supported!"))
-    if (shuffle) {
+    if (shuffle & method == "winsvd") {
         if (nrow(A) > ncol(A)) {
             n <- nrow(A)
             A <- A[sample(n),]
