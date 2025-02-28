@@ -11,7 +11,7 @@ pcaone(
   s = 10,
   sdist = "normal",
   method = "winsvd",
-  windows = 64,
+  batchs = 64,
   shuffle = TRUE
 )
 }
@@ -38,8 +38,8 @@ specifies the different variation of the randomized singular value decomposition
 \eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
 \eqn{'rsvd'} : single pass RSVD with power iterations in PCAone paper. \cr}
 
-\item{windows}{integer, optional; \cr
-the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=64}).}
+\item{batchs}{integer, optional; \cr
+the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{batchs=64}).}
 
 \item{shuffle}{logical, optional; \cr
 if shuffle the rows of input tall matrix or not for winsvd (by default \eqn{shuffle=TRUE}).}

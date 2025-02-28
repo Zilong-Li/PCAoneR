@@ -52,8 +52,8 @@
 #'                		\eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
 #'                		\eqn{'rsvd'} : single pass RSVD with power iterations in PCAone paper. \cr
 #'
-#' @param windows integer, optional; \cr
-#'                the number of windows for 'alg2' method. must be a power of 2 (by default \eqn{windows=64}).
+#' @param batchs integer, optional; \cr
+#'                the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{batchs=64}).
 #'
 #' @param shuffle logical, optional; \cr
 #'                if shuffle the rows of input tall matrix or not for winsvd (by default \eqn{shuffle=TRUE}).
@@ -94,10 +94,10 @@
 #' res <- pcaone(mat, k = 10, p = 7, method = "rsvd")
 #' str(res)
 #' @export
-pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", windows = 64, shuffle = TRUE) UseMethod("pcaone")
+pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE) UseMethod("pcaone")
 
 #' @export
-pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", windows = 64, shuffle = TRUE)
+pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE)
 {
   rand <- switch(sdist,
                  normal = 1,
@@ -120,7 +120,7 @@ pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsv
   
   pcaoneObj <- switch(method,
                       rsvd = .Call(`_pcaone_PCAoneAlg1`, A, k, p, s, rand),
-                      winsvd = .Call(`_pcaone_PCAoneAlg2`, A, k, p, s, rand, windows),
+                      winsvd = .Call(`_pcaone_PCAoneAlg2`, A, k, p, s, rand, batchs),
                       stop("Method is not supported!"))
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)

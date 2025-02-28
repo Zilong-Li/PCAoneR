@@ -188,15 +188,15 @@ class RsvdOpOnePass
         }
     }
 
-    void computeGandH(MatrixType & G, MatrixType & H, uint32_t p, uint32_t windows)
+    void computeGandH(MatrixType & G, MatrixType & H, uint32_t p, uint32_t batchs)
     {
-        if(windows % 2 != 0) throw std::runtime_error("windows must be a power of 2, ie. windows=2^x.\n");
-        if(std::pow(2, p) < windows) throw std::runtime_error("pow(2, p) >= windows is not true\n");
-        uint32_t blocksize = (unsigned int)std::ceil((double)nrow / windows);
-        if(blocksize < windows)
+        if(batchs % 2 != 0) throw std::runtime_error("batchs must be a power of 2, ie. batchs=2^x.\n");
+        if(std::pow(2, p) < batchs) throw std::runtime_error("pow(2, p) >= batchs is not true\n");
+        uint32_t blocksize = (unsigned int)std::ceil((double)nrow / batchs);
+        if(blocksize < batchs)
             throw std::runtime_error(
-                "window size is smaller than number of windows because given matrix is too small. please "
-                "consider other methods or adjust parameter windows.\n");
+                "window size is smaller than number of batchs because given matrix is too small. please "
+                "consider other methods or adjust parameter batchs.\n");
         if(trans)
         {
             G.noalias() = mat.transpose() * Omg;
@@ -216,14 +216,14 @@ class RsvdOpOnePass
         for(uint32_t pi = 0; pi <= p; pi++)
         {
             if(pi == 0) Omg2 = Omg;
-            if(std::pow(2, pi) >= windows)
+            if(std::pow(2, pi) >= batchs)
             {
                 // reset H1, H2 to zero
                 H1.setZero();
                 H2.setZero();
             }
-            band = std::fmin(band * 2, windows);
-            for(uint32_t b = 0, i = 1, j = 1; b < windows; ++b, ++i, ++j)
+            band = std::fmin(band * 2, batchs);
+            for(uint32_t b = 0, i = 1, j = 1; b < batchs; ++b, ++i, ++j)
             {
                 start_idx = b * blocksize;
                 stop_idx = (b + 1) * blocksize >= nrow ? nrow - 1 : (b + 1) * blocksize - 1;
@@ -234,7 +234,7 @@ class RsvdOpOnePass
                 else
                     G.middleRows(start_idx, actual_block_size).noalias() =
                         mat.middleRows(start_idx, actual_block_size) * Omg;
-                // if (pi > 0 && j <= std::pow(2, pi - 1) && std::pow(2, pi) < windows)
+                // if (pi > 0 && j <= std::pow(2, pi - 1) && std::pow(2, pi) < batchs)
                 // {
                 //     if (trans)
                 //         H1.noalias() += mat.middleCols(start_idx, actual_block_size) *
@@ -269,7 +269,7 @@ class RsvdOpOnePass
                         H2.noalias() += mat.middleRows(start_idx, actual_block_size).transpose()
                                         * G.middleRows(start_idx, actual_block_size);
                 }
-                if((b % (uint32_t)std::pow(2, pi) != (int)std::pow(2, pi) - 1) && (b != (windows - 1)))
+                if((b % (uint32_t)std::pow(2, pi) != (int)std::pow(2, pi) - 1) && (b != (batchs - 1)))
                     continue;
                 H = H1 + H2;
                 Eigen::HouseholderQR<MatrixType> qr(H);
@@ -327,7 +327,7 @@ class RsvdOnePass
     }
 
     // G = D * Omega; H = D.transpose() * G;
-    void computeUSV(uint32_t p, uint32_t windows = 0)
+    void computeUSV(uint32_t p, uint32_t batchs = 0)
     {
         const Eigen::Index nrow{b_op.rows()};
         const Eigen::Index ncol{b_op.cols()};
@@ -335,8 +335,8 @@ class RsvdOnePass
         const Eigen::Index k{b_op.ranks()};
         MatrixType H(ncol, size), G(nrow, size), R(size, size), Rt(size, size);
 
-        if(windows > 0)
-            b_op.computeGandH(G, H, p, windows);
+        if(batchs > 0)
+            b_op.computeGandH(G, H, p, batchs);
         else
             b_op.computeGandH(G, H, p);
 
@@ -406,9 +406,9 @@ class RsvdOne
         op->finder = flag;
     }
 
-    inline void compute(uint32_t p, uint32_t windows = 0)
+    inline void compute(uint32_t p, uint32_t batchs = 0)
     {
-        rsvd->computeUSV(p, windows);
+        rsvd->computeUSV(p, batchs);
     }
 
     inline MatrixType matrixU() const

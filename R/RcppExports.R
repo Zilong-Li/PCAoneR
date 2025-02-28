@@ -5,7 +5,7 @@ PCAoneAlg1 <- function(mat, k, p, q, rand) {
     .Call(`_pcaone_PCAoneAlg1`, mat, k, p, q, rand)
 }
 
-PCAoneAlg2 <- function(mat, k, p, q, rand, windows = 64L) {
-    .Call(`_pcaone_PCAoneAlg2`, mat, k, p, q, rand, windows)
+PCAoneAlg2 <- function(mat, k, p, q, rand, batchs = 64L) {
+    .Call(`_pcaone_PCAoneAlg2`, mat, k, p, q, rand, batchs)
 }
 
