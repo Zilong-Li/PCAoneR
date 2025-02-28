@@ -42,7 +42,7 @@ testthat::test_that("Test 1: PCAone with winsvd k=n", {
           })
 
 #Randomized SVD k=k
-rsvd_out <- pcaone(testMat, k = k, windows = 4, p = 3, method = "winsvd")
+rsvd_out <- pcaone(testMat, k = k, windows = 8, p = 3, method = "winsvd")
 testMat.re <- rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
 testthat::test_that("Test 2: PCAone with winsvd k=k", {
               testthat::expect_equal(svd_out$d[1:k], rsvd_out$d[1:k])

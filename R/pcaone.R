@@ -99,27 +99,43 @@ pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", wind
 #' @export
 pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", windows = 64, shuffle = TRUE)
 {
-    rand <- switch(sdist,
-                   normal = 1,
-                   unif = 2,
-                   stop("Selected sampling distribution is not supported!"))
-    if (shuffle & method == "winsvd") {
-        if (nrow(A) > ncol(A)) {
-            n <- nrow(A)
-            A <- A[sample(n),]
-        } else {
-            n <- ncol(A)
-            A <- A[,sample(n)]
-        }
+  rand <- switch(sdist,
+                 normal = 1,
+                 unif = 2,
+                 stop("Selected sampling distribution is not supported!"))
+  isPerm <- (shuffle && method == "winsvd")
+  perm <- NULL
+  isTall <- ifelse(nrow(A)>ncol(A), TRUE,  FALSE)
+  
+  if (isPerm) {
+    n <- max(dim(A))
+    perm <- sample(n)
+    if(isTall) {
+      A <- A[perm,]
+    } else {
+      A <- A[,perm]
     }
-    pcaoneObj <- switch(method,
-                        rsvd = .Call(`_pcaone_PCAoneAlg1`, A, k, p, s, rand),
-                        winsvd = .Call(`_pcaone_PCAoneAlg2`, A, k, p, s, rand, windows),
-                        stop("Method is not supported!"))
-    pcaoneObj$d <- as.vector(pcaoneObj$d)
-    pcaoneObj$u <- as.matrix(pcaoneObj$u)
-    pcaoneObj$v <- as.matrix(pcaoneObj$v)
+    
+  }
+  
+  pcaoneObj <- switch(method,
+                      rsvd = .Call(`_pcaone_PCAoneAlg1`, A, k, p, s, rand),
+                      winsvd = .Call(`_pcaone_PCAoneAlg2`, A, k, p, s, rand, windows),
+                      stop("Method is not supported!"))
+  pcaoneObj$d <- as.vector(pcaoneObj$d)
+  pcaoneObj$u <- as.matrix(pcaoneObj$u)
+  pcaoneObj$v <- as.matrix(pcaoneObj$v)
 
-    class(pcaoneObj) <- "pcaone"
-    return(pcaoneObj)
+  if(!is.null(perm)) {
+    original <- order(perm)
+    if(isTall) {
+      pcaoneObj$u <- pcaoneObj$u[original,]
+    } else {
+      pcaoneObj$v <- pcaoneObj$v[original,]
+    }
+  }
+
+  class(pcaoneObj) <- "pcaone"
+  return(pcaoneObj)
 }
+
