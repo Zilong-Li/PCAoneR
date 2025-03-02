@@ -4,7 +4,6 @@
 #include <RcppEigen.h>
 #include <random>
 #include <stdexcept>
-#include <vector>
 
 namespace PCAone
 {

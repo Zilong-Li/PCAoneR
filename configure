@@ -2,42 +2,26 @@
 
 R_HOME=$(R RHOME)
 
-# Function to detect BLAS library
-detect_blas() {
-    blas_info=$(${R_HOME}/bin/R --slave -e "si <- sessionInfo(); cat(si\$BLAS, '\n', si\$LAPACK)")
-    if echo "$blas_info" | grep -iq "mkl"; then
-        echo "mkl"
-    elif echo "$blas_info" | grep -iq "openblas"; then
-        echo "openblas"
-    else
-        echo "default"
-    fi
-}
-
 # Detect BLAS
-BLAS_TYPE=$(detect_blas)
+R_BLAS_LIBS=$(R CMD config BLAS_LIBS)
+R_LAPACK_LIBS=$(R CMD config LAPACK_LIBS)
 
-# OPENBLAS seems sub-optimal
-case $BLAS_TYPE in
-    mkl)
-        echo "Using MKL"
-        BLAS_LAPACK_LIBS="-lmkl_rt"
-        USE_MKL=true
-        USE_OPENBLAS=false
-        USE_LAPACKE=true
-        ;;
-    *)
-        echo "Using default BLAS and LAPACK"
-        BLAS_LAPACK_LIBS="-lblas -llapack"
-        USE_MKL=false
-        USE_OPENBLAS=false
-        USE_LAPACKE=false
-        ;;
-esac
+# Generate Makevars with correct linkage
+echo "CXX_STD = CXX17"  > src/Makevars
+echo "PKG_CPPFLAGS = -I../inst/include" >> src/Makevars
+echo "PKG_LIBS = $R_BLAS_LIBS $R_LAPACK_LIBS" >> src/Makevars
+if echo "$R_BLAS_LIBS" | grep -qi 'mkl'; then
+    echo "Using Intel MKL backend for Eigen";
+    echo "PKG_CXXFLAGS = -DEIGEN_USE_MKL_ALL -DNDEBUG -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS" >> src/Makevars
+else
+    echo "Using BLAS/LAPACK backend for Eigen";
+    echo "PKG_CXXFLAGS = -DEIGEN_USE_BLAS -DEIGEN_USE_LAPACK -DNDEBUG -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS" >> src/Makevars
+fi
 
-# Create Makevars
-sed -e "s|@BLAS_LAPACK_LIBS@|$BLAS_LAPACK_LIBS|" \
-    -e "s|@USE_MKL@|$USE_MKL|" \
-    -e "s|@USE_OPENBLAS@|$USE_OPENBLAS|" \
-    -e "s|@USE_LAPACKE@|$USE_LAPACKE|" \
-    src/Makevars.in > src/Makevars
+
+# Print configuration summary
+echo "----------------------------------------"
+echo "Successfully configured Eigen backend:"
+echo "BLAS detected:   $R_BLAS_LIBS"
+echo "LAPACK detected: $R_LAPACK_LIBS"
+echo "----------------------------------------"
