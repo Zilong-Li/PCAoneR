@@ -9,8 +9,8 @@ R_LAPACK_LIBS=$(R CMD config LAPACK_LIBS)
 # Generate Makevars with correct linkage
 echo "CXX_STD = CXX17"  > src/Makevars
 echo "PKG_CPPFLAGS = -I../inst/include" >> src/Makevars
-echo "PKG_LIBS = $R_BLAS_LIBS $R_LAPACK_LIBS" >> src/Makevars
-if echo "$R_BLAS_LIBS" | grep -qi 'mkl_rt\.dll'; then
+echo "PKG_LIBS = ${R_BLAS_LIBS} ${R_LAPACK_LIBS}" >> src/Makevars
+if echo "${R_BLAS_LIBS}" | grep -qi 'mkl_rt\.dll'; then
     echo "Using Intel MKL backend for Eigen";
     echo "PKG_CXXFLAGS = -DEIGEN_USE_MKL_ALL -DNDEBUG -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS" >> src/Makevars
 else
@@ -22,6 +22,6 @@ fi
 # Print configuration summary
 echo "----------------------------------------"
 echo "Successfully configured Eigen backend:"
-echo "BLAS detected:   $R_BLAS_LIBS"
-echo "LAPACK detected: $R_LAPACK_LIBS"
+echo "BLAS detected:   ${R_BLAS_LIBS}"
+echo "LAPACK detected: ${R_LAPACK_LIBS}"
 echo "----------------------------------------"
