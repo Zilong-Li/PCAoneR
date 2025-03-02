@@ -1,3 +1,11 @@
+/***********************************************************************
+ * @file        RsvdEigen.hpp
+ * @author      Zilong Li
+ * @email       zilong.dk@gmail.com
+ * @brief       Various Randomized Singular Value Decomposition in Eigen
+ * Copyright (C) 2021 Zilong Li
+ ***********************************************************************/
+
 #ifndef RSVDEIGEN_H_
 #define RSVDEIGEN_H_
 

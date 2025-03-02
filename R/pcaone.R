@@ -47,7 +47,7 @@
 #'                		\eqn{'unif'} :  Uniform `[-1,1]`. \cr
 #'                		\eqn{'normal'} (default) : Normal `~N(0,1)`. \cr
 #'
-#' @param method  string \eqn{c( 'winsvd', 'rsvd')}, optional; \cr
+#' @param method  string \eqn{c( 'winsvd', 'ssvd', 'winsvd')}, optional; \cr
 #'                specifies the different variation of the randomized singular value decomposition : \cr
 #'                		\eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
 #'                		\eqn{'ssvd'} : single-pass RSVD with power iterations in PCAone paper. \cr
@@ -81,20 +81,21 @@
 #'
 #' @references
 #' \itemize{
-#'  \item Z. Li, J Meisner, A Albrechtsen. "PCAone: fast and accurate out-of-core PCA framework for large scale biobank data" (2022)
-#'        \doi{10.1101/2022.05.25.493261}.
+#'  \item Z. Li, J Meisner, A Albrechtsen. "Fast and accurate out-of-core PCA framework for large scale biobank data" (2023)
+#'        \doi{10.1101/gr.277525.122}.
 #' }
 #'
 #' @author Zilong Li \email{zilong.dk@gmail.com}
 #'
 #' @examples
 #' library('pcaone')
-#' mat <- matrix(rnorm(100*20000), 100, 20000)
-#' res <- pcaone(mat, k = 10, p = 7, method = "winsvd")
+#' data(popgen)
+#' A <- popgen - rowMeans(popgen)
+#' res <- pcaone(A, k = 10, p = 7, method = "winsvd")
 #' str(res)
-#' res <- pcaone(mat, k = 10, p = 7, method = "ssvd")
+#' res <- pcaone(A, k = 10, p = 7, method = "ssvd")
 #' str(res)
-#' res <- pcaone(mat, k = 10, p = 7, method = "dashsvd")
+#' res <- pcaone(A, k = 10, p = 7, method = "dashsvd")
 #' str(res)
 #' @export
 pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE) UseMethod("pcaone")
@@ -184,35 +185,19 @@ eigSVD <- function(A, tol = 1e-10) {
   m <- nrow(A)
   n <- ncol(A)
   
-  if (m >= n) {
-    # Case 1: Compute via A^T A (smaller covariance matrix)
-    C <- t(A) %*% A
-    eig <- eigen(C, symmetric = TRUE)
-    V <- eig$vectors
-    sigma <- sqrt(pmax(eig$values, 0))  # Ensure non-negative singular values
-    
-    # Avoid division by near-zero values
-    sigma_inv <- ifelse(sigma > tol, 1 / sigma, 0)
-    U <- A %*% V %*% diag(sigma_inv)
-    
-    # Ensure U is orthonormal (QR decomposition)
-    ## qrU <- qr(U)
-    ## U <- qr.Q(qrU)
-  } else {
-    # Case 2: Compute via AA^T (smaller covariance matrix)
-    C <- A %*% t(A)
-    eig <- eigen(C, symmetric = TRUE)
-    U <- eig$vectors
-    sigma <- sqrt(pmax(eig$values, 0))  # Ensure non-negative singular values
-    
-    # Avoid division by near-zero values
-    sigma_inv <- ifelse(sigma > tol, 1 / sigma, 0)
-    V <- t(A) %*% U %*% diag(sigma_inv)
-    
-    # Ensure V is orthonormal (QR decomposition)
-    ## qrV <- qr(V)
-    ## V <- qr.Q(qrV)
-  }
+  # Case 1: Compute via A^T A (smaller covariance matrix)
+  C <- t(A) %*% A
+  eig <- eigen(C, symmetric = TRUE)
+  V <- eig$vectors
+  sigma <- sqrt(pmax(eig$values, 0))  # Ensure non-negative singular values
+  
+  # Avoid division by near-zero values
+  sigma_inv <- ifelse(sigma > tol, 1 / sigma, 0)
+  U <- A %*% V %*% diag(sigma_inv)
+  
+  # Ensure U is orthonormal (QR decomposition)
+  ## qrU <- qr(U)
+  ## U <- qr.Q(qrU)
   
   # Return results as list (thin SVD)
   list(U = U, S = sigma, V = V)

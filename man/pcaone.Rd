@@ -33,7 +33,7 @@ specifies the sampling distribution of the random test matrix: \cr
 \eqn{'unif'} :  Uniform \verb{[-1,1]}. \cr
 \eqn{'normal'} (default) : Normal \code{~N(0,1)}. \cr}
 
-\item{method}{string \eqn{c( 'winsvd', 'rsvd')}, optional; \cr
+\item{method}{string \eqn{c( 'winsvd', 'ssvd', 'winsvd')}, optional; \cr
 specifies the different variation of the randomized singular value decomposition : \cr
 \eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
 \eqn{'ssvd'} : single-pass RSVD with power iterations in PCAone paper. \cr
@@ -98,18 +98,19 @@ gives an equivalent decomposition.
 }
 \examples{
 library('pcaone')
-mat <- matrix(rnorm(100*20000), 100, 20000)
-res <- pcaone(mat, k = 10, p = 7, method = "winsvd")
+data(popgen)
+A <- popgen - rowMeans(popgen)
+res <- pcaone(A, k = 10, p = 7, method = "winsvd")
 str(res)
-res <- pcaone(mat, k = 10, p = 7, method = "ssvd")
+res <- pcaone(A, k = 10, p = 7, method = "ssvd")
 str(res)
-res <- pcaone(mat, k = 10, p = 7, method = "dashsvd")
+res <- pcaone(A, k = 10, p = 7, method = "dashsvd")
 str(res)
 }
 \references{
 \itemize{
-\item Z. Li, J Meisner, A Albrechtsen. "PCAone: fast and accurate out-of-core PCA framework for large scale biobank data" (2022)
-\doi{10.1101/2022.05.25.493261}.
+\item Z. Li, J Meisner, A Albrechtsen. "Fast and accurate out-of-core PCA framework for large scale biobank data" (2023)
+\doi{10.1101/gr.277525.122}.
 }
 }
 \author{
