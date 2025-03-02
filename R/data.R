@@ -8,11 +8,7 @@
 #'
 #' @format An object of class \code{\link[pcaone]{pcaone}}.
 #'
-#' @source \href{https://www.internationalgenome.org/}
-#'
-#' @examples
-#' \dontrun{
-#' library('pcaone')
-#' data('popgen')
-#' }
+#' @keywords datasets
+#' 
+#' @source <https://www.internationalgenome.org>
 "popgen"

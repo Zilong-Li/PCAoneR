@@ -8,18 +8,12 @@
 An object of class \code{\link[pcaone]{pcaone}}.
 }
 \source{
-\href{https://www.internationalgenome.org/}
+\url{https://www.internationalgenome.org}
 }
 \usage{
 data('popgen')
 }
 \description{
 Four populations from East Asia in the 1000 Genome Project
-}
-\examples{
-\dontrun{
-library('pcaone')
-data('popgen')
-}
 }
 \keyword{datasets}

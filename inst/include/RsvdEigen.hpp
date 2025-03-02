@@ -233,23 +233,6 @@ class RsvdOpOnePass
                 else
                     G.middleRows(start_idx, actual_block_size).noalias() =
                         mat.middleRows(start_idx, actual_block_size) * Omg;
-                // if (pi > 0 && j <= std::pow(2, pi - 1) && std::pow(2, pi) < batchs)
-                // {
-                //     if (trans)
-                //         H1.noalias() += mat.middleCols(start_idx, actual_block_size) *
-                //         G.middleRows(start_idx, actual_block_size);
-                //     else
-                //         H1.noalias() += mat.middleRows(start_idx, actual_block_size).transpose() *
-                //         G.middleRows(start_idx, actual_block_size);
-                //     // additional complementary power iteration for last read
-                //     if (j == std::pow(2, pi - 1)){
-                //         H = H1 + H2;
-                //         Eigen::HouseholderQR<MatrixType> qr(H);
-                //         Omg.noalias() = qr.householderQ() * MatrixType::Identity(cols(), size);
-                //         H2.setZero();
-                //         flipOmg(Omg2, Omg);
-                //     }
-                // }
                 if(i <= band / 2)
                 {
                     if(trans)
