@@ -7,15 +7,15 @@ R_BLAS_LIBS=$(${R_HOME}/bin/R CMD config BLAS_LIBS)
 R_LAPACK_LIBS=$(${R_HOME}/bin/R CMD config LAPACK_LIBS)
 
 # Generate Makevars with correct linkage
-echo "CXX_STD = CXX17"  > src/Makevars
-echo "PKG_CPPFLAGS = -I../inst/include" >> src/Makevars
-echo "PKG_LIBS = ${R_BLAS_LIBS} ${R_LAPACK_LIBS}" >> src/Makevars
+echo "CXX_STD = CXX17"  > src/Makevars.win
+echo "PKG_CPPFLAGS = -I../inst/include" >> src/Makevars.win
+echo "PKG_LIBS = ${R_BLAS_LIBS} ${R_LAPACK_LIBS}" >> src/Makevars.win
 if echo "${R_BLAS_LIBS}" | grep -qi 'mkl_rt\.dll'; then
     echo "Using Intel MKL backend for Eigen";
-    echo "PKG_CXXFLAGS = -DEIGEN_USE_MKL_ALL -DNDEBUG -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS" >> src/Makevars
+    echo "PKG_CXXFLAGS = -DEIGEN_USE_MKL_ALL -DNDEBUG -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS" >> src/Makevars.win
 else
     echo "Using BLAS/LAPACK backend for Eigen";
-    echo "PKG_CXXFLAGS = -DEIGEN_USE_BLAS -DEIGEN_USE_LAPACK -DNDEBUG -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS" >> src/Makevars
+    echo "PKG_CXXFLAGS = -DEIGEN_USE_BLAS -DEIGEN_USE_LAPACK -DNDEBUG -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS" >> src/Makevars.win
 fi
 
 

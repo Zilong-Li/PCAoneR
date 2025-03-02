@@ -1,7 +1,18 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# PCAone algorithms in R with RcppEigen\!
+# Fast and accurate randomized singular value decomposition (RSVD)
+
+## Introduction
+
+There are 3 versions of RSVD implemented in this package, which are
+ordered by their accuracy.
+
+  - **winSVD: window based randomized singular value decomposition**
+  - **dashSVD**: randomized singular value decomposition with dynamic
+    shifted eigenvalues
+  - **sSVD**: single pass randomized singular value decomposition with
+    power iterations
 
 <!-- badges: start -->
 
@@ -22,15 +33,46 @@ This is a basic example which shows you how to use pcaone:
 
 ``` r
 library(pcaone)
-mat <- matrix(rnorm(100*5000), 100, 5000)
+mat <- matrix(rnorm(100*5000), 5000, 100)
 res <- pcaone(mat, k = 10)
 str(res)
 #> List of 3
-#>  $ d: num [1:10] 80.1 79.3 78.8 78.5 78.4 ...
-#>  $ u: num [1:100, 1:10] -0.282 -0.106 -0.0348 -0.0219 0.0414 ...
-#>  $ v: num [1:5000, 1:10] -0.01971 0.00974 -0.02306 -0.00957 0.01311 ...
+#>  $ d: num [1:10] 80.1 79.7 79.4 79 78.7 ...
+#>  $ u: num [1:5000, 1:10] -0.00319 0.00769 0.01271 -0.00393 -0.00679 ...
+#>  $ v: num [1:100, 1:10] 0.154527 0.000605 0.323732 -0.164047 0.052849 ...
 #>  - attr(*, "class")= chr "pcaone"
 ```
+
+## Accuracy
+
+``` r
+library(RSpectra) ## svds
+library(rsvd)     ## regular rsvd
+library(pcaone)
+data(popgen)
+A <- popgen - rowMeans(popgen) ## center
+k <- 40
+system.time(s0 <- RSpectra::svds(A, k = k) )
+#>    user  system elapsed 
+#>  29.057  11.899   1.765
+system.time(s1 <- rsvd::rsvd(A, k = k, p = 7))
+#>    user  system elapsed 
+#>   5.647  12.359   0.795
+system.time(s2 <- pcaone(A, k = k, method = "ssvd"))
+#>    user  system elapsed 
+#>  19.558  48.724   4.942
+system.time(s3 <- pcaone(A, k = k, method = "winsvd"))
+#>    user  system elapsed 
+#>  40.248 117.970   9.466
+
+par(mar = c(5, 5, 2, 2))
+plot(s0$d-s1$d, ylim = c(0, 15), xlab = "PC index", ylab = "Error of singular valuse", cex = 2, cex.lab = 2)
+points(s0$d-s2$d, col = "orange", cex = 2)
+points(s0$d-s3$d, col = "red", cex = 2)
+legend("top", legend = c("rSVD", "sSVD", "winSVD"), pch = 16,col = c("black", "orange", "red"), horiz = T, cex = 2, bty = "n" )
+```
+
+<img src="man/figures/README-acc-1.png" width="100%" />
 
 ## Benchmarking
 
@@ -39,29 +81,14 @@ packages.
 
 ``` r
 library(microbenchmark)
-library(pcaone)
-library(rsvd)
-data(tiger)
 timing <- microbenchmark(
-    'SVD' = svd(tiger, nu=150, nv=150),
-    'rSVD' = rsvd(tiger, k=150, q = 3),
-    'pcaone.alg1' = pcaone(tiger, k=150, p = 3, method = "alg1"),
-    'pcaone.alg2' = pcaone(tiger, k=150, p = 3, windows = 8),
-    times=10)
+  'RSpectra' = svds(A,k = k),
+  'rSVD' = rsvd(A, k=k, q = 7),
+  'pcaone.rsvd' = pcaone(A, k=k, p = 7, method = "rsvd"),
+  'pcaone.winsvd' = pcaone(A, k=k, p = 7),
+  times=5)
 print(timing, unit='s')
-#> Unit: seconds
-#>         expr       min        lq      mean    median        uq       max neval
-#>          SVD 6.3386527 6.4493697 6.5878084 6.4936343 6.6752989 7.2448005    10
-#>         rSVD 2.7598743 2.8006495 2.8523624 2.8390449 2.8630295 3.0286470    10
-#>  pcaone.alg1 0.5111962 0.5174421 0.5360362 0.5257972 0.5529187 0.5814665    10
-#>  pcaone.alg2 0.7594326 0.7668610 0.7872839 0.7833292 0.7878939 0.8441923    10
 ```
-
-The above test is run on my MacBook Pro 2019 with processor 2.6 GHz
-6-Core Intel Core i7. Note that the R is not linked to external BLAS or
-MKL routine. To proper benchmark the performance with single core, we
-can set the number of threads as one by `export OPENBLAS_NUM_THREADS=1
-OMP_NUM_THREADS=1 MKL_NUM_THREADS=1`.
 
 ## References
 

@@ -356,7 +356,7 @@ class RsvdOnePass
 
         // R.T * B = H.T => lapack dtrtrs()
         MatrixType B = R.transpose().fullPivHouseholderQr().solve(H.transpose());
-        Eigen::JacobiSVD<MatrixType> svd(B, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        Eigen::BDCSVD<MatrixType> svd(B, Eigen::ComputeThinU | Eigen::ComputeThinV);
         b_leftSingularVectors.noalias() = G * svd.matrixU().leftCols(k);
         b_rightSingularVectors = svd.matrixV().leftCols(k);
         b_singularValues = svd.singularValues().head(k);

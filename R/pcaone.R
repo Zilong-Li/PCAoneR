@@ -50,7 +50,7 @@
 #' @param method  string \eqn{c( 'winsvd', 'rsvd')}, optional; \cr
 #'                specifies the different variation of the randomized singular value decomposition : \cr
 #'                		\eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
-#'                		\eqn{'rsvd'} : single pass RSVD with power iterations in PCAone paper. \cr
+#'                		\eqn{'ssvd'} : single pass RSVD with power iterations in PCAone paper. \cr
 #'
 #' @param batchs integer, optional; \cr
 #'                the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{batchs=64}).
@@ -91,7 +91,7 @@
 #' mat <- matrix(rnorm(100*20000), 100, 20000)
 #' res <- pcaone(mat, k = 10, p = 7, method = "winsvd")
 #' str(res)
-#' res <- pcaone(mat, k = 10, p = 7, method = "rsvd")
+#' res <- pcaone(mat, k = 10, p = 7, method = "ssvd")
 #' str(res)
 #' @export
 pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE) UseMethod("pcaone")
@@ -119,7 +119,7 @@ pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsv
   }
   
   pcaoneObj <- switch(method,
-                      rsvd = .Call(`_pcaone_PCAoneAlg1`, A, k, p, s, rand),
+                      ssvd = .Call(`_pcaone_PCAoneAlg1`, A, k, p, s, rand),
                       winsvd = .Call(`_pcaone_PCAoneAlg2`, A, k, p, s, rand, batchs),
                       stop("Method is not supported!"))
   pcaoneObj$d <- as.vector(pcaoneObj$d)
