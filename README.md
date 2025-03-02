@@ -37,9 +37,9 @@ mat <- matrix(rnorm(100*5000), 5000, 100)
 res <- pcaone(mat, k = 10)
 str(res)
 #> List of 3
-#>  $ d: num [1:10] 80.1 79.7 79.4 79 78.7 ...
-#>  $ u: num [1:5000, 1:10] -0.00319 0.00769 0.01271 -0.00393 -0.00679 ...
-#>  $ v: num [1:100, 1:10] 0.154527 0.000605 0.323732 -0.164047 0.052849 ...
+#>  $ d: num [1:10] 79.8 79.7 79 78.8 78.6 ...
+#>  $ u: num [1:5000, 1:10] -0.000154 -0.007631 -0.010643 -0.024208 -0.007177 ...
+#>  $ v: num [1:100, 1:10] -0.1704 -0.0301 0.0467 -0.0239 0.1965 ...
 #>  - attr(*, "class")= chr "pcaone"
 ```
 
@@ -54,19 +54,19 @@ A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
 #>    user  system elapsed 
-#>  29.057  11.899   1.765
-system.time(s1 <- rsvd::rsvd(A, k = k, p = 7))
+#>  28.853  21.787   2.764
+system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))
 #>    user  system elapsed 
-#>   5.647  12.359   0.795
+#>   9.186  18.886   1.421
 system.time(s2 <- pcaone(A, k = k, method = "ssvd"))
 #>    user  system elapsed 
-#>  19.558  48.724   4.942
+#>  17.434  37.939   3.841
 system.time(s3 <- pcaone(A, k = k, method = "winsvd"))
 #>    user  system elapsed 
-#>  40.248 117.970   9.466
+#>  44.085 133.619  10.006
 
 par(mar = c(5, 5, 2, 2))
-plot(s0$d-s1$d, ylim = c(0, 15), xlab = "PC index", ylab = "Error of singular valuse", cex = 2, cex.lab = 2)
+plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 2, cex.lab = 2)
 points(s0$d-s2$d, col = "orange", cex = 2)
 points(s0$d-s3$d, col = "red", cex = 2)
 legend("top", legend = c("rSVD", "sSVD", "winSVD"), pch = 16,col = c("black", "orange", "red"), horiz = T, cex = 2, bty = "n" )

@@ -58,12 +58,12 @@ data(popgen)
 A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
-system.time(s1 <- rsvd::rsvd(A, k = k, p = 7))
+system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))
 system.time(s2 <- pcaone(A, k = k, method = "ssvd"))
 system.time(s3 <- pcaone(A, k = k, method = "winsvd"))
 
 par(mar = c(5, 5, 2, 2))
-plot(s0$d-s1$d, ylim = c(0, 15), xlab = "PC index", ylab = "Error of singular values", cex = 2, cex.lab = 2)
+plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 2, cex.lab = 2)
 points(s0$d-s2$d, col = "orange", cex = 2)
 points(s0$d-s3$d, col = "red", cex = 2)
 legend("top", legend = c("rSVD", "sSVD", "winSVD"), pch = 16,col = c("black", "orange", "red"), horiz = T, cex = 2, bty = "n" )
