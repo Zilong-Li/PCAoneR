@@ -36,7 +36,8 @@ specifies the sampling distribution of the random test matrix: \cr
 \item{method}{string \eqn{c( 'winsvd', 'rsvd')}, optional; \cr
 specifies the different variation of the randomized singular value decomposition : \cr
 \eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
-\eqn{'ssvd'} : single pass RSVD with power iterations in PCAone paper. \cr}
+\eqn{'ssvd'} : single-pass RSVD with power iterations in PCAone paper. \cr
+\eqn{'dashsvd'} : RSVD with Dynamic Shifts by Feng et al. 2024. \cr}
 
 \item{batchs}{integer, optional; \cr
 the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{batchs=64}).}
@@ -101,6 +102,8 @@ mat <- matrix(rnorm(100*20000), 100, 20000)
 res <- pcaone(mat, k = 10, p = 7, method = "winsvd")
 str(res)
 res <- pcaone(mat, k = 10, p = 7, method = "ssvd")
+str(res)
+res <- pcaone(mat, k = 10, p = 7, method = "dashsvd")
 str(res)
 }
 \references{

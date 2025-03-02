@@ -50,7 +50,8 @@
 #' @param method  string \eqn{c( 'winsvd', 'rsvd')}, optional; \cr
 #'                specifies the different variation of the randomized singular value decomposition : \cr
 #'                		\eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
-#'                		\eqn{'ssvd'} : single pass RSVD with power iterations in PCAone paper. \cr
+#'                		\eqn{'ssvd'} : single-pass RSVD with power iterations in PCAone paper. \cr
+#'                		\eqn{'dashsvd'} : RSVD with Dynamic Shifts by Feng et al. 2024. \cr
 #'
 #' @param batchs integer, optional; \cr
 #'                the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{batchs=64}).
@@ -93,6 +94,8 @@
 #' str(res)
 #' res <- pcaone(mat, k = 10, p = 7, method = "ssvd")
 #' str(res)
+#' res <- pcaone(mat, k = 10, p = 7, method = "dashsvd")
+#' str(res)
 #' @export
 pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE) UseMethod("pcaone")
 
@@ -121,6 +124,7 @@ pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsv
   pcaoneObj <- switch(method,
                       ssvd = .Call(`_pcaone_PCAoneAlg1`, A, k, p, s, rand),
                       winsvd = .Call(`_pcaone_PCAoneAlg2`, A, k, p, s, rand, batchs),
+                      dashsvd = dashSVD(A, k, p, s, rand),
                       stop("Method is not supported!"))
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
@@ -139,3 +143,77 @@ pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsv
   return(pcaoneObj)
 }
 
+dashSVD <- function(A, k, p, s, rand) {
+  if (nrow(A)>ncol(A)) {
+    dashSVD_tall(A = A, k = k, p = p, s = s, rand = rand)
+  } else {
+    dashSVD_tall(A = t(A), k = k, p = p, s = s, rand = rand)
+  }
+}
+
+#' @import stats
+dashSVD_tall <- function(A, k, p = 3, s = 10, rand =  2) {
+  M <- nrow(A)
+  N <- ncol(A)
+  ## L <- k + as.integer(ceiling(k / 2))
+  L <- k + s
+  if(rand == 2) {
+    Omg <- matrix(stats::rnorm(L * M), M, L)
+  } else {
+    Omg <- matrix(stats::runif(L * M), M, L)
+  }
+  Q <- t(A) %*% Omg
+  e <- eigSVD(Q)
+  Q <- e$U
+  alpha <- 0.0
+  for(i in 1:p) {
+    ## message("power iteration ", i, ", alpha=",alpha)
+    e <- eigSVD(t(A) %*% (A %*% Q)-alpha*Q)
+    Q <- e$U
+    if(e$S[L] > alpha) alpha <- (alpha + e$S[L]) / 2
+  }
+  e <- eigSVD(A %*% Q)
+  U <- e$U
+  S <- e$S
+  V <- Q %*% e$V
+  list(d = S[1:k], u = U[,1:k], v = V[,1:k])
+}
+
+# SVD via eigendecomposition 
+eigSVD <- function(A, tol = 1e-10) {
+  m <- nrow(A)
+  n <- ncol(A)
+  
+  if (m >= n) {
+    # Case 1: Compute via A^T A (smaller covariance matrix)
+    C <- t(A) %*% A
+    eig <- eigen(C, symmetric = TRUE)
+    V <- eig$vectors
+    sigma <- sqrt(pmax(eig$values, 0))  # Ensure non-negative singular values
+    
+    # Avoid division by near-zero values
+    sigma_inv <- ifelse(sigma > tol, 1 / sigma, 0)
+    U <- A %*% V %*% diag(sigma_inv)
+    
+    # Ensure U is orthonormal (QR decomposition)
+    ## qrU <- qr(U)
+    ## U <- qr.Q(qrU)
+  } else {
+    # Case 2: Compute via AA^T (smaller covariance matrix)
+    C <- A %*% t(A)
+    eig <- eigen(C, symmetric = TRUE)
+    U <- eig$vectors
+    sigma <- sqrt(pmax(eig$values, 0))  # Ensure non-negative singular values
+    
+    # Avoid division by near-zero values
+    sigma_inv <- ifelse(sigma > tol, 1 / sigma, 0)
+    V <- t(A) %*% U %*% diag(sigma_inv)
+    
+    # Ensure V is orthonormal (QR decomposition)
+    ## qrV <- qr(V)
+    ## V <- qr.Q(qrV)
+  }
+  
+  # Return results as list (thin SVD)
+  list(U = U, S = sigma, V = V)
+}

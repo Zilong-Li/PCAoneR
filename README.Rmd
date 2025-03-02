@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 There are 3 versions of RSVD implemented in this package, which are ordered by their accuracy.
 
 - **winSVD**: [window based randomized singular value decomposition](https://genome.cshlp.org/content/33/9/1599)
-- **dashSVD**: randomized singular value decomposition with dynamic shifted eigenvalues
+- **dashSVD**: [randomized singular value decomposition with dynamic shifted eigenvalues](https://dl.acm.org/doi/10.1145/3660629)
 - **sSVD**: [single pass randomized singular value decomposition with power iterations](https://genome.cshlp.org/content/33/9/1599)
 
 <!-- badges: start -->
@@ -30,10 +30,8 @@ There are 3 versions of RSVD implemented in this package, which are ordered by t
 ## Installation
 
 ``` r
-# For the CRAN version
-install.packages("pcaone")
-# For the latest developing version
-## devtools::install_github("Zilong-Li/PCAoneR")
+# install.packages("pcaone") # For the CRAN version
+remotes::install_github("Zilong-Li/PCAoneR") # For the latest developing version
 ```
 
 ## Example
@@ -47,8 +45,9 @@ res <- pcaone(mat, k = 10)
 str(res)
 ```
 
-## Accuracy
+## Benchmarking of accuracy
 
+We define the accuracy as the error of singular values using results of `RSpectra::svds` as truth. For all RSVD, let's restrict the number of epochs as 7, i.e. how many times the whole matrix is read through if it can only be hold on disk. 
 
 ```{r acc}
 library(RSpectra) ## svds
@@ -58,29 +57,47 @@ data(popgen)
 A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
-system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))
+system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))  ## the number of epochs is 4*2=8
 system.time(s2 <- pcaone(A, k = k, method = "ssvd"))
 system.time(s3 <- pcaone(A, k = k, method = "winsvd"))
+system.time(s4 <- pcaone(A, k = k, method = "dashsvd"))
 
-par(mar = c(5, 5, 2, 2))
-plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 2, cex.lab = 2)
-points(s0$d-s2$d, col = "orange", cex = 2)
-points(s0$d-s3$d, col = "red", cex = 2)
-legend("top", legend = c("rSVD", "sSVD", "winSVD"), pch = 16,col = c("black", "orange", "red"), horiz = T, cex = 2, bty = "n" )
-
+par(mar = c(5, 5, 2, 1))
+plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
+points(s0$d-s2$d, col = "orange", cex = 1.5)
+points(s0$d-s3$d, col = "red", cex = 1.5)
+points(s0$d-s4$d, col = "blue", cex = 1.5)
+legend("top", legend = c("rSVD", "sSVD", "winSVD", "dashSVD"), pch = 16,col = c("black", "orange", "red", "blue"), horiz = T, cex = 1.2, bty = "n" )
 ```
 
-## Benchmarking
+Now let's see how many epochs we need for `rSVD`, `sSVD` and `dashSVD`  to reach the accuracy of `winSVD`.
 
-Let's see the performance of ```pcaone``` compared to the other rsvd packages. 
+```{r acc2}
+system.time(s1 <- rsvd::rsvd(A, k = k, q = 20))  ## the number of epochs is 4*20=40
+system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 20))
+system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 20))
 
-``` r
+par(mar = c(5, 5, 2, 1))
+plot(s0$d-s1$d, ylim = c(0, 2), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
+points(s0$d-s2$d, col = "orange", cex = 1.5)
+points(s0$d-s3$d, col = "red", cex = 1.5)
+points(s0$d-s4$d, col = "blue", cex = 1.5)
+legend("top", legend = c("rSVD", "sSVD", "winSVD", "dashSVD"), pch = 16,col = c("black", "orange", "red", "blue"), horiz = T, cex = 1.2, bty = "n" )
+```
+
+
+## Benchmarking of speed
+
+Let's see the performance of ```pcaone``` compared to the other packages. 
+
+``` {r time}
 library(microbenchmark)
 timing <- microbenchmark(
   'RSpectra' = svds(A,k = k),
-  'rSVD' = rsvd(A, k=k, q = 7),
-  'pcaone.rsvd' = pcaone(A, k=k, p = 7, method = "rsvd"),
+  'rSVD' = rsvd(A, k=k, q = 20),
   'pcaone.winsvd' = pcaone(A, k=k, p = 7),
+  'pcaone.ssvd' = pcaone(A, k=k, p = 20, method = "ssvd"),
+  'pcaone.dashsvd' = pcaone(A, k=k, p = 20, method = "dashsvd"),
   times=5)
 print(timing, unit='s')
 ```
@@ -88,6 +105,7 @@ print(timing, unit='s')
 ## References
 
 * [Zilong Li, Jonas Meisner, Anders Albrechtsen (2023). Fast and accurate out-of-core PCA framework for large scale biobank data](https://genome.cshlp.org/content/33/9/1599)
+* [Feng et al. 2024. Algorithm 1043: Faster Randomized SVD with Dynamic Shifts](https://dl.acm.org/doi/10.1145/3660629)
 
 ## Todo
 
