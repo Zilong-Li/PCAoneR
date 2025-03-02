@@ -3,8 +3,8 @@
 R_HOME=$(R RHOME)
 
 # Detect BLAS
-R_BLAS_LIBS=$(R CMD config BLAS_LIBS)
-R_LAPACK_LIBS=$(R CMD config LAPACK_LIBS)
+R_BLAS_LIBS=$(${R_HOME}/bin/R CMD config BLAS_LIBS)
+R_LAPACK_LIBS=$(${R_HOME}/bin/R CMD config LAPACK_LIBS)
 
 # Generate Makevars with correct linkage
 echo "CXX_STD = CXX17"  > src/Makevars
