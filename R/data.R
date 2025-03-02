@@ -14,6 +14,5 @@
 #' \dontrun{
 #' library('pcaone')
 #' data('popgen')
-#'
 #' }
 "popgen"

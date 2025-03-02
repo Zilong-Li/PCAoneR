@@ -19,9 +19,9 @@ knitr::opts_chunk$set(
 
 There are 3 versions of RSVD implemented in this package, which are ordered by their accuracy.
 
-- **winSVD: window based randomized singular value decomposition**
+- **winSVD**: [window based randomized singular value decomposition](https://genome.cshlp.org/content/33/9/1599)
 - **dashSVD**: randomized singular value decomposition with dynamic shifted eigenvalues
-- **sSVD**: single pass randomized singular value decomposition with power iterations
+- **sSVD**: [single pass randomized singular value decomposition with power iterations](https://genome.cshlp.org/content/33/9/1599)
 
 <!-- badges: start -->
 <!-- badges: end -->

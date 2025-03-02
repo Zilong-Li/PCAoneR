@@ -8,11 +8,12 @@
 There are 3 versions of RSVD implemented in this package, which are
 ordered by their accuracy.
 
-  - **winSVD: window based randomized singular value decomposition**
+  - **winSVD**: [window based randomized singular value
+    decomposition](https://genome.cshlp.org/content/33/9/1599)
   - **dashSVD**: randomized singular value decomposition with dynamic
     shifted eigenvalues
-  - **sSVD**: single pass randomized singular value decomposition with
-    power iterations
+  - **sSVD**: [single pass randomized singular value decomposition with
+    power iterations](https://genome.cshlp.org/content/33/9/1599)
 
 <!-- badges: start -->
 
@@ -37,9 +38,9 @@ mat <- matrix(rnorm(100*5000), 5000, 100)
 res <- pcaone(mat, k = 10)
 str(res)
 #> List of 3
-#>  $ d: num [1:10] 79.8 79.7 79 78.8 78.6 ...
-#>  $ u: num [1:5000, 1:10] -0.000154 -0.007631 -0.010643 -0.024208 -0.007177 ...
-#>  $ v: num [1:100, 1:10] -0.1704 -0.0301 0.0467 -0.0239 0.1965 ...
+#>  $ d: num [1:10] 80.3 79.7 79.3 79.2 78.9 ...
+#>  $ u: num [1:5000, 1:10] -0.00671 -0.01336 -0.0143 0.01195 0.00831 ...
+#>  $ v: num [1:100, 1:10] 0.1466 0.1119 0.1024 0.2006 0.0736 ...
 #>  - attr(*, "class")= chr "pcaone"
 ```
 
@@ -54,16 +55,16 @@ A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
 #>    user  system elapsed 
-#>  28.853  21.787   2.764
+#>  27.916   1.570   1.237
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))
 #>    user  system elapsed 
-#>   9.186  18.886   1.421
+#>   9.673  18.263   1.645
 system.time(s2 <- pcaone(A, k = k, method = "ssvd"))
 #>    user  system elapsed 
-#>  17.434  37.939   3.841
+#>  17.052  33.534   3.838
 system.time(s3 <- pcaone(A, k = k, method = "winsvd"))
 #>    user  system elapsed 
-#>  44.085 133.619  10.006
+#>  40.115 120.547   9.508
 
 par(mar = c(5, 5, 2, 2))
 plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 2, cex.lab = 2)
