@@ -8,25 +8,10 @@ set.seed(1234)
 # Test: pcaone using real random test matrix
 #*************************************************************************************
 #Create real random test matrix of dimension m x n with target rank k
-m <- 500
-n <- 100
+m <- 50
+n <- 30
 k <- 10
-p <- min(c(m, n))
-
-L <- matrix(rnorm(m*m), m, m)
-qrl <- qr(L)
-U <- qr.Q(qrl)
-L <- matrix(rnorm(n*n), n, n)
-qrl <- qr(L)
-V <- qr.Q(qrl)
-
-# type2 matrix
-## d <- (1:p)^(-2)
-## testMat <- U %*% diag(d, m, n) %*% V
-
-
 testMat <- matrix(runif(m*k), m, k)
-testMat <- matrix(rnorm(m*k), m, k)
 testMat <- testMat %*% t(testMat)
 testMat <- testMat[,1:n]
 
@@ -34,17 +19,18 @@ testMat <- testMat[,1:n]
 svd_out <- svd(testMat)
 
 #Randomized SVD k=n
-rsvd_out <- pcaone(testMat, k = n, batchs = 8, p = 3, method = "winsvd")
+rsvd_out <- pcaone(testMat, k = n, p = 0, method = "dashsvd")
 testMat.re <- rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
-testthat::test_that("Test 1: winSVD k=n", {
+
+testthat::test_that("Test 1: dashSVD k=n", {
               testthat::expect_equal(svd_out$d, rsvd_out$d)
               testthat::expect_equal(testMat, testMat.re)
           })
 
 #Randomized SVD k=k
-rsvd_out <- pcaone(testMat, k = k, batchs = 8, p = 3, method = "winsvd")
+rsvd_out <- pcaone(testMat, k = k, p = 0, s = 0, method = "dashsvd")
 testMat.re <- rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
-testthat::test_that("Test 2: winSVD k=k", {
+testthat::test_that("Test 2: dashSVD k=k, p=0, q=0", {
               testthat::expect_equal(svd_out$d[1:k], rsvd_out$d[1:k])
               testthat::expect_equal(testMat, testMat.re)
           })
@@ -59,19 +45,17 @@ testMat <- t(testMat)
 svd_out <- svd(testMat)
 
 #Randomized SVD k=n
-rsvd_out <- pcaone(testMat, k = n, batchs = 8, p = 3, method = "winsvd")
-testMat.re <- rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
-testthat::test_that("Test 1: winSVD k=n", {
+rsvd_out <- pcaone(testMat, k = n, p = 3, s = 10, method = "dashsvd")
+testMat.re = rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
+testthat::test_that("Test 1: dashSVD k=n", {
               testthat::expect_equal(svd_out$d, rsvd_out$d)
               testthat::expect_equal(testMat, testMat.re)
           })
 
 #Randomized SVD k=k
-rsvd_out <- pcaone(testMat, k = k, batchs = 8, p = 3, method = "winsvd")
+rsvd_out <- pcaone(testMat, k = k, p = 2, s = 0, method = "dashsvd")
 testMat.re = rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
-testthat::test_that("Test 2: winSVD k=k", {
+testthat::test_that("Test 2: dashSVD k=k, p=0, q=0", {
               testthat::expect_equal(svd_out$d[1:k], rsvd_out$d[1:k])
               testthat::expect_equal(testMat, testMat.re)
           })
-
-

@@ -148,7 +148,7 @@ dashSVD <- function(A, k, p, s, rand) {
   if (nrow(A)>ncol(A)) {
     dashSVD_tall(A = A, k = k, p = p, s = s, rand = rand)
   } else {
-    dashSVD_tall(A = t(A), k = k, p = p, s = s, rand = rand)
+    dashSVD_wide(A = A, k = k, p = p, s = s, rand = rand)
   }
 }
 
@@ -177,6 +177,34 @@ dashSVD_tall <- function(A, k, p = 3, s = 10, rand =  2) {
   U <- e$U
   S <- e$S
   V <- Q %*% e$V
+  list(d = S[1:k], u = U[,1:k], v = V[,1:k])
+}
+
+#' @import stats
+dashSVD_wide <- function(A, k, p = 3, s = 10, rand =  2) {
+  M <- nrow(A)
+  N <- ncol(A)
+  ## L <- k + as.integer(ceiling(k / 2))
+  L <- k + s
+  if(rand == 2) {
+    Omg <- matrix(stats::rnorm(L * N), N, L)
+  } else {
+    Omg <- matrix(stats::runif(L * N), N, L)
+  }
+  Q <- A %*% Omg
+  e <- eigSVD(Q)
+  Q <- e$U
+  alpha <- 0.0
+  for(i in 1:p) {
+    ## message("power iteration ", i, ", alpha=",alpha)
+    e <- eigSVD(A %*% (t(A) %*% Q)-alpha*Q)
+    Q <- e$U
+    if(e$S[L] > alpha) alpha <- (alpha + e$S[L]) / 2
+  }
+  e <- eigSVD(t(A) %*% Q)
+  V <- e$U
+  S <- e$S
+  U <- Q %*% e$V
   list(d = S[1:k], u = U[,1:k], v = V[,1:k])
 }
 
