@@ -250,7 +250,7 @@ class RsvdOpOnePass
                         H1.noalias() += mat.middleRows(start_idx, actual_block_size).transpose()
                                         * G.middleRows(start_idx, actual_block_size);
                 }
-                else if(i > band / 2 && i <= band)
+                else
                 {
                     if(trans)
                         H2.noalias() += mat.middleCols(start_idx, actual_block_size)
@@ -259,7 +259,7 @@ class RsvdOpOnePass
                         H2.noalias() += mat.middleRows(start_idx, actual_block_size).transpose()
                                         * G.middleRows(start_idx, actual_block_size);
                 }
-                if((b % (uint32_t)std::pow(2, pi) != (int)std::pow(2, pi) - 1) && (b != (batchs - 1)))
+                if( (b+1) < band || ((b % (uint32_t)std::pow(2, pi) != (uint32_t)std::pow(2, pi) - 1) && (b != (batchs - 1))))
                     continue;
                 H = H1 + H2;
                 Eigen::HouseholderQR<MatrixType> qr(H);
