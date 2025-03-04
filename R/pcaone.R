@@ -221,10 +221,6 @@ eigSVD <- function(A, tol = 1e-10) {
   sigma_inv <- ifelse(sigma > tol, 1 / sigma, 0)
   U <- A %*% V %*% diag(sigma_inv)
   
-  # Ensure U is orthonormal (QR decomposition)
-  qrU <- qr(U)
-  U <- qr.Q(qrU)
-  
   # Return results as list (thin SVD)
   list(U = U, S = sigma, V = V)
 }
