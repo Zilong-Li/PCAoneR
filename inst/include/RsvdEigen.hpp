@@ -259,8 +259,13 @@ class RsvdOpOnePass
                         H2.noalias() += mat.middleRows(start_idx, actual_block_size).transpose()
                                         * G.middleRows(start_idx, actual_block_size);
                 }
-                if( (b+1) < band || ((b % (uint32_t)std::pow(2, pi) != (uint32_t)std::pow(2, pi) - 1) && (b != (batchs - 1))))
-                    continue;
+
+                // use the first quarter band of succesive iteration (H1)
+                // for extra power iteration updates with the last used band (H2)
+                const bool adjacent =
+                  (pi > 0 && (b + 1) == std::pow(2, pi - 1) && std::pow(2, pi) < batchs);
+                if ((b + 1) < band && !adjacent) continue;
+                if(!((i == band) || (i == band / 2) || adjacent)) continue;
                 H = H1 + H2;
                 Eigen::HouseholderQR<MatrixType> qr(H);
                 Omg.noalias() = qr.householderQ() * MatrixType::Identity(cols(), size);
@@ -269,9 +274,7 @@ class RsvdOpOnePass
                 {
                     H1.setZero();
                     i = 0;
-                }
-                if(i == band / 2)
-                {
+                } else {
                     H2.setZero();
                 }
             }
@@ -347,7 +350,7 @@ class RsvdOnePass
 
         // R.T * B = H.T => lapack dtrtrs()
         MatrixType B = R.transpose().fullPivHouseholderQr().solve(H.transpose());
-        Eigen::BDCSVD<MatrixType> svd(B, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        Eigen::JacobiSVD<MatrixType> svd(B, Eigen::ComputeThinU | Eigen::ComputeThinV);
         b_leftSingularVectors.noalias() = G * svd.matrixU().leftCols(k);
         b_rightSingularVectors = svd.matrixV().leftCols(k);
         b_singularValues = svd.singularValues().head(k);
