@@ -10,6 +10,7 @@
 #define RSVDEIGEN_H_
 
 #include <RcppEigen.h>
+// #include <Eigen/Dense>
 #include <random>
 #include <stdexcept>
 
@@ -367,7 +368,7 @@ class RsvdOne
     using ConstGenericMatrix = const Eigen::Ref<const MatrixType>;
 
     ConstGenericMatrix mat;
-    uint32_t k, os, rand;
+    const uint32_t k, os, rand;
     bool trans;
 
     RsvdOpOnePass<MatrixType> * op;
@@ -414,6 +415,90 @@ class RsvdOne
     inline MatrixType singularValues() const
     {
         return rsvd->singularValues();
+    }
+};
+
+template<typename MatrixType>
+class RsvdDash
+{
+  private:
+    using ConstGenericMatrix = const Eigen::Ref<const MatrixType>;
+    using Index = Eigen::Index;
+
+    ConstGenericMatrix mat;
+    const uint32_t k, os, size, rand;
+    const Index nrow, ncol;
+    bool tall;
+    MatrixType Omg;
+    MatrixType b_leftSingularVectors;
+    MatrixType b_singularValues;
+    MatrixType b_rightSingularVectors;
+
+  public:
+    RsvdDash(ConstGenericMatrix & mat_, uint32_t k_, uint32_t os_ = 10, uint32_t rand_ = 1)
+    : mat(mat_), k(k_), os(os_), size(k_ + os_), rand(rand_), nrow(mat.rows()), ncol(mat.cols())
+    {
+        if(mat.rows() >= mat.cols())
+            tall = true;
+        else
+            tall = false;
+        auto randomEngine = std::default_random_engine{};
+        if(rand == 1)
+        {
+            Omg = StandardNormalRandom<MatrixType, std::default_random_engine>(tall ? nrow : ncol, size,
+                                                                               randomEngine);
+        }
+        else
+        {
+            Omg =
+                UniformRandom<MatrixType, std::default_random_engine>(tall ? nrow : ncol, size, randomEngine);
+        }
+    }
+
+    ~RsvdDash() {}
+
+    void compute(uint32_t p)
+    {
+        compute_tall(p);
+        // if (tall)
+        //   compute_tall(p);
+        // else
+        //   compute_wide(p);
+    }
+
+    void compute_tall(uint32_t p)
+    {
+        Omg = mat.transpose() * Omg;
+        Eigen::JacobiSVD<MatrixType> svd(Omg, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        MatrixType Q = svd.matrixU();
+        double alpha = 0.0;
+        for(uint32_t i = 0; i < p; i++)
+        {
+            Omg = mat.transpose() * (mat * Q) - alpha * Q;
+            Eigen::JacobiSVD<MatrixType> svd2(Omg, Eigen::ComputeFullU | Eigen::ComputeFullV);
+            Q = svd2.matrixU();
+            if(svd2.singularValues()[size] > alpha) alpha = (alpha + svd2.singularValues()[size]) / 2.0;
+        }
+        Omg.noalias() = mat * Q;
+        Eigen::JacobiSVD<MatrixType> svd2(Omg, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        b_leftSingularVectors = svd2.matrixU().leftCols(k);
+        b_singularValues = svd2.singularValues().head(k);
+        b_rightSingularVectors = Q * svd2.matrixV().leftCols(k);
+    }
+
+    inline MatrixType matrixU() const
+    {
+        return b_leftSingularVectors;
+    }
+
+    inline MatrixType matrixV() const
+    {
+        return b_rightSingularVectors;
+    }
+
+    inline MatrixType singularValues() const
+    {
+        return b_singularValues;
     }
 };
 

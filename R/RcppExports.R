@@ -9,3 +9,7 @@ PCAoneAlg2 <- function(mat, k, p, q, rand, batchs = 64L) {
     .Call(`_pcaone_PCAoneAlg2`, mat, k, p, q, rand, batchs)
 }
 
+PCAoneDashSVD <- function(mat, k, p, q, rand) {
+    .Call(`_pcaone_PCAoneDashSVD`, mat, k, p, q, rand)
+}
+

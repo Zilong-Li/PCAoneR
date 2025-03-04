@@ -158,7 +158,7 @@ dashSVD_tall <- function(A, k, p = 3, s = 10, rand =  2) {
   N <- ncol(A)
   ## L <- k + as.integer(ceiling(k / 2))
   L <- k + s
-  if(rand == 2) {
+  if(rand == 1) {
     Omg <- matrix(stats::rnorm(L * M), M, L)
   } else {
     Omg <- matrix(stats::runif(L * M), M, L)
@@ -186,7 +186,7 @@ dashSVD_wide <- function(A, k, p = 3, s = 10, rand =  2) {
   N <- ncol(A)
   ## L <- k + as.integer(ceiling(k / 2))
   L <- k + s
-  if(rand == 2) {
+  if(rand == 1) {
     Omg <- matrix(stats::rnorm(L * N), N, L)
   } else {
     Omg <- matrix(stats::runif(L * N), N, L)

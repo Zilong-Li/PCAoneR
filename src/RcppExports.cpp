@@ -42,10 +42,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// PCAoneDashSVD
+Rcpp::List PCAoneDashSVD(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand);
+RcppExport SEXP _pcaone_PCAoneDashSVD(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP qSEXP, SEXP randSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd>& >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    Rcpp::traits::input_parameter< int >::type rand(randSEXP);
+    rcpp_result_gen = Rcpp::wrap(PCAoneDashSVD(mat, k, p, q, rand));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pcaone_PCAoneAlg1", (DL_FUNC) &_pcaone_PCAoneAlg1, 5},
     {"_pcaone_PCAoneAlg2", (DL_FUNC) &_pcaone_PCAoneAlg2, 6},
+    {"_pcaone_PCAoneDashSVD", (DL_FUNC) &_pcaone_PCAoneDashSVD, 5},
     {NULL, NULL, 0}
 };
 

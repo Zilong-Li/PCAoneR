@@ -34,3 +34,14 @@ Rcpp::List PCAoneAlg2(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int 
                             Rcpp::Named("u") = Rcpp::wrap(rsvd.matrixU()),
                             Rcpp::Named("v") = Rcpp::wrap(rsvd.matrixV()));
 }
+
+// [[Rcpp::export]]
+Rcpp::List PCAoneDashSVD(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int q, int rand) {
+
+  PCAone::RsvdDash<Eigen::MatrixXd> rsvd(mat, k, q, rand);
+  rsvd.compute(p);
+
+  return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
+                            Rcpp::Named("u") = Rcpp::wrap(rsvd.matrixU()),
+                            Rcpp::Named("v") = Rcpp::wrap(rsvd.matrixV()));
+}
