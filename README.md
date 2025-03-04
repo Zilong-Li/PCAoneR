@@ -36,9 +36,9 @@ mat <- matrix(rnorm(100*5000), 5000, 100)
 res <- pcaone(mat, k = 10)
 str(res)
 #> List of 3
-#>  $ d: num [1:10] 80.4 80.1 79.9 79 78.6 ...
-#>  $ u: num [1:5000, 1:10] 0.04199 0.00165 0.00775 0.00605 0.01877 ...
-#>  $ v: num [1:100, 1:10] -0.1023 0.1136 -0.0479 0.0457 -0.0982 ...
+#>  $ d: num [1:10] 81 80.1 79.5 79.1 78.6 ...
+#>  $ u: num [1:5000, 1:10] -0.00402 -0.00015 -0.00481 0.01755 0.00365 ...
+#>  $ v: num [1:100, 1:10] -0.1459 0.1601 0.0482 -0.0908 0.042 ...
 #>  - attr(*, "class")= chr "pcaone"
 ```
 
@@ -58,19 +58,19 @@ A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
 #>    user  system elapsed 
-#>  27.688   2.833   1.282
+#>  28.024  21.107   2.399
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))  ## the number of epochs is two times of power iters, 4*2=8
 #>    user  system elapsed 
-#>   8.538  14.078   1.152
+#>   9.027  20.213   1.881
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 8))
 #>    user  system elapsed 
-#>   7.932   5.863   0.738
+#>   8.446   8.953   0.767
 system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 7))
 #>    user  system elapsed 
-#>  10.221   8.921   0.937
+#>  10.177  10.926   1.024
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6)) ## the number of epochs is 2 + power iters
 #>    user  system elapsed 
-#>  11.541  15.372   1.972
+#>  10.665  14.759   2.085
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -88,13 +88,13 @@ to reach the accuracy of `winSVD`.
 ``` r
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 20))  ## the number of epochs is 4*20=40
 #>    user  system elapsed 
-#>  32.619  53.136   4.231
+#>  36.119  69.747   5.707
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 20))
 #>    user  system elapsed 
-#>  15.607   6.231   0.918
+#>  17.537  13.900   1.363
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 18))
 #>    user  system elapsed 
-#>  27.619  41.514   4.493
+#>  29.395  52.729   5.321
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 2), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -121,12 +121,12 @@ timing <- microbenchmark(
   times=10)
 print(timing, unit='s')
 #> Unit: seconds
-#>            expr       min        lq     mean    median       uq      max neval
-#>        RSpectra 1.2353597 1.4116179 1.731160 1.7462612 1.980583 2.170780    10
-#>            rSVD 3.2378337 3.7664747 4.528873 4.5787277 5.091018 6.399555    10
-#>   pcaone.winsvd 0.8144586 0.8431530 1.035334 0.9515424 1.005934 2.018279    10
-#>     pcaone.ssvd 0.8590501 0.8756084 1.156631 0.9761875 1.598022 1.761097    10
-#>  pcaone.dashsvd 4.4119749 4.4745547 4.746664 4.5025322 4.739109 6.516111    10
+#>            expr       min       lq     mean   median       uq      max neval
+#>        RSpectra 1.4525233 1.843104 2.050252 1.873966 2.306075 2.773527    10
+#>            rSVD 4.5324825 4.658543 5.844413 5.714663 7.107667 7.930224    10
+#>   pcaone.winsvd 1.0078065 1.079937 1.346716 1.217142 1.336223 2.296519    10
+#>     pcaone.ssvd 0.9257167 1.059345 1.768647 1.867721 2.438595 2.569187    10
+#>  pcaone.dashsvd 4.3526371 4.644177 4.820574 4.862795 5.048073 5.097065    10
 ```
 
 ## References
