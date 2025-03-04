@@ -47,7 +47,7 @@ str(res)
 
 ## Benchmarking of accuracy
 
-We define the accuracy as the error of singular values using results of `RSpectra::svds` as truth. For all RSVD, let's restrict the number of epochs as 8, i.e. how many times the whole matrix is read through if it can only be hold on disk. 
+We define the accuracy as the error of singular values using results of `RSpectra::svds` as truth. For all RSVD, let's restrict the number of epochs as 8 with only `winsvd` using 7, i.e. how many times the whole matrix is read through if it can only be hold on disk. 
 
 ```{r acc}
 library(RSpectra) ## svds
@@ -59,7 +59,7 @@ k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))  ## the number of epochs is two times of power iters, 4*2=8
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 8))
-system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 8))
+system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 7))
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6)) ## the number of epochs is 2 + power iters
 
 par(mar = c(5, 5, 2, 1))
@@ -75,7 +75,7 @@ Now let's see how many epochs we need for `rSVD`, `sSVD` and `dashSVD`  to reach
 ```{r acc2}
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 20))  ## the number of epochs is 4*20=40
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 20))
-system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 20))
+system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 18))
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 2), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -97,7 +97,7 @@ timing <- microbenchmark(
   'rSVD' = rsvd(A, k=k, q = 20),
   'pcaone.winsvd' = pcaone(A, k=k, p = 7),
   'pcaone.ssvd' = pcaone(A, k=k, p = 20, method = "ssvd"),
-  'pcaone.dashsvd' = pcaone(A, k=k, p = 20, method = "dashsvd"),
+  'pcaone.dashsvd' = pcaone(A, k=k, p = 18, method = "dashsvd"),
   times=10)
 print(timing, unit='s')
 ```

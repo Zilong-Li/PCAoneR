@@ -152,7 +152,6 @@ dashSVD <- function(A, k, p, s, rand) {
   }
 }
 
-#' @import stats
 dashSVD_tall <- function(A, k, p = 3, s = 10, rand =  1) {
   M <- nrow(A)
   N <- ncol(A)
@@ -180,7 +179,6 @@ dashSVD_tall <- function(A, k, p = 3, s = 10, rand =  1) {
   list(d = S[1:k], u = U[,1:k], v = V[,1:k])
 }
 
-#' @import stats
 dashSVD_wide <- function(A, k, p = 3, s = 10, rand =  1) {
   M <- nrow(A)
   N <- ncol(A)
@@ -224,8 +222,8 @@ eigSVD <- function(A, tol = 1e-10) {
   U <- A %*% V %*% diag(sigma_inv)
   
   # Ensure U is orthonormal (QR decomposition)
-  ## qrU <- qr(U)
-  ## U <- qr.Q(qrU)
+  qrU <- qr(U)
+  U <- qr.Q(qrU)
   
   # Return results as list (thin SVD)
   list(U = U, S = sigma, V = V)

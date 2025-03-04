@@ -36,9 +36,9 @@ mat <- matrix(rnorm(100*5000), 5000, 100)
 res <- pcaone(mat, k = 10)
 str(res)
 #> List of 3
-#>  $ d: num [1:10] 81 80.3 79.5 79.5 79.3 ...
-#>  $ u: num [1:5000, 1:10] 0.02376 0.01619 0.00688 0.01737 0.00316 ...
-#>  $ v: num [1:100, 1:10] -0.0608 -0.0074 -0.0329 -0.0271 0.0213 ...
+#>  $ d: num [1:10] 80.4 80.1 79.9 79 78.6 ...
+#>  $ u: num [1:5000, 1:10] 0.04199 0.00165 0.00775 0.00605 0.01877 ...
+#>  $ v: num [1:100, 1:10] -0.1023 0.1136 -0.0479 0.0457 -0.0982 ...
 #>  - attr(*, "class")= chr "pcaone"
 ```
 
@@ -46,8 +46,8 @@ str(res)
 
 We define the accuracy as the error of singular values using results of
 `RSpectra::svds` as truth. For all RSVD, let’s restrict the number of
-epochs as 8, i.e. how many times the whole matrix is read through if it
-can only be hold on disk.
+epochs as 8 with only `winsvd` using 7, i.e. how many times the whole
+matrix is read through if it can only be hold on disk.
 
 ``` r
 library(RSpectra) ## svds
@@ -58,19 +58,19 @@ A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
 #>    user  system elapsed 
-#>  28.247   1.710   1.258
+#>  27.688   2.833   1.282
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))  ## the number of epochs is two times of power iters, 4*2=8
 #>    user  system elapsed 
-#>   8.826  15.496   1.225
+#>   8.538  14.078   1.152
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 8))
 #>    user  system elapsed 
-#>   6.660   5.916   0.954
-system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 8))
+#>   7.932   5.863   0.738
+system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 7))
 #>    user  system elapsed 
-#>  11.112   8.740   0.956
+#>  10.221   8.921   0.937
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6)) ## the number of epochs is 2 + power iters
 #>    user  system elapsed 
-#>  10.654  12.905   1.792
+#>  11.541  15.372   1.972
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -88,13 +88,13 @@ to reach the accuracy of `winSVD`.
 ``` r
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 20))  ## the number of epochs is 4*20=40
 #>    user  system elapsed 
-#>  33.213  57.589   4.874
+#>  32.619  53.136   4.231
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 20))
 #>    user  system elapsed 
-#>  15.453   5.560   0.881
-system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 20))
+#>  15.607   6.231   0.918
+system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 18))
 #>    user  system elapsed 
-#>  30.136  37.707   4.358
+#>  27.619  41.514   4.493
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 2), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -117,16 +117,16 @@ timing <- microbenchmark(
   'rSVD' = rsvd(A, k=k, q = 20),
   'pcaone.winsvd' = pcaone(A, k=k, p = 7),
   'pcaone.ssvd' = pcaone(A, k=k, p = 20, method = "ssvd"),
-  'pcaone.dashsvd' = pcaone(A, k=k, p = 20, method = "dashsvd"),
+  'pcaone.dashsvd' = pcaone(A, k=k, p = 18, method = "dashsvd"),
   times=10)
 print(timing, unit='s')
 #> Unit: seconds
 #>            expr       min        lq     mean    median       uq      max neval
-#>        RSpectra 1.2408488 1.4194163 1.766091 1.6250544 2.060196 2.908666    10
-#>            rSVD 4.1430016 4.4327371 5.105631 4.9439714 5.785335 6.443811    10
-#>   pcaone.winsvd 0.8368182 0.9249775 1.059625 0.9889866 1.076512 1.478980    10
-#>     pcaone.ssvd 0.8181878 1.0357433 1.434357 1.0795606 1.906965 2.783159    10
-#>  pcaone.dashsvd 4.7534786 5.0128576 5.295586 5.2492082 5.742555 5.798519    10
+#>        RSpectra 1.2353597 1.4116179 1.731160 1.7462612 1.980583 2.170780    10
+#>            rSVD 3.2378337 3.7664747 4.528873 4.5787277 5.091018 6.399555    10
+#>   pcaone.winsvd 0.8144586 0.8431530 1.035334 0.9515424 1.005934 2.018279    10
+#>     pcaone.ssvd 0.8590501 0.8756084 1.156631 0.9761875 1.598022 1.761097    10
+#>  pcaone.dashsvd 4.4119749 4.4745547 4.746664 4.5025322 4.739109 6.516111    10
 ```
 
 ## References
