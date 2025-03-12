@@ -105,6 +105,8 @@ str(res)
 res <- pcaone(A, k = 10, p = 7, method = "ssvd")
 str(res)
 res <- pcaone(A, k = 10, p = 7, method = "dashsvd")
+At <- t(A)
+res <- pcaone(At, k = 10, p = 7, method = "dashsvd")
 str(res)
 }
 \references{

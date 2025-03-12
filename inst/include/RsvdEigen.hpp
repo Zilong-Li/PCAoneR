@@ -428,15 +428,18 @@ class RsvdDash
   private:
     using ConstGenericMatrix = const Eigen::Ref<const MatrixType>;
     using Index = Eigen::Index;
+    using Scalar = typename MatrixType::Scalar;
+    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
+    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
     ConstGenericMatrix mat;
     const uint32_t k, os, size, rand;
     const Index nrow, ncol;
     bool tall;
     MatrixType Omg;
-    MatrixType b_leftSingularVectors;
-    MatrixType b_singularValues;
-    MatrixType b_rightSingularVectors;
+    Matrix b_leftSingularVectors;
+    Vector b_singularValues;
+    Matrix b_rightSingularVectors;
 
   public:
     RsvdDash(ConstGenericMatrix & mat_, uint32_t k_, uint32_t os_ = 10, uint32_t rand_ = 1)
@@ -454,6 +457,9 @@ class RsvdDash
             Omg =
                 UniformRandom<MatrixType, std::default_random_engine>(tall ? nrow : ncol, size, randomEngine);
         }
+        b_leftSingularVectors = Matrix::Zero(nrow, size);
+        b_rightSingularVectors = Matrix::Zero(ncol, size);
+        b_singularValues = Vector::Zero(size);
     }
 
     ~RsvdDash() {}
@@ -473,70 +479,70 @@ class RsvdDash
     void compute_tall(uint32_t p)
     {
         Omg = mat.transpose() * Omg;
-        Eigen::JacobiSVD<MatrixType> svd(Omg, Eigen::ComputeFullU | Eigen::ComputeThinV);
-        MatrixType Q = svd.matrixU();
+        eigSVD(Omg, b_rightSingularVectors, b_singularValues, b_leftSingularVectors);
         double alpha = 0.0;
         for(uint32_t i = 0; i < p; i++)
         {
-            Omg.noalias() = mat.transpose() * (mat * Q) - alpha * Q;
-            Eigen::JacobiSVD<MatrixType> svd2(Omg, Eigen::ComputeFullU | Eigen::ComputeThinV);
-            Q = svd2.matrixU();
-            if(svd2.singularValues()[size] > alpha) alpha = (alpha + svd2.singularValues()[size]) / 2.0;
+            Omg.noalias() = mat.transpose() * (mat * b_rightSingularVectors) - alpha * b_rightSingularVectors;
+            eigSVD(Omg, b_rightSingularVectors, b_singularValues, b_leftSingularVectors);
+            if(b_singularValues[size - 1] > alpha) alpha = (alpha + b_singularValues[size - 1]) / 2.0;
         }
-        Omg.noalias() = mat * Q;
-        Eigen::JacobiSVD<MatrixType> svd2(Omg, Eigen::ComputeThinU | Eigen::ComputeThinV);
-        b_leftSingularVectors = svd2.matrixU().leftCols(k);
-        b_singularValues = svd2.singularValues().head(k);
-        b_rightSingularVectors = Q * svd2.matrixV().leftCols(k);
+        eigSVD(mat * b_rightSingularVectors, b_leftSingularVectors, b_singularValues, Omg);
+        b_rightSingularVectors = b_rightSingularVectors * Omg;
     }
 
     void compute_wide(uint32_t p)
     {
         Omg = mat * Omg;
-        Eigen::JacobiSVD<MatrixType> svd(Omg, Eigen::ComputeFullU | Eigen::ComputeThinV);
-        MatrixType Q = svd.matrixU();
+        eigSVD(Omg, b_leftSingularVectors, b_singularValues, b_rightSingularVectors);
         double alpha = 0.0;
         for(uint32_t i = 0; i < p; i++)
         {
-            Omg.noalias() = mat * (mat.transpose() * Q) - alpha * Q;
-            Eigen::JacobiSVD<MatrixType> svd2(Omg, Eigen::ComputeFullU | Eigen::ComputeThinV);
-            Q = svd2.matrixU();
-            if(svd2.singularValues()[size] > alpha) alpha = (alpha + svd2.singularValues()[size]) / 2.0;
+            Omg.noalias() = mat * (mat.transpose() * b_leftSingularVectors) - alpha * b_leftSingularVectors;
+            eigSVD(Omg, b_leftSingularVectors, b_singularValues, b_rightSingularVectors);
+            if(b_singularValues[size - 1] > alpha) alpha = (alpha + b_singularValues[size - 1]) / 2.0;
         }
-        Omg.noalias() = mat.transpose() * Q;
-        Eigen::JacobiSVD<MatrixType> svd2(Omg, Eigen::ComputeThinU | Eigen::ComputeThinV);
-        b_leftSingularVectors = svd2.matrixU().leftCols(k);
-        b_singularValues = svd2.singularValues().head(k);
-        b_rightSingularVectors = Q * svd2.matrixV().leftCols(k);
+        eigSVD(mat.transpose() * b_leftSingularVectors, b_rightSingularVectors, b_singularValues, Omg);
+        b_leftSingularVectors = b_leftSingularVectors * Omg;
     }
 
-    inline MatrixType matrixU() const
+    /// A is tall and thin
+    void eigSVD(const MatrixType & A, Matrix & U, Vector & S, Matrix & V)
     {
-        if(tall)
+        MatrixType C = A.transpose() * A;
+        Eigen::SelfAdjointEigenSolver<MatrixType> eigen_solver(C);
+        if(eigen_solver.info() != Eigen::Success)
         {
-            return b_leftSingularVectors;
+            throw std::runtime_error("Eigendecomposition failed");
         }
-        else
-        {
-            return b_rightSingularVectors;
-        }
+        // Reverse order for descending eigenvalues
+        V.noalias() = eigen_solver.eigenvectors().rowwise().reverse();
+        Vector eigenvalues = eigen_solver.eigenvalues().reverse();
+
+        // Compute singular values (sqrt of eigenvalues)
+        S.noalias() = eigenvalues.cwiseSqrt();
+
+        // Handle numerical stability for singular values
+        const double tolerance = 1e-10 * S.maxCoeff() * A.cols();
+        Vector inv_S = (S.array().abs() > tolerance).select(S.array().inverse(), 0.0);
+
+        U.noalias() = A * V * inv_S.asDiagonal();
     }
 
-    inline MatrixType matrixV() const
+    // return a copy or maybe a reference ?
+    inline Matrix matrixU() const
     {
-        if(tall)
-        {
-            return b_rightSingularVectors;
-        }
-        else
-        {
-            return b_leftSingularVectors;
-        }
+        return b_leftSingularVectors.leftCols(k);
     }
 
-    inline MatrixType singularValues() const
+    inline Matrix matrixV() const
     {
-        return b_singularValues;
+        return b_rightSingularVectors.leftCols(k);
+    }
+
+    inline Vector singularValues() const
+    {
+        return b_singularValues.head(k);
     }
 };
 
