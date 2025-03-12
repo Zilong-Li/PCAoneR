@@ -21,7 +21,6 @@ ordered by their accuracy.
 
 ## Installation
 
-
 ``` r
 # install.packages("pcaone") # For the CRAN version
 remotes::install_github("Zilong-Li/PCAoneR") # For the latest developing version
@@ -37,9 +36,9 @@ mat <- matrix(rnorm(100*5000), 5000, 100)
 res <- pcaone(mat, k = 10)
 str(res)
 #> List of 3
-#>  $ d: num [1:10] 80 79.5 79.1 79 78.6 ...
-#>  $ u: num [1:5000, 1:10] -0.0187 0.01282 0.00819 0.01606 0.00111 ...
-#>  $ v: num [1:100, 1:10] -0.0925 -0.0236 -0.1496 -0.0353 0.0525 ...
+#>  $ d: num [1:10] 81 80.1 79.5 79.1 78.6 ...
+#>  $ u: num [1:5000, 1:10] -0.00402 -0.00015 -0.00481 0.01755 0.00365 ...
+#>  $ v: num [1:100, 1:10] -0.1459 0.1601 0.0482 -0.0908 0.042 ...
 #>  - attr(*, "class")= chr "pcaone"
 ```
 
@@ -47,8 +46,8 @@ str(res)
 
 We define the accuracy as the error of singular values using results of
 `RSpectra::svds` as truth. For all RSVD, let’s restrict the number of
-epochs as 7, i.e. how many times the whole matrix is read through if it
-can only be hold on disk.
+epochs as 8 with only `winsvd` using 7, i.e. how many times the whole
+matrix is read through if it can only be hold on disk.
 
 ``` r
 library(RSpectra) ## svds
@@ -59,26 +58,26 @@ A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
 #>    user  system elapsed 
-#>  29.327   6.687   1.528
-system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))  ## the number of epochs is 4*2=8
+#>  28.024  21.107   2.399
+system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))  ## the number of epochs is two times of power iters, 4*2=8
 #>    user  system elapsed 
-#>  10.674  22.568   1.955
-system.time(s2 <- pcaone(A, k = k, method = "ssvd"))
+#>   9.027  20.213   1.881
+system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 8))
 #>    user  system elapsed 
-#>   6.961   3.461   0.437
-system.time(s3 <- pcaone(A, k = k, method = "winsvd"))
+#>   8.446   8.953   0.767
+system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 7))
 #>    user  system elapsed 
-#>   9.868   9.518   0.957
-system.time(s4 <- pcaone(A, k = k, method = "dashsvd"))
+#>  10.177  10.926   1.024
+system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6)) ## the number of epochs is 2 + power iters
 #>    user  system elapsed 
-#>  11.842  14.117   2.280
+#>  10.665  14.759   2.085
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
 points(s0$d-s2$d, col = "orange", cex = 1.5)
 points(s0$d-s3$d, col = "red", cex = 1.5)
 points(s0$d-s4$d, col = "blue", cex = 1.5)
-legend("top", legend = c("rSVD", "sSVD", "winSVD", "dashSVD"), pch = 16,col = c("black", "orange", "red", "blue"), horiz = T, cex = 1.2, bty = "n" )
+legend("top", legend = c("rSVD", "sSVD", "dashSVD", "winSVD"), pch = 16,col = c("black", "orange", "blue", "red"), horiz = T, cex = 1.2, bty = "n" )
 ```
 
 <img src="man/figures/README-acc-1.png" width="100%" />
@@ -89,20 +88,20 @@ to reach the accuracy of `winSVD`.
 ``` r
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 20))  ## the number of epochs is 4*20=40
 #>    user  system elapsed 
-#>  34.556  53.571   4.203
+#>  36.119  69.747   5.707
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 20))
 #>    user  system elapsed 
-#>  15.759   5.670   0.899
-system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 20))
+#>  17.537  13.900   1.363
+system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 18))
 #>    user  system elapsed 
-#>  31.030  40.201   4.903
+#>  29.395  52.729   5.321
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 2), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
 points(s0$d-s2$d, col = "orange", cex = 1.5)
 points(s0$d-s3$d, col = "red", cex = 1.5)
 points(s0$d-s4$d, col = "blue", cex = 1.5)
-legend("top", legend = c("rSVD", "sSVD", "winSVD", "dashSVD"), pch = 16,col = c("black", "orange", "red", "blue"), horiz = T, cex = 1.2, bty = "n" )
+legend("top", legend = c("rSVD", "sSVD", "dashSVD", "winSVD"), pch = 16,col = c("black", "orange", "blue", "red"), horiz = T, cex = 1.2, bty = "n" )
 ```
 
 <img src="man/figures/README-acc2-1.png" width="100%" />
@@ -118,16 +117,16 @@ timing <- microbenchmark(
   'rSVD' = rsvd(A, k=k, q = 20),
   'pcaone.winsvd' = pcaone(A, k=k, p = 7),
   'pcaone.ssvd' = pcaone(A, k=k, p = 20, method = "ssvd"),
-  'pcaone.dashsvd' = pcaone(A, k=k, p = 20, method = "dashsvd"),
-  times=5)
+  'pcaone.dashsvd' = pcaone(A, k=k, p = 18, method = "dashsvd"),
+  times=10)
 print(timing, unit='s')
 #> Unit: seconds
-#>            expr       min        lq     mean   median       uq      max neval
-#>        RSpectra 1.3405160 1.4557409 1.624167 1.506560 1.537043 2.280976     5
-#>            rSVD 3.7770404 4.2052743 5.405628 5.400490 6.323018 7.322318     5
-#>   pcaone.winsvd 0.8201352 0.9213472 1.425965 1.631140 1.742322 2.014879     5
-#>     pcaone.ssvd 0.8309767 0.9813462 1.788951 2.087639 2.398111 2.646681     5
-#>  pcaone.dashsvd 5.1641422 5.2611238 5.499963 5.598988 5.629761 5.845800     5
+#>            expr       min       lq     mean   median       uq      max neval
+#>        RSpectra 1.4525233 1.843104 2.050252 1.873966 2.306075 2.773527    10
+#>            rSVD 4.5324825 4.658543 5.844413 5.714663 7.107667 7.930224    10
+#>   pcaone.winsvd 1.0078065 1.079937 1.346716 1.217142 1.336223 2.296519    10
+#>     pcaone.ssvd 0.9257167 1.059345 1.768647 1.867721 2.438595 2.569187    10
+#>  pcaone.dashsvd 4.3526371 4.644177 4.820574 4.862795 5.048073 5.097065    10
 ```
 
 ## References

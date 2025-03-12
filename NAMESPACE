@@ -2,6 +2,7 @@
 
 S3method(pcaone,default)
 export(pcaone)
-import(stats)
 importFrom(Rcpp,sourceCpp)
+importFrom(stats,rnorm)
+importFrom(stats,runif)
 useDynLib(pcaone, .registration = TRUE)
