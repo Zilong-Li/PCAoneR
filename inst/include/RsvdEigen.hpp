@@ -445,6 +445,9 @@ class RsvdDash
     RsvdDash(ConstGenericMatrix & mat_, uint32_t k_, uint32_t os_ = 10, uint32_t rand_ = 1)
     : mat(mat_), k(k_), os(os_), size(k_ + os_), rand(rand_), nrow(mat_.rows()), ncol(mat_.cols())
     {
+        if(size > nrow || size > ncol)
+            throw std::runtime_error(
+                "k(pc) + s(oversampling) must be not greater than the dimension of data");
         tall = nrow > ncol ? true : false;
         auto randomEngine = std::default_random_engine{};
         if(rand == 1)

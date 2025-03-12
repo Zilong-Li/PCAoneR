@@ -18,15 +18,6 @@ testMat <- testMat[,1:n]
 #Deterministic SVD
 svd_out <- svd(testMat)
 
-#Randomized SVD k=n
-rsvd_out <- pcaone(testMat, k = n, p = 0, method = "dashsvd")
-testMat.re <- rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
-
-testthat::test_that("Test 1: dashSVD k=n", {
-              testthat::expect_equal(svd_out$d, rsvd_out$d)
-              testthat::expect_equal(testMat, testMat.re)
-          })
-
 #Randomized SVD k=k
 rsvd_out <- pcaone(testMat, k = k, p = 0, s = 0, method = "dashsvd")
 testMat.re <- rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
@@ -43,14 +34,6 @@ testMat <- t(testMat)
 
 #Deterministic SVD
 svd_out <- svd(testMat)
-
-#Randomized SVD k=n
-rsvd_out <- pcaone(testMat, k = n, p = 3, s = 10, method = "dashsvd")
-testMat.re = rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
-testthat::test_that("Test 1: dashSVD k=n", {
-              testthat::expect_equal(svd_out$d, rsvd_out$d)
-              testthat::expect_equal(testMat, testMat.re)
-          })
 
 #Randomized SVD k=k
 rsvd_out <- pcaone(testMat, k = k, p = 2, s = 0, method = "dashsvd")

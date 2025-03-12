@@ -34,7 +34,7 @@
 #'                a real/complex \eqn{(m, n)} input matrix (or data frame) to be decomposed.
 #'
 #' @param k       integer; \cr
-#'                specifies the target rank of the low-rank decomposition. \eqn{k} should satisfy \eqn{k << min(m,n)}.
+#'                the target rank for the low-rank decomposition. \eqn{k} should satisfy \eqn{k << min(m,n)}.
 #'
 #' @param p       integer, optional; \cr
 #'                number of additional power iterations (by default \eqn{p=7}).
@@ -91,13 +91,11 @@
 #' library('pcaone')
 #' data(popgen)
 #' A <- popgen - rowMeans(popgen)
-#' res <- pcaone(A, k = 10, p = 7, method = "winsvd")
+#' res <- pcaone(A, k = 40, method = "winsvd")
 #' str(res)
-#' res <- pcaone(A, k = 10, p = 7, method = "ssvd")
+#' res <- pcaone(A, k = 40, method = "dashsvd")
 #' str(res)
-#' res <- pcaone(A, k = 10, p = 7, method = "dashsvd")
-#' At <- t(A)
-#' res <- pcaone(At, k = 10, p = 7, method = "dashsvd")
+#' res <- pcaone(A, k = 40, method = "ssvd")
 #' str(res)
 #' @export
 pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE) UseMethod("pcaone")

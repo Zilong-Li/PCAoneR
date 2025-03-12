@@ -36,9 +36,9 @@ mat <- matrix(rnorm(100*5000), 5000, 100)
 res <- pcaone(mat, k = 10)
 str(res)
 #> List of 3
-#>  $ d: num [1:10] 80.3 79.7 79.6 79.3 78.7 ...
-#>  $ u: num [1:5000, 1:10] 0.00914 0.01157 0.01647 -0.01457 0.00449 ...
-#>  $ v: num [1:100, 1:10] 0.00383 0.07312 -0.02572 0.05766 0.10849 ...
+#>  $ d: num [1:10] 80.7 79.9 79.3 79.1 78.6 ...
+#>  $ u: num [1:5000, 1:10] 0.00561 0.02096 0.02855 -0.00381 0.00558 ...
+#>  $ v: num [1:100, 1:10] -0.02066 0.12137 0.11801 -0.11926 -0.00992 ...
 #>  - attr(*, "class")= chr "pcaone"
 ```
 
@@ -46,8 +46,8 @@ str(res)
 
 We define the accuracy as the error of singular values using results of
 `RSpectra::svds` as truth. For all RSVD, let’s restrict the number of
-epochs as 8 with only `winsvd` using 7, i.e. how many times the whole
-matrix is read through if it can only be hold on disk.
+epochs as `8`, i.e. how many times the whole matrix is read through if
+it can only be hold on disk.
 
 ``` r
 library(RSpectra) ## svds
@@ -58,19 +58,19 @@ A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
 #>    user  system elapsed 
-#>  29.306  12.016   1.804
+#>  29.420  14.668   1.927
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))  ## the number of epochs is two times of power iters, 4*2=8
 #>    user  system elapsed 
-#>  10.440  28.235   2.752
-system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 8))
+#>   8.722  17.691   1.317
+system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 7))   ## the number of epochs is 1 + p
 #>    user  system elapsed 
-#>   8.265   9.720   0.785
-system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 7))
+#>   7.122   6.239   0.775
+system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 7)) ## the number of epochs is 1 + p
 #>    user  system elapsed 
-#>   9.882  11.067   1.036
-system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6)) ## the number of epochs is 2 + power iters
+#>  10.122  11.114   1.034
+system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6))## the number of epochs is 2 + p
 #>    user  system elapsed 
-#>   6.185   5.101   0.521
+#>   5.311   0.766   0.296
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -88,13 +88,13 @@ to reach the accuracy of `winSVD`.
 ``` r
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 20))  ## the number of epochs is 4*20=40
 #>    user  system elapsed 
-#>  34.971  57.354   4.448
+#>  34.010  56.014   4.426
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 20))
 #>    user  system elapsed 
-#>  17.254  21.050   2.406
+#>  15.840   9.335   1.066
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 18))
 #>    user  system elapsed 
-#>  14.644  13.760   1.446
+#>  13.975   7.773   1.016
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 2), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -121,12 +121,12 @@ timing <- microbenchmark(
   times=10)
 print(timing, unit='s')
 #> Unit: seconds
-#>            expr       min        lq     mean    median       uq      max neval
-#>        RSpectra 1.6214804 1.8045701 2.153150 2.1708929 2.378451 2.792410    10
-#>            rSVD 3.9832089 4.4928445 5.597502 5.7184078 6.678621 7.167970    10
-#>   pcaone.winsvd 0.8413689 1.2609646 1.542842 1.4258020 1.786600 2.211722    10
-#>     pcaone.ssvd 1.0405265 1.1062428 1.507835 1.2116182 1.897299 2.432535    10
-#>  pcaone.dashsvd 0.7261568 0.7517289 1.275557 0.9464012 1.349643 2.672243    10
+#>            expr       min        lq     mean   median       uq      max neval
+#>        RSpectra 1.3123276 1.5685666 1.996660 1.888353 2.421958 2.975789    10
+#>            rSVD 4.1148399 4.8318071 5.559569 5.266937 5.843289 8.291830    10
+#>   pcaone.winsvd 0.8139188 0.8835514 1.247171 1.128622 1.401493 1.988634    10
+#>     pcaone.ssvd 0.8720162 0.9468745 1.739007 1.736949 2.239249 3.085669    10
+#>  pcaone.dashsvd 0.7368719 1.0958707 1.407987 1.403486 1.545074 2.092847    10
 ```
 
 ## References
