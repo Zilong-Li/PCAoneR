@@ -12,48 +12,48 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // PCAoneAlg1
-Rcpp::List PCAoneAlg1(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand);
-RcppExport SEXP _pcaone_PCAoneAlg1(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP qSEXP, SEXP randSEXP) {
+Rcpp::List PCAoneAlg1(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int s, int rand);
+RcppExport SEXP _pcaone_PCAoneAlg1(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd>& >::type mat(matSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
-    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    Rcpp::traits::input_parameter< int >::type s(sSEXP);
     Rcpp::traits::input_parameter< int >::type rand(randSEXP);
-    rcpp_result_gen = Rcpp::wrap(PCAoneAlg1(mat, k, p, q, rand));
+    rcpp_result_gen = Rcpp::wrap(PCAoneAlg1(mat, k, p, s, rand));
     return rcpp_result_gen;
 END_RCPP
 }
 // PCAoneAlg2
-Rcpp::List PCAoneAlg2(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand, int batchs);
-RcppExport SEXP _pcaone_PCAoneAlg2(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP qSEXP, SEXP randSEXP, SEXP batchsSEXP) {
+Rcpp::List PCAoneAlg2(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int s, int rand, int batchs);
+RcppExport SEXP _pcaone_PCAoneAlg2(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP, SEXP batchsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd>& >::type mat(matSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
-    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    Rcpp::traits::input_parameter< int >::type s(sSEXP);
     Rcpp::traits::input_parameter< int >::type rand(randSEXP);
     Rcpp::traits::input_parameter< int >::type batchs(batchsSEXP);
-    rcpp_result_gen = Rcpp::wrap(PCAoneAlg2(mat, k, p, q, rand, batchs));
+    rcpp_result_gen = Rcpp::wrap(PCAoneAlg2(mat, k, p, s, rand, batchs));
     return rcpp_result_gen;
 END_RCPP
 }
 // PCAoneDashSVD
-Rcpp::List PCAoneDashSVD(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int q, int rand);
-RcppExport SEXP _pcaone_PCAoneDashSVD(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP qSEXP, SEXP randSEXP) {
+Rcpp::List PCAoneDashSVD(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int s, int rand);
+RcppExport SEXP _pcaone_PCAoneDashSVD(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd>& >::type mat(matSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
-    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    Rcpp::traits::input_parameter< int >::type s(sSEXP);
     Rcpp::traits::input_parameter< int >::type rand(randSEXP);
-    rcpp_result_gen = Rcpp::wrap(PCAoneDashSVD(mat, k, p, q, rand));
+    rcpp_result_gen = Rcpp::wrap(PCAoneDashSVD(mat, k, p, s, rand));
     return rcpp_result_gen;
 END_RCPP
 }

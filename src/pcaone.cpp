@@ -7,9 +7,9 @@
 #endif
 
 // [[Rcpp::export]]
-Rcpp::List PCAoneAlg1(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int q, int rand) {
+Rcpp::List PCAoneAlg1(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int s, int rand) {
 
-  PCAone::RsvdOne<Eigen::MatrixXd> rsvd(mat, k, q, rand);
+  PCAone::RsvdOne<Eigen::MatrixXd> rsvd(mat, k, s, rand);
   int finder = 1;
   rsvd.setRangeFinder(finder);
   rsvd.compute(p);
@@ -20,14 +20,14 @@ Rcpp::List PCAoneAlg1(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int 
 }
 
 // [[Rcpp::export]]
-Rcpp::List PCAoneAlg2(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int q, int rand, int batchs = 64) {
+Rcpp::List PCAoneAlg2(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int s, int rand, int batchs = 64) {
 
   if (batchs % 2 != 0)
     Rcpp::Rcout << "batchs %% 2 == 0 has to be met\n";
   if (std::pow(2, p) < batchs)
     Rcpp::Rcout << "2^p >= batchs has to be met. suggesting p > 6 for batchs=64\n";
 
-  PCAone::RsvdOne<Eigen::MatrixXd> rsvd(mat, k, q, rand);
+  PCAone::RsvdOne<Eigen::MatrixXd> rsvd(mat, k, s, rand);
   rsvd.compute(p, batchs);
 
   return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
@@ -36,9 +36,9 @@ Rcpp::List PCAoneAlg2(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int 
 }
 
 // [[Rcpp::export]]
-Rcpp::List PCAoneDashSVD(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int q, int rand) {
+Rcpp::List PCAoneDashSVD(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int s, int rand) {
 
-  PCAone::RsvdDash<Eigen::MatrixXd> rsvd(mat, k, q, rand);
+  PCAone::RsvdDash<Eigen::MatrixXd> rsvd(mat, k, s, rand);
   rsvd.compute(p);
 
   return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),

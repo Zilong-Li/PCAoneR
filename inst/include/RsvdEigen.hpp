@@ -263,9 +263,8 @@ class RsvdOpOnePass
 
                 // use the first quarter band of succesive iteration (H1)
                 // for extra power iteration updates with the last used band (H2)
-                const bool adjacent =
-                  (pi > 0 && (b + 1) == std::pow(2, pi - 1) && std::pow(2, pi) < batchs);
-                if ((b + 1) < band && !adjacent) continue;
+                const bool adjacent = (pi > 0 && (b + 1) == std::pow(2, pi - 1) && std::pow(2, pi) < batchs);
+                if((b + 1) < band && !adjacent) continue;
                 if(!((i == band) || (i == band / 2) || adjacent)) continue;
                 H = H1 + H2;
                 Eigen::HouseholderQR<MatrixType> qr(H);
@@ -275,7 +274,9 @@ class RsvdOpOnePass
                 {
                     H1.setZero();
                     i = 0;
-                } else {
+                }
+                else
+                {
                     H2.setZero();
                 }
             }
@@ -439,12 +440,9 @@ class RsvdDash
 
   public:
     RsvdDash(ConstGenericMatrix & mat_, uint32_t k_, uint32_t os_ = 10, uint32_t rand_ = 1)
-    : mat(mat_), k(k_), os(os_), size(k_ + os_), rand(rand_), nrow(mat.rows()), ncol(mat.cols())
+    : mat(mat_), k(k_), os(os_), size(k_ + os_), rand(rand_), nrow(mat_.rows()), ncol(mat_.cols())
     {
-        if(mat.rows() >= mat.cols())
-            tall = true;
-        else
-            tall = false;
+        tall = nrow > ncol ? true : false;
         auto randomEngine = std::default_random_engine{};
         if(rand == 1)
         {
@@ -460,30 +458,53 @@ class RsvdDash
 
     ~RsvdDash() {}
 
-    void compute(uint32_t p)
+    inline void compute(uint32_t p)
     {
-        compute_tall(p);
-        // if (tall)
-        //   compute_tall(p);
-        // else
-        //   compute_wide(p);
+        if(tall)
+        {
+            compute_tall(p);
+        }
+        else
+        {
+            compute_wide(p);
+        }
     }
 
     void compute_tall(uint32_t p)
     {
         Omg = mat.transpose() * Omg;
-        Eigen::JacobiSVD<MatrixType> svd(Omg, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        Eigen::JacobiSVD<MatrixType> svd(Omg, Eigen::ComputeFullU | Eigen::ComputeThinV);
         MatrixType Q = svd.matrixU();
         double alpha = 0.0;
         for(uint32_t i = 0; i < p; i++)
         {
-            Omg = mat.transpose() * (mat * Q) - alpha * Q;
-            Eigen::JacobiSVD<MatrixType> svd2(Omg, Eigen::ComputeFullU | Eigen::ComputeFullV);
+            Omg.noalias() = mat.transpose() * (mat * Q) - alpha * Q;
+            Eigen::JacobiSVD<MatrixType> svd2(Omg, Eigen::ComputeFullU | Eigen::ComputeThinV);
             Q = svd2.matrixU();
             if(svd2.singularValues()[size] > alpha) alpha = (alpha + svd2.singularValues()[size]) / 2.0;
         }
         Omg.noalias() = mat * Q;
-        Eigen::JacobiSVD<MatrixType> svd2(Omg, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        Eigen::JacobiSVD<MatrixType> svd2(Omg, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        b_leftSingularVectors = svd2.matrixU().leftCols(k);
+        b_singularValues = svd2.singularValues().head(k);
+        b_rightSingularVectors = Q * svd2.matrixV().leftCols(k);
+    }
+
+    void compute_wide(uint32_t p)
+    {
+        Omg = mat * Omg;
+        Eigen::JacobiSVD<MatrixType> svd(Omg, Eigen::ComputeFullU | Eigen::ComputeThinV);
+        MatrixType Q = svd.matrixU();
+        double alpha = 0.0;
+        for(uint32_t i = 0; i < p; i++)
+        {
+            Omg.noalias() = mat * (mat.transpose() * Q) - alpha * Q;
+            Eigen::JacobiSVD<MatrixType> svd2(Omg, Eigen::ComputeFullU | Eigen::ComputeThinV);
+            Q = svd2.matrixU();
+            if(svd2.singularValues()[size] > alpha) alpha = (alpha + svd2.singularValues()[size]) / 2.0;
+        }
+        Omg.noalias() = mat.transpose() * Q;
+        Eigen::JacobiSVD<MatrixType> svd2(Omg, Eigen::ComputeThinU | Eigen::ComputeThinV);
         b_leftSingularVectors = svd2.matrixU().leftCols(k);
         b_singularValues = svd2.singularValues().head(k);
         b_rightSingularVectors = Q * svd2.matrixV().leftCols(k);
@@ -491,12 +512,26 @@ class RsvdDash
 
     inline MatrixType matrixU() const
     {
-        return b_leftSingularVectors;
+        if(tall)
+        {
+            return b_leftSingularVectors;
+        }
+        else
+        {
+            return b_rightSingularVectors;
+        }
     }
 
     inline MatrixType matrixV() const
     {
-        return b_rightSingularVectors;
+        if(tall)
+        {
+            return b_rightSingularVectors;
+        }
+        else
+        {
+            return b_leftSingularVectors;
+        }
     }
 
     inline MatrixType singularValues() const

@@ -123,9 +123,9 @@ pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsv
   }
   
   pcaoneObj <- switch(method,
-                      ssvd = .Call(`_pcaone_PCAoneAlg1`, A, k, p, s, rand),
                       winsvd = .Call(`_pcaone_PCAoneAlg2`, A, k, p, s, rand, batchs),
-                      dashsvd = dashSVD(A, k, p, s, rand),
+                      dashsvd = .Call(`_pcaone_PCAoneDashSVD`, A, k, p, s, rand),
+                      ssvd = .Call(`_pcaone_PCAoneAlg1`, A, k, p, s, rand),
                       stop("Method is not supported!"))
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
@@ -144,6 +144,7 @@ pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsv
   return(pcaoneObj)
 }
 
+#' @export
 dashSVD <- function(A, k, p, s, rand) {
   if (nrow(A)>ncol(A)) {
     dashSVD_tall(A = A, k = k, p = p, s = s, rand = rand)
