@@ -14,6 +14,9 @@
 #include <random>
 #include <stdexcept>
 
+using SpMat = Eigen::SparseMatrix<double, Eigen::ColMajor>;
+using SpRMat = Eigen::SparseMatrix<double, Eigen::RowMajor>;
+
 namespace PCAone
 {
 
@@ -436,7 +439,7 @@ class RsvdDash
     const uint32_t k, os, size, rand;
     const Index nrow, ncol;
     bool tall;
-    MatrixType Omg;
+    Matrix Omg;
     Matrix b_leftSingularVectors;
     Vector b_singularValues;
     Matrix b_rightSingularVectors;
@@ -452,13 +455,13 @@ class RsvdDash
         auto randomEngine = std::default_random_engine{};
         if(rand == 1)
         {
-            Omg = StandardNormalRandom<MatrixType, std::default_random_engine>(tall ? nrow : ncol, size,
+            Omg = StandardNormalRandom<Matrix, std::default_random_engine>(tall ? nrow : ncol, size,
                                                                                randomEngine);
         }
         else
         {
             Omg =
-                UniformRandom<MatrixType, std::default_random_engine>(tall ? nrow : ncol, size, randomEngine);
+                UniformRandom<Matrix, std::default_random_engine>(tall ? nrow : ncol, size, randomEngine);
         }
         b_leftSingularVectors = Matrix::Zero(nrow, size);
         b_rightSingularVectors = Matrix::Zero(ncol, size);
@@ -510,10 +513,10 @@ class RsvdDash
     }
 
     /// A is tall and thin
-    void eigSVD(const MatrixType & A, Matrix & U, Vector & S, Matrix & V)
+    void eigSVD(const Matrix & A, Matrix & U, Vector & S, Matrix & V)
     {
-        MatrixType C = A.transpose() * A;
-        Eigen::SelfAdjointEigenSolver<MatrixType> eigen_solver(C);
+        Matrix C = A.transpose() * A;
+        Eigen::SelfAdjointEigenSolver<Matrix> eigen_solver(C);
         if(eigen_solver.info() != Eigen::Success)
         {
             throw std::runtime_error("Eigendecomposition failed");

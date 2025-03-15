@@ -6,6 +6,7 @@
 #include <Eigen/PardisoSupport>
 #endif
 
+
 // [[Rcpp::export]]
 Rcpp::List PCAoneAlg1(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int s, int rand) {
 
@@ -35,10 +36,25 @@ Rcpp::List PCAoneAlg2(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int 
                             Rcpp::Named("v") = Rcpp::wrap(rsvd.matrixV()));
 }
 
-// [[Rcpp::export]]
-Rcpp::List PCAoneDashSVD(const Eigen::Map<Eigen::MatrixXd> &mat, int k, int p, int s, int rand) {
 
-  PCAone::RsvdDash<Eigen::MatrixXd> rsvd(mat, k, s, rand);
+
+// [[Rcpp::export]]
+Rcpp::List PCAoneDashSVD(SEXP mat, int k, int p, int s, int rand) {
+
+  Eigen::Map<Eigen::MatrixXd> A = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(mat);
+  PCAone::RsvdDash<Eigen::MatrixXd> rsvd(A, k, s, rand);
+  rsvd.compute(p);
+
+  return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
+                            Rcpp::Named("u") = Rcpp::wrap(rsvd.matrixU()),
+                            Rcpp::Named("v") = Rcpp::wrap(rsvd.matrixV()));
+}
+
+// [[Rcpp::export]]
+Rcpp::List DashSVDsparse(SEXP mat, int k, int p, int s, int rand) {
+
+  Eigen::Map<SpMat> A = Rcpp::as<Eigen::Map<SpMat>>(mat);
+  PCAone::RsvdDash<SpMat> rsvd(A, k, s, rand);
   rsvd.compute(p);
 
   return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),

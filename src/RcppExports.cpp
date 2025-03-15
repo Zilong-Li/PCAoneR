@@ -43,12 +43,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // PCAoneDashSVD
-Rcpp::List PCAoneDashSVD(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int s, int rand);
+Rcpp::List PCAoneDashSVD(SEXP mat, int k, int p, int s, int rand);
 RcppExport SEXP _pcaone_PCAoneDashSVD(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd>& >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< int >::type s(sSEXP);
@@ -57,11 +57,27 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// DashSVDsparse
+Rcpp::List DashSVDsparse(SEXP mat, int k, int p, int s, int rand);
+RcppExport SEXP _pcaone_DashSVDsparse(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type s(sSEXP);
+    Rcpp::traits::input_parameter< int >::type rand(randSEXP);
+    rcpp_result_gen = Rcpp::wrap(DashSVDsparse(mat, k, p, s, rand));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pcaone_PCAoneAlg1", (DL_FUNC) &_pcaone_PCAoneAlg1, 5},
     {"_pcaone_PCAoneAlg2", (DL_FUNC) &_pcaone_PCAoneAlg2, 6},
     {"_pcaone_PCAoneDashSVD", (DL_FUNC) &_pcaone_PCAoneDashSVD, 5},
+    {"_pcaone_DashSVDsparse", (DL_FUNC) &_pcaone_DashSVDsparse, 5},
     {NULL, NULL, 0}
 };
 

@@ -13,3 +13,7 @@ PCAoneDashSVD <- function(mat, k, p, s, rand) {
     .Call(`_pcaone_PCAoneDashSVD`, mat, k, p, s, rand)
 }
 
+DashSVDsparse <- function(mat, k, p, s, rand) {
+    .Call(`_pcaone_DashSVDsparse`, mat, k, p, s, rand)
+}
+
