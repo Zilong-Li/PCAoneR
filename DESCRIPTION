@@ -7,11 +7,10 @@ Description: Fast and Accurate Randomized Singular Value Decomposition (RSVD) me
 License: GPL (>= 3)
 Depends: R (>= 4.0.0)
 Imports:
-    Rcpp,
-    stats
+    Rcpp
 LinkingTo:
-    Rcpp,
-    RcppEigen (>= 0.3.3.3.0)
+    RcppEigen (>= 0.3.4.0.0),
+    Rcpp
 SystemRequirements: C++17, GNU make
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2

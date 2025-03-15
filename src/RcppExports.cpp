@@ -12,12 +12,12 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // ssvd
-Rcpp::List ssvd(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int s, int rand);
+Rcpp::List ssvd(SEXP mat, int k, int p, int s, int rand);
 RcppExport SEXP _pcaone_ssvd(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd>& >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< int >::type s(sSEXP);
@@ -27,12 +27,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // winsvd
-Rcpp::List winsvd(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int s, int rand, int batchs);
+Rcpp::List winsvd(SEXP mat, int k, int p, int s, int rand, int batchs);
 RcppExport SEXP _pcaone_winsvd(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP, SEXP batchsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd>& >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< int >::type s(sSEXP);
