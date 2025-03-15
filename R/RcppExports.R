@@ -13,7 +13,11 @@ dashsvd <- function(mat, k, p, s, rand) {
     .Call(`_pcaone_dashsvd`, mat, k, p, s, rand)
 }
 
-dashsvd_sparse <- function(mat, k, p, s, rand) {
-    .Call(`_pcaone_dashsvd_sparse`, mat, k, p, s, rand)
+dashsvd_sparse_col <- function(mat, k, p, s, rand) {
+    .Call(`_pcaone_dashsvd_sparse_col`, mat, k, p, s, rand)
+}
+
+dashsvd_sparse_row <- function(mat, k, p, s, rand) {
+    .Call(`_pcaone_dashsvd_sparse_row`, mat, k, p, s, rand)
 }
 

@@ -57,9 +57,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// dashsvd_sparse
-Rcpp::List dashsvd_sparse(SEXP mat, int k, int p, int s, int rand);
-RcppExport SEXP _pcaone_dashsvd_sparse(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
+// dashsvd_sparse_col
+Rcpp::List dashsvd_sparse_col(SEXP mat, int k, int p, int s, int rand);
+RcppExport SEXP _pcaone_dashsvd_sparse_col(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -68,7 +68,22 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< int >::type s(sSEXP);
     Rcpp::traits::input_parameter< int >::type rand(randSEXP);
-    rcpp_result_gen = Rcpp::wrap(dashsvd_sparse(mat, k, p, s, rand));
+    rcpp_result_gen = Rcpp::wrap(dashsvd_sparse_col(mat, k, p, s, rand));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dashsvd_sparse_row
+Rcpp::List dashsvd_sparse_row(SEXP mat, int k, int p, int s, int rand);
+RcppExport SEXP _pcaone_dashsvd_sparse_row(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type s(sSEXP);
+    Rcpp::traits::input_parameter< int >::type rand(randSEXP);
+    rcpp_result_gen = Rcpp::wrap(dashsvd_sparse_row(mat, k, p, s, rand));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -77,7 +92,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcaone_ssvd", (DL_FUNC) &_pcaone_ssvd, 5},
     {"_pcaone_winsvd", (DL_FUNC) &_pcaone_winsvd, 6},
     {"_pcaone_dashsvd", (DL_FUNC) &_pcaone_dashsvd, 5},
-    {"_pcaone_dashsvd_sparse", (DL_FUNC) &_pcaone_dashsvd_sparse, 5},
+    {"_pcaone_dashsvd_sparse_col", (DL_FUNC) &_pcaone_dashsvd_sparse_col, 5},
+    {"_pcaone_dashsvd_sparse_row", (DL_FUNC) &_pcaone_dashsvd_sparse_row, 5},
     {NULL, NULL, 0}
 };
 

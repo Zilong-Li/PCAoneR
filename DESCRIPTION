@@ -7,6 +7,7 @@ Description: Fast and Accurate Randomized Singular Value Decomposition (RSVD) me
 License: GPL (>= 3)
 Depends: R (>= 4.0.0)
 Imports:
+    Matrix (>= 1.1-0),
     Rcpp
 LinkingTo:
     RcppEigen (>= 0.3.4.0.0),

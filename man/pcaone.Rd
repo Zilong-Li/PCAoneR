@@ -2,9 +2,57 @@
 % Please edit documentation in R/pcaone.R
 \name{pcaone}
 \alias{pcaone}
+\alias{pcaone.matrix}
+\alias{pcaone.dgeMatrix}
+\alias{pcaone.dgCMatrix}
+\alias{pcaone.dgRMatrix}
 \title{Randomized Singular Value Decomposition Algorithm with Window-based Power Iterations from PCAone (Li et al 2022).}
 \usage{
 pcaone(
+  A,
+  k = NULL,
+  p = 7,
+  s = 10,
+  sdist = "normal",
+  method = "winsvd",
+  batchs = 64,
+  shuffle = TRUE
+)
+
+\method{pcaone}{matrix}(
+  A,
+  k = NULL,
+  p = 7,
+  s = 10,
+  sdist = "normal",
+  method = "winsvd",
+  batchs = 64,
+  shuffle = TRUE
+)
+
+\method{pcaone}{dgeMatrix}(
+  A,
+  k = NULL,
+  p = 7,
+  s = 10,
+  sdist = "normal",
+  method = "winsvd",
+  batchs = 64,
+  shuffle = TRUE
+)
+
+\method{pcaone}{dgCMatrix}(
+  A,
+  k = NULL,
+  p = 7,
+  s = 10,
+  sdist = "normal",
+  method = "winsvd",
+  batchs = 64,
+  shuffle = TRUE
+)
+
+\method{pcaone}{dgRMatrix}(
   A,
   k = NULL,
   p = 7,
@@ -37,8 +85,7 @@ specifies the sampling distribution of the random test matrix: \cr
 specifies the different variation of the randomized singular value decomposition : \cr
 \eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
 \eqn{'ssvd'} : single-pass RSVD with power iterations in PCAone paper. \cr
-\eqn{'dashsvd'} : dynamic shifts based RSVD with  by Feng et al. 2024. \cr
-\eqn{'dashsvd_sparse'} : dashsvd for sparse matrix, e.g. dgCMatrix. \cr}
+\eqn{'dashsvd'} : dynamic shifts based RSVD with  by Feng et al. 2024. \cr}
 
 \item{batchs}{integer, optional; \cr
 the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{batchs=64}).}

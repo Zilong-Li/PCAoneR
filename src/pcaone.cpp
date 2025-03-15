@@ -56,10 +56,22 @@ Rcpp::List dashsvd(SEXP mat, int k, int p, int s, int rand) {
 }
 
 // [[Rcpp::export]]
-Rcpp::List dashsvd_sparse(SEXP mat, int k, int p, int s, int rand) {
+Rcpp::List dashsvd_sparse_col(SEXP mat, int k, int p, int s, int rand) {
 
   Eigen::Map<SpMat> A = Rcpp::as<Eigen::Map<SpMat>>(mat);
   PCAone::RsvdDash<SpMat> rsvd(A, k, s, rand);
+  rsvd.compute(p);
+
+  return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
+                            Rcpp::Named("u") = Rcpp::wrap(rsvd.matrixU()),
+                            Rcpp::Named("v") = Rcpp::wrap(rsvd.matrixV()));
+}
+
+// [[Rcpp::export]]
+Rcpp::List dashsvd_sparse_row(SEXP mat, int k, int p, int s, int rand) {
+
+  Eigen::Map<SpRMat> A = Rcpp::as<Eigen::Map<SpRMat>>(mat);
+  PCAone::RsvdDash<SpRMat> rsvd(A, k, s, rand);
   rsvd.compute(p);
 
   return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
