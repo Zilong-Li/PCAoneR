@@ -51,7 +51,8 @@
 #'                specifies the different variation of the randomized singular value decomposition : \cr
 #'                		\eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
 #'                		\eqn{'ssvd'} : single-pass RSVD with power iterations in PCAone paper. \cr
-#'                		\eqn{'dashsvd'} : RSVD with Dynamic Shifts by Feng et al. 2024. \cr
+#'                		\eqn{'dashsvd'} : dynamic shifts based RSVD with  by Feng et al. 2024. \cr
+#'                		\eqn{'dashsvd_sparse'} : dashsvd for sparse matrix, e.g. dgCMatrix. \cr
 #'
 #' @param batchs integer, optional; \cr
 #'                the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{batchs=64}).
@@ -123,9 +124,10 @@ pcaone.default <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsv
   }
   
   pcaoneObj <- switch(method,
-                      winsvd = .Call(`_pcaone_PCAoneAlg2`, A, k, p, s, rand, batchs),
-                      dashsvd = .Call(`_pcaone_PCAoneDashSVD`, A, k, p, s, rand),
-                      ssvd = .Call(`_pcaone_PCAoneAlg1`, A, k, p, s, rand),
+                      winsvd = .Call(`_pcaone_winsvd`, A, k, p, s, rand, batchs),
+                      dashsvd = .Call(`_pcaone_dashsvd`, A, k, p, s, rand),
+                      dashsvd_sparse = .Call(`_pcaone_dashsvd_sparse`, A, k, p, s, rand),
+                      ssvd = .Call(`_pcaone_ssvd`, A, k, p, s, rand),
                       stop("Method is not supported!"))
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)

@@ -10,8 +10,8 @@ ordered by their accuracy.
 
   - **winSVD**: [window based randomized singular value
     decomposition](https://genome.cshlp.org/content/33/9/1599)
-  - **dashSVD**: [randomized singular value decomposition with dynamic
-    shifted eigenvalues](https://dl.acm.org/doi/10.1145/3660629)
+  - **dashSVD**: [dynamic shifts based randomized singular
+    value decomposition](https://dl.acm.org/doi/10.1145/3660629)
   - **sSVD**: [single pass randomized singular value decomposition with
     power iterations](https://genome.cshlp.org/content/33/9/1599)
 

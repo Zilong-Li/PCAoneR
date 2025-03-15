@@ -11,9 +11,9 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// PCAoneAlg1
-Rcpp::List PCAoneAlg1(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int s, int rand);
-RcppExport SEXP _pcaone_PCAoneAlg1(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
+// ssvd
+Rcpp::List ssvd(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int s, int rand);
+RcppExport SEXP _pcaone_ssvd(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -22,13 +22,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< int >::type s(sSEXP);
     Rcpp::traits::input_parameter< int >::type rand(randSEXP);
-    rcpp_result_gen = Rcpp::wrap(PCAoneAlg1(mat, k, p, s, rand));
+    rcpp_result_gen = Rcpp::wrap(ssvd(mat, k, p, s, rand));
     return rcpp_result_gen;
 END_RCPP
 }
-// PCAoneAlg2
-Rcpp::List PCAoneAlg2(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int s, int rand, int batchs);
-RcppExport SEXP _pcaone_PCAoneAlg2(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP, SEXP batchsSEXP) {
+// winsvd
+Rcpp::List winsvd(const Eigen::Map<Eigen::MatrixXd>& mat, int k, int p, int s, int rand, int batchs);
+RcppExport SEXP _pcaone_winsvd(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP, SEXP batchsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -38,13 +38,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type s(sSEXP);
     Rcpp::traits::input_parameter< int >::type rand(randSEXP);
     Rcpp::traits::input_parameter< int >::type batchs(batchsSEXP);
-    rcpp_result_gen = Rcpp::wrap(PCAoneAlg2(mat, k, p, s, rand, batchs));
+    rcpp_result_gen = Rcpp::wrap(winsvd(mat, k, p, s, rand, batchs));
     return rcpp_result_gen;
 END_RCPP
 }
-// PCAoneDashSVD
-Rcpp::List PCAoneDashSVD(SEXP mat, int k, int p, int s, int rand);
-RcppExport SEXP _pcaone_PCAoneDashSVD(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
+// dashsvd
+Rcpp::List dashsvd(SEXP mat, int k, int p, int s, int rand);
+RcppExport SEXP _pcaone_dashsvd(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -53,13 +53,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< int >::type s(sSEXP);
     Rcpp::traits::input_parameter< int >::type rand(randSEXP);
-    rcpp_result_gen = Rcpp::wrap(PCAoneDashSVD(mat, k, p, s, rand));
+    rcpp_result_gen = Rcpp::wrap(dashsvd(mat, k, p, s, rand));
     return rcpp_result_gen;
 END_RCPP
 }
-// DashSVDsparse
-Rcpp::List DashSVDsparse(SEXP mat, int k, int p, int s, int rand);
-RcppExport SEXP _pcaone_DashSVDsparse(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
+// dashsvd_sparse
+Rcpp::List dashsvd_sparse(SEXP mat, int k, int p, int s, int rand);
+RcppExport SEXP _pcaone_dashsvd_sparse(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -68,16 +68,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< int >::type s(sSEXP);
     Rcpp::traits::input_parameter< int >::type rand(randSEXP);
-    rcpp_result_gen = Rcpp::wrap(DashSVDsparse(mat, k, p, s, rand));
+    rcpp_result_gen = Rcpp::wrap(dashsvd_sparse(mat, k, p, s, rand));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_pcaone_PCAoneAlg1", (DL_FUNC) &_pcaone_PCAoneAlg1, 5},
-    {"_pcaone_PCAoneAlg2", (DL_FUNC) &_pcaone_PCAoneAlg2, 6},
-    {"_pcaone_PCAoneDashSVD", (DL_FUNC) &_pcaone_PCAoneDashSVD, 5},
-    {"_pcaone_DashSVDsparse", (DL_FUNC) &_pcaone_DashSVDsparse, 5},
+    {"_pcaone_ssvd", (DL_FUNC) &_pcaone_ssvd, 5},
+    {"_pcaone_winsvd", (DL_FUNC) &_pcaone_winsvd, 6},
+    {"_pcaone_dashsvd", (DL_FUNC) &_pcaone_dashsvd, 5},
+    {"_pcaone_dashsvd_sparse", (DL_FUNC) &_pcaone_dashsvd_sparse, 5},
     {NULL, NULL, 0}
 };
 

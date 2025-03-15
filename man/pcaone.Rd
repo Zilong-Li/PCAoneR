@@ -37,7 +37,8 @@ specifies the sampling distribution of the random test matrix: \cr
 specifies the different variation of the randomized singular value decomposition : \cr
 \eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
 \eqn{'ssvd'} : single-pass RSVD with power iterations in PCAone paper. \cr
-\eqn{'dashsvd'} : RSVD with Dynamic Shifts by Feng et al. 2024. \cr}
+\eqn{'dashsvd'} : dynamic shifts based RSVD with  by Feng et al. 2024. \cr
+\eqn{'dashsvd_sparse'} : dashsvd for sparse matrix, e.g. dgCMatrix. \cr}
 
 \item{batchs}{integer, optional; \cr
 the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{batchs=64}).}
@@ -98,7 +99,7 @@ gives an equivalent decomposition.
 }
 \examples{
 library('pcaone')
-data(popgen)
+load(system.file("extdata", "popgen.rda", package="pcaone") )
 A <- popgen - rowMeans(popgen)
 res <- pcaone(A, k = 40, method = "winsvd")
 str(res)
