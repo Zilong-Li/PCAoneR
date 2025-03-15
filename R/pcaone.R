@@ -89,7 +89,7 @@
 #'
 #' @examples
 #' library('pcaone')
-#' data(popgen)
+#' load(system.file("extdata", "popgen.rda", package="pcaone") )
 #' A <- popgen - rowMeans(popgen)
 #' res <- pcaone(A, k = 40, method = "winsvd")
 #' str(res)

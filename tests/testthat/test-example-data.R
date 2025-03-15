@@ -4,7 +4,7 @@ set.seed(1234)
 
 reconstruct <- function(s) s$u %*% diag(s$d) %*% t(s$v)
 
-data(popgen)
+load(system.file("extdata", "popgen.rda", package="pcaone") )
 A <- popgen - rowMeans(popgen)
 k <- 40
 
