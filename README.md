@@ -1,19 +1,32 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Fast and accurate randomized singular value decomposition (RSVD)
+# Accurate Randomized SVD with window-based power iteration
 
 ## Introduction
 
-There are 3 versions of RSVD implemented in this package, which are
-ordered by their accuracy.
+This repo initially implements the algorithm so-called window-based
+Randomized SVD in the [PCAone](https://github.com/Zilong-Li/PCAone)
+paper. **The aim of the package is to implement state-of-the-art
+Randomized SVD algorithms other than the basic
+[rsvd](https://github.com/erichson/rSVD) for R community.**
+
+Currently there are 3 versions of RSVD implemented in this package
+ordered by their accuracy in below.
 
   - **winSVD**: [window based randomized singular value
     decomposition](https://genome.cshlp.org/content/33/9/1599)
-  - **dashSVD**: [dynamic shifts based randomized singular
-    value decomposition](https://dl.acm.org/doi/10.1145/3660629)
+  - **dashSVD**: [dynamic shifts based randomized singular value
+    decomposition](https://dl.acm.org/doi/10.1145/3660629)
   - **sSVD**: [single pass randomized singular value decomposition with
     power iterations](https://genome.cshlp.org/content/33/9/1599)
+
+With surports for a number of matrix type including:
+
+  - `matrix` in base R
+  - `dgeMatrix` in **Matrix** package, for general matrices
+  - `dgCMatrix` in **Matrix** package, for column major sparse matrices
+  - `dgRMatrix` in **Matrix** package, for row major sparse matrices
 
 <!-- badges: start -->
 
@@ -36,9 +49,9 @@ mat <- matrix(rnorm(100*5000), 5000, 100)
 res <- pcaone(mat, k = 10)
 str(res)
 #> List of 3
-#>  $ d: num [1:10] 80.7 79.9 79.3 79.1 78.6 ...
-#>  $ u: num [1:5000, 1:10] 0.00561 0.02096 0.02855 -0.00381 0.00558 ...
-#>  $ v: num [1:100, 1:10] -0.02066 0.12137 0.11801 -0.11926 -0.00992 ...
+#>  $ d: num [1:10] 80.1 79.9 79.6 79 78.8 ...
+#>  $ u: num [1:5000, 1:10] 0.00058 -0.02966 0.0031 0.0049 0.00569 ...
+#>  $ v: num [1:100, 1:10] -0.3033 0.1388 -0.02 -0.1313 0.0323 ...
 #>  - attr(*, "class")= chr "pcaone"
 ```
 
@@ -53,24 +66,24 @@ it can only be hold on disk.
 library(RSpectra) ## svds
 library(rsvd)     ## regular rsvd
 library(pcaone)
-data(popgen)
+load(system.file("extdata", "popgen.rda", package="pcaone") )
 A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
 #>    user  system elapsed 
-#>  29.420  14.668   1.927
+#>  27.474   3.009   1.279
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))  ## the number of epochs is two times of power iters, 4*2=8
 #>    user  system elapsed 
-#>   8.722  17.691   1.317
+#>   8.064  12.305   0.921
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 7))   ## the number of epochs is 1 + p
 #>    user  system elapsed 
-#>   7.122   6.239   0.775
+#>   6.892   4.949   0.499
 system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 7)) ## the number of epochs is 1 + p
 #>    user  system elapsed 
-#>  10.122  11.114   1.034
+#>   8.821   7.993   0.821
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6))## the number of epochs is 2 + p
 #>    user  system elapsed 
-#>   5.311   0.766   0.296
+#>   5.290   1.041   0.295
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -88,13 +101,13 @@ to reach the accuracy of `winSVD`.
 ``` r
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 20))  ## the number of epochs is 4*20=40
 #>    user  system elapsed 
-#>  34.010  56.014   4.426
+#>  31.081  40.246   3.117
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 20))
 #>    user  system elapsed 
-#>  15.840   9.335   1.066
+#>  16.221   8.828   1.064
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 18))
 #>    user  system elapsed 
-#>  13.975   7.773   1.016
+#>  13.323   2.598   0.697
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 2), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -121,12 +134,18 @@ timing <- microbenchmark(
   times=10)
 print(timing, unit='s')
 #> Unit: seconds
-#>            expr       min        lq     mean   median       uq      max neval
-#>        RSpectra 1.3123276 1.5685666 1.996660 1.888353 2.421958 2.975789    10
-#>            rSVD 4.1148399 4.8318071 5.559569 5.266937 5.843289 8.291830    10
-#>   pcaone.winsvd 0.8139188 0.8835514 1.247171 1.128622 1.401493 1.988634    10
-#>     pcaone.ssvd 0.8720162 0.9468745 1.739007 1.736949 2.239249 3.085669    10
-#>  pcaone.dashsvd 0.7368719 1.0958707 1.407987 1.403486 1.545074 2.092847    10
+#>            expr       min        lq      mean    median        uq       max
+#>        RSpectra 1.2188606 1.2569006 1.2934870 1.2716421 1.3021439 1.4671394
+#>            rSVD 2.9463901 2.9751527 3.1790342 3.0345312 3.3626545 3.7373127
+#>   pcaone.winsvd 0.7909559 0.8057960 0.8709076 0.8442994 0.9053499 1.1054273
+#>     pcaone.ssvd 0.8526956 0.8768734 0.9126460 0.8968143 0.9404433 1.0432016
+#>  pcaone.dashsvd 0.6797940 0.6874866 0.7363161 0.7036035 0.8150240 0.8522621
+#>  neval
+#>     10
+#>     10
+#>     10
+#>     10
+#>     10
 ```
 
 ## References

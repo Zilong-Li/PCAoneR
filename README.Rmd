@@ -13,15 +13,24 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Fast and accurate randomized singular value decomposition (RSVD)
+# Accurate Randomized SVD with window-based power iteration
 
 ## Introduction
 
-There are 3 versions of RSVD implemented in this package, which are ordered by their accuracy.
+This repo initially implements the algorithm so-called window-based Randomized SVD in the [PCAone](https://github.com/Zilong-Li/PCAone) paper. **The aim of the package is to implement state-of-the-art Randomized SVD algorithms other than the basic [rsvd](https://github.com/erichson/rSVD) for R community.**
+
+Currently there are 3 versions of RSVD implemented in this package ordered by their accuracy in below.
 
 - **winSVD**: [window based randomized singular value decomposition](https://genome.cshlp.org/content/33/9/1599)
 - **dashSVD**: [dynamic shifts based randomized singular value decomposition](https://dl.acm.org/doi/10.1145/3660629)
 - **sSVD**: [single pass randomized singular value decomposition with power iterations](https://genome.cshlp.org/content/33/9/1599)
+
+With surports for a number of matrix type including:
+
+- `matrix` in base R
+- `dgeMatrix` in **Matrix** package, for general matrices
+- `dgCMatrix` in **Matrix** package, for column major sparse matrices
+- `dgRMatrix` in **Matrix** package, for row major sparse matrices
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -53,7 +62,7 @@ We define the accuracy as the error of singular values using results of `RSpectr
 library(RSpectra) ## svds
 library(rsvd)     ## regular rsvd
 library(pcaone)
-data(popgen)
+load(system.file("extdata", "popgen.rda", package="pcaone") )
 A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )

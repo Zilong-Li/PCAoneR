@@ -3,7 +3,7 @@
  * @author      Zilong Li
  * @email       zilong.dk@gmail.com
  * @brief       Various Randomized Singular Value Decomposition in Eigen
- * Copyright (C) 2021 Zilong Li
+ * Copyright (C) 2021-2025 Zilong Li
  ***********************************************************************/
 
 #ifndef RSVDEIGEN_H_
