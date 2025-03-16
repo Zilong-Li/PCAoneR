@@ -35,12 +35,15 @@ template<typename MatrixType>
 class RsvdOpOnePass
 {
   private:
-    using Index = Eigen::Index;
     using ConstGenericMatrix = const Eigen::Ref<const MatrixType>;
+    using Index = Eigen::Index;
+    using Scalar = typename MatrixType::Scalar;
+    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>; // dense matrix
+    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
     ConstGenericMatrix mat;
     Index nrow, ncol;
-    MatrixType Omg;
+    Matrix Omg;
     int k, os, size, rand;
     bool trans; // if matrix is wide then flip the matrix dimension
 
@@ -65,11 +68,11 @@ class RsvdOpOnePass
         auto randomEngine = std::default_random_engine{};
         if(rand == 1)
         {
-            Omg = StandardNormalRandom<MatrixType, std::default_random_engine>(ncol, size, randomEngine);
+            Omg = StandardNormalRandom<Matrix, std::default_random_engine>(ncol, size, randomEngine);
         }
         else
         {
-            Omg = UniformRandom<MatrixType, std::default_random_engine>(ncol, size, randomEngine);
+            Omg = UniformRandom<Matrix, std::default_random_engine>(ncol, size, randomEngine);
         }
     }
 
@@ -92,7 +95,7 @@ class RsvdOpOnePass
         return os;
     }
 
-    void computeGandH(MatrixType & G, MatrixType & H, uint32_t p)
+    void computeGandH(Matrix & G, Matrix & H, uint32_t p)
     {
         if(trans)
         {
@@ -110,12 +113,12 @@ class RsvdOpOnePass
             {
                 if(finder == 1)
                 {
-                    Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(H);
-                    Omg.noalias() = qr.householderQ() * MatrixType::Identity(cols(), size);
+                    Eigen::HouseholderQR<Eigen::Ref<Matrix>> qr(H);
+                    Omg.noalias() = qr.householderQ() * Matrix::Identity(cols(), size);
                 }
                 else if(finder == 2)
                 {
-                    Eigen::FullPivLU<Eigen::Ref<MatrixType>> lu(H);
+                    Eigen::FullPivLU<Eigen::Ref<Matrix>> lu(H);
                     Omg.setIdentity(cols(), size);
                     Omg.template triangularView<Eigen::StrictlyLower>() = lu.matrixLU();
                 }
@@ -137,7 +140,7 @@ class RsvdOpOnePass
         }
     }
 
-    void computeGandH(MatrixType & G, MatrixType & H, uint32_t p, uint32_t batchs)
+    void computeGandH(Matrix & G, Matrix & H, uint32_t p, uint32_t batchs)
     {
         if(batchs % 2 != 0) throw std::runtime_error("batchs must be a power of 2, ie. batchs=2^x.\n");
         if(std::pow(2, p) < batchs) throw std::runtime_error("pow(2, p) >= batchs is not true\n");
@@ -158,9 +161,9 @@ class RsvdOpOnePass
         }
 
         uint32_t start_idx, stop_idx, actual_block_size;
-        MatrixType H1 = MatrixType::Zero(ncol, size);
-        MatrixType H2 = MatrixType::Zero(ncol, size);
-        MatrixType Omg2;
+        Matrix H1 = Matrix::Zero(ncol, size);
+        Matrix H2 = Matrix::Zero(ncol, size);
+        Matrix Omg2;
         uint32_t band = 1;
         for(uint32_t pi = 0; pi <= p; pi++)
         {
@@ -208,8 +211,8 @@ class RsvdOpOnePass
                 if((b + 1) < band && !adjacent) continue;
                 if(!((i == band) || (i == band / 2) || adjacent)) continue;
                 H = H1 + H2;
-                Eigen::HouseholderQR<MatrixType> qr(H);
-                Omg.noalias() = qr.householderQ() * MatrixType::Identity(cols(), size);
+                Eigen::HouseholderQR<Matrix> qr(H);
+                Omg.noalias() = qr.householderQ() * Matrix::Identity(cols(), size);
                 flipOmg(Omg2, Omg);
                 if(i == band)
                 {
@@ -228,17 +231,30 @@ class RsvdOpOnePass
 template<typename MatrixType, typename RsvdOp>
 class RsvdOnePass
 {
+  private:
+    using ConstGenericMatrix = const Eigen::Ref<const MatrixType>;
+    using Index = Eigen::Index;
+    using Scalar = typename MatrixType::Scalar;
+    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>; // dense matrix
+    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+    Matrix b_leftSingularVectors{};
+    Vector b_singularValues{};
+    Matrix b_rightSingularVectors{};
+
+  private:
+    RsvdOp & b_op;
+
   public:
     RsvdOnePass(RsvdOp & op) : b_op(op) {}
 
     ~RsvdOnePass() {}
 
-    inline MatrixType singularValues() const
+    inline Vector singularValues() const
     {
         return b_singularValues;
     }
 
-    inline MatrixType matrixU(bool trans = false) const
+    inline Matrix matrixU(bool trans = false) const
     {
         if(trans)
         {
@@ -250,7 +266,7 @@ class RsvdOnePass
         }
     }
 
-    inline MatrixType matrixV(bool trans = false) const
+    inline Matrix matrixV(bool trans = false) const
     {
         if(trans)
         {
@@ -269,7 +285,7 @@ class RsvdOnePass
         const Eigen::Index ncol{b_op.cols()};
         const Eigen::Index size{b_op.ranks() + b_op.oversamples()};
         const Eigen::Index k{b_op.ranks()};
-        MatrixType H(ncol, size), G(nrow, size), R(size, size), Rt(size, size);
+        Matrix H(ncol, size), G(nrow, size), R(size, size), Rt(size, size);
 
         if(batchs > 0)
             b_op.computeGandH(G, H, p, batchs);
@@ -277,33 +293,27 @@ class RsvdOnePass
             b_op.computeGandH(G, H, p);
 
         {
-            Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(G);
+            Eigen::HouseholderQR<Eigen::Ref<Matrix>> qr(G);
             R.noalias() =
-                MatrixType::Identity(size, nrow) * qr.matrixQR().template triangularView<Eigen::Upper>();
-            G.noalias() = qr.householderQ() * MatrixType::Identity(nrow, size);
+                Matrix::Identity(size, nrow) * qr.matrixQR().template triangularView<Eigen::Upper>();
+            G.noalias() = qr.householderQ() * Matrix::Identity(nrow, size);
         }
         {
-            Eigen::HouseholderQR<Eigen::Ref<MatrixType>> qr(G);
+            Eigen::HouseholderQR<Eigen::Ref<Matrix>> qr(G);
             Rt.noalias() =
-                MatrixType::Identity(size, nrow) * qr.matrixQR().template triangularView<Eigen::Upper>();
-            G.noalias() = qr.householderQ() * MatrixType::Identity(nrow, size);
+                Matrix::Identity(size, nrow) * qr.matrixQR().template triangularView<Eigen::Upper>();
+            G.noalias() = qr.householderQ() * Matrix::Identity(nrow, size);
         }
 
         R = Rt * R;
 
         // R.T * B = H.T => lapack dtrtrs()
-        MatrixType B = R.transpose().fullPivHouseholderQr().solve(H.transpose());
-        Eigen::JacobiSVD<MatrixType> svd(B, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        Matrix B = R.transpose().fullPivHouseholderQr().solve(H.transpose());
+        Eigen::JacobiSVD<Matrix> svd(B, Eigen::ComputeThinU | Eigen::ComputeThinV);
         b_leftSingularVectors.noalias() = G * svd.matrixU().leftCols(k);
         b_rightSingularVectors = svd.matrixV().leftCols(k);
         b_singularValues = svd.singularValues().head(k);
     }
-
-  private:
-    RsvdOp & b_op;
-    MatrixType b_leftSingularVectors{};
-    MatrixType b_singularValues{};
-    MatrixType b_rightSingularVectors{};
 };
 
 template<typename MatrixType>
@@ -311,6 +321,10 @@ class RsvdOne
 {
   private:
     using ConstGenericMatrix = const Eigen::Ref<const MatrixType>;
+    using Scalar = typename MatrixType::Scalar;
+    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>; // dense matrix
+    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+
 
     ConstGenericMatrix mat;
     const uint32_t k, os, rand;
@@ -347,17 +361,17 @@ class RsvdOne
         rsvd->computeUSV(p, batchs);
     }
 
-    inline MatrixType matrixU() const
+    inline Matrix matrixU() const
     {
         return rsvd->matrixU(trans);
     }
 
-    inline MatrixType matrixV() const
+    inline Matrix matrixV() const
     {
         return rsvd->matrixV(trans);
     }
 
-    inline MatrixType singularValues() const
+    inline Vector singularValues() const
     {
         return rsvd->singularValues();
     }
@@ -394,12 +408,11 @@ class RsvdDash
         if(rand == 1)
         {
             Omg = StandardNormalRandom<Matrix, std::default_random_engine>(tall ? nrow : ncol, size,
-                                                                               randomEngine);
+                                                                           randomEngine);
         }
         else
         {
-            Omg =
-                UniformRandom<Matrix, std::default_random_engine>(tall ? nrow : ncol, size, randomEngine);
+            Omg = UniformRandom<Matrix, std::default_random_engine>(tall ? nrow : ncol, size, randomEngine);
         }
         b_leftSingularVectors = Matrix::Zero(nrow, size);
         b_rightSingularVectors = Matrix::Zero(ncol, size);

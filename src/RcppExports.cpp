@@ -11,6 +11,54 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// winsvd
+Rcpp::List winsvd(SEXP mat, int k, int p, int s, int rand, int batchs);
+RcppExport SEXP _pcaone_winsvd(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP, SEXP batchsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type s(sSEXP);
+    Rcpp::traits::input_parameter< int >::type rand(randSEXP);
+    Rcpp::traits::input_parameter< int >::type batchs(batchsSEXP);
+    rcpp_result_gen = Rcpp::wrap(winsvd(mat, k, p, s, rand, batchs));
+    return rcpp_result_gen;
+END_RCPP
+}
+// winsvd_sparse_col
+Rcpp::List winsvd_sparse_col(SEXP mat, int k, int p, int s, int rand, int batchs);
+RcppExport SEXP _pcaone_winsvd_sparse_col(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP, SEXP batchsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type s(sSEXP);
+    Rcpp::traits::input_parameter< int >::type rand(randSEXP);
+    Rcpp::traits::input_parameter< int >::type batchs(batchsSEXP);
+    rcpp_result_gen = Rcpp::wrap(winsvd_sparse_col(mat, k, p, s, rand, batchs));
+    return rcpp_result_gen;
+END_RCPP
+}
+// winsvd_sparse_row
+Rcpp::List winsvd_sparse_row(SEXP mat, int k, int p, int s, int rand, int batchs);
+RcppExport SEXP _pcaone_winsvd_sparse_row(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP, SEXP batchsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type s(sSEXP);
+    Rcpp::traits::input_parameter< int >::type rand(randSEXP);
+    Rcpp::traits::input_parameter< int >::type batchs(batchsSEXP);
+    rcpp_result_gen = Rcpp::wrap(winsvd_sparse_row(mat, k, p, s, rand, batchs));
+    return rcpp_result_gen;
+END_RCPP
+}
 // ssvd
 Rcpp::List ssvd(SEXP mat, int k, int p, int s, int rand);
 RcppExport SEXP _pcaone_ssvd(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
@@ -26,9 +74,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// winsvd
-Rcpp::List winsvd(SEXP mat, int k, int p, int s, int rand, int batchs);
-RcppExport SEXP _pcaone_winsvd(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP, SEXP batchsSEXP) {
+// ssvd_sparse_col
+Rcpp::List ssvd_sparse_col(SEXP mat, int k, int p, int s, int rand);
+RcppExport SEXP _pcaone_ssvd_sparse_col(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -37,8 +85,22 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< int >::type s(sSEXP);
     Rcpp::traits::input_parameter< int >::type rand(randSEXP);
-    Rcpp::traits::input_parameter< int >::type batchs(batchsSEXP);
-    rcpp_result_gen = Rcpp::wrap(winsvd(mat, k, p, s, rand, batchs));
+    rcpp_result_gen = Rcpp::wrap(ssvd_sparse_col(mat, k, p, s, rand));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ssvd_sparse_row
+Rcpp::List ssvd_sparse_row(SEXP mat, int k, int p, int s, int rand);
+RcppExport SEXP _pcaone_ssvd_sparse_row(SEXP matSEXP, SEXP kSEXP, SEXP pSEXP, SEXP sSEXP, SEXP randSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type s(sSEXP);
+    Rcpp::traits::input_parameter< int >::type rand(randSEXP);
+    rcpp_result_gen = Rcpp::wrap(ssvd_sparse_row(mat, k, p, s, rand));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -89,8 +151,12 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_pcaone_ssvd", (DL_FUNC) &_pcaone_ssvd, 5},
     {"_pcaone_winsvd", (DL_FUNC) &_pcaone_winsvd, 6},
+    {"_pcaone_winsvd_sparse_col", (DL_FUNC) &_pcaone_winsvd_sparse_col, 6},
+    {"_pcaone_winsvd_sparse_row", (DL_FUNC) &_pcaone_winsvd_sparse_row, 6},
+    {"_pcaone_ssvd", (DL_FUNC) &_pcaone_ssvd, 5},
+    {"_pcaone_ssvd_sparse_col", (DL_FUNC) &_pcaone_ssvd_sparse_col, 5},
+    {"_pcaone_ssvd_sparse_row", (DL_FUNC) &_pcaone_ssvd_sparse_row, 5},
     {"_pcaone_dashsvd", (DL_FUNC) &_pcaone_dashsvd, 5},
     {"_pcaone_dashsvd_sparse_col", (DL_FUNC) &_pcaone_dashsvd_sparse_col, 5},
     {"_pcaone_dashsvd_sparse_row", (DL_FUNC) &_pcaone_dashsvd_sparse_row, 5},

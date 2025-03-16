@@ -204,7 +204,9 @@ pcaone.dgCMatrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "win
   message("pcaone for sparse matrix in column major [dgCMatrix]" )
   
   pcaoneObj <- switch(method,
+                      winsvd = .Call(`_pcaone_winsvd_sparse_col`, A, k, p, s, rand, batchs),
                       dashsvd = .Call(`_pcaone_dashsvd_sparse_col`, A, k, p, s, rand),
+                      ssvd = .Call(`_pcaone_ssvd_sparse_col`, A, k, p, s, rand),
                       stop("Method is not supported!"))
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
@@ -226,7 +228,9 @@ pcaone.dgRMatrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "win
   message("pcaone for sparse matrix in row major [dgRMatrix]" )
   
   pcaoneObj <- switch(method,
+                      winsvd = .Call(`_pcaone_winsvd_sparse_row`, A, k, p, s, rand, batchs),
                       dashsvd = .Call(`_pcaone_dashsvd_sparse_row`, A, k, p, s, rand),
+                      ssvd = .Call(`_pcaone_ssvd_sparse_row`, A, k, p, s, rand),
                       stop("Method is not supported!"))
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
