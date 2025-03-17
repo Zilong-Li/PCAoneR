@@ -10,12 +10,7 @@ using SpMat = Eigen::SparseMatrix<double, Eigen::ColMajor>;
 using SpRMat = Eigen::SparseMatrix<double, Eigen::RowMajor>;
 
 // [[Rcpp::export]]
-Rcpp::List winsvd(SEXP mat, int k, int p, int s, int rand, int batchs = 64) {
-
-  if (batchs % 2 != 0)
-    Rcpp::Rcout << "batchs %% 2 == 0 has to be met\n";
-  if (std::pow(2, p) < batchs)
-    Rcpp::Rcout << "2^p >= batchs has to be met. suggesting p > 6 for batchs=64\n";
+Rcpp::List winsvd(SEXP mat, int k, int p, int s, int rand, int batchs) {
 
   Eigen::Map<Eigen::MatrixXd> A = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(mat);
   PCAone::RsvdOne<Eigen::MatrixXd> rsvd(A, k, s, rand);
@@ -27,7 +22,7 @@ Rcpp::List winsvd(SEXP mat, int k, int p, int s, int rand, int batchs = 64) {
 }
 
 // [[Rcpp::export]]
-Rcpp::List winsvd_sparse_col(SEXP mat, int k, int p, int s, int rand, int batchs = 64) {
+Rcpp::List winsvd_sparse_col(SEXP mat, int k, int p, int s, int rand, int batchs) {
   Eigen::Map<SpMat> A = Rcpp::as<Eigen::Map<SpMat>>(mat);
   PCAone::RsvdOne<SpMat> rsvd(A, k, s, rand);
   rsvd.compute(p, batchs);
@@ -38,7 +33,7 @@ Rcpp::List winsvd_sparse_col(SEXP mat, int k, int p, int s, int rand, int batchs
 }
 
 // [[Rcpp::export]]
-Rcpp::List winsvd_sparse_row(SEXP mat, int k, int p, int s, int rand, int batchs = 64) {
+Rcpp::List winsvd_sparse_row(SEXP mat, int k, int p, int s, int rand, int batchs) {
   Eigen::Map<SpRMat> A = Rcpp::as<Eigen::Map<SpRMat>>(mat);
   PCAone::RsvdOne<SpRMat> rsvd(A, k, s, rand);
   rsvd.compute(p, batchs);
