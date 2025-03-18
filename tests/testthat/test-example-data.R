@@ -6,11 +6,13 @@ reconstruct <- function(s) s$u %*% diag(s$d) %*% t(s$v)
 
 load(system.file("extdata", "popgen.rda", package="pcaone") )
 
-A <- popgen - rowMeans(popgen)
+## A <- popgen - rowMeans(popgen)
+A <- sweep(popgen, 1, rowMeans(popgen), FUN = "-")
 k <- 40
 
 ## A <- matrix(popgen, nrow = nrow(popgen))
-## d <- pcaone(A, k = k, method = "ssvd", opts = list("center" = TRUE, "scale" = TRUE, "byrow" = TRUE) )
+d <- pcaone(A, k = k, method = "ssvd", opts = list("center" = TRUE, "scale" = TRUE, "byrow" = FALSE) )
+## d <- pcaone(A, k = k, method = "winsvd", opts = list("center" = TRUE, "scale" = TRUE, "byrow" = TRUE) )
 
 #*************************************************************************************
 # Test: real tall matrix with population gentic data

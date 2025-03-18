@@ -7,8 +7,9 @@ k <- 10
 
 ## Set up test matrices
 set.seed(123)
-x = matrix(rnorm(m * n), m)
+x = matrix(rnorm(m * n), n)
 x[sample(m * n, floor( m * n / 2))] = 0
+
 # General matrices
 gen = list(x,
            ## as(x, "dgeMatrix"),
@@ -18,10 +19,11 @@ gen = list(x,
 ## d <- pcaone(x, k = 10, method = "ssvd", opts = list("center" = TRUE, "scale" = rep(1, 200)) )
 ## d <- RSpectra::svds(x, k = 10)
 
-## d <- pcaone(x, k = 10, method = "ssvd", opts = list("center" = TRUE, "scale" = TRUE) )
-## d <- RSpectra::svds(x, k = 10, opts = list("center" = TRUE, "scale" = TRUE) )
-## d <- rsvd::rpca(x, k = 10)
-## str(d)
+d <- pcaone(x, k = 10, method = "ssvd", opts = list("center" = TRUE, "scale" = TRUE) )
+d <- pcaone(x, k = 10, method = "winsvd", opts = list("center" = TRUE, "scale" = TRUE) )
+d <- RSpectra::svds(x, k = 10, opts = list("center" = TRUE, "scale" = TRUE) )
+d <- rsvd::rpca(x, k = 10, q = 10)
+str(d)
 
 
 # "true" values

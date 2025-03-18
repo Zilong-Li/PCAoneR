@@ -2,31 +2,20 @@
  * @file        RsvdEigen.hpp
  * @author      Zilong Li
  * @email       zilong.dk@gmail.com
- * @brief       Various Randomized Singular Value Decomposition in Eigen
+ * @brief       Window-based Randomized Singular Value Decomposition
  * Copyright (C) 2021-2025 Zilong Li
  ***********************************************************************/
 
 #ifndef RSVDEIGEN_H_
 #define RSVDEIGEN_H_
 
-#include <RcppEigen.h>
 #include "Rand.hpp"
-#include <stdexcept>
+#include <RcppEigen.h>
 #include <memory>
+#include <stdexcept>
 
 namespace PCAone
 {
-
-// Type trait to check if a type is an Eigen sparse matrix
-// template<typename T>
-// struct is_eigen_sparse : std::false_type
-// {
-// };
-
-// template<typename Scalar, int Options, typename StorageIndex>
-// struct is_eigen_sparse<Eigen::SparseMatrix<Scalar, Options, StorageIndex>> : std::true_type
-// {
-// };
 
 template<typename MatrixType>
 Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> center_and_scale(
@@ -37,9 +26,6 @@ Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> cente
 {
   using Scalar = typename MatrixType::Scalar;
   assert(center.size() == scale.size() && "the size of center and scale are different");
-
-  // match dimension of matrix to decide how to scale it
-  // const bool bycol = center.size() == matrix.cols() ? true : false;
 
   // Convert input matrix to dense (handles both sparse and dense matrices)
   Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> mat = matrix;
@@ -54,6 +40,36 @@ Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> cente
     mat.rowwise() -= center.transpose();
     // Scale cols
     mat = mat * scale.asDiagonal();
+  }
+
+  return mat;
+}
+
+template<typename MatrixType>
+Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> center_and_scale(
+  const MatrixType & matrix,
+  const Eigen::Map<Eigen::VectorXd> & center,
+  const Eigen::Map<Eigen::VectorXd> & scale,
+  const bool byrow,
+  const int start,
+  const int nb)
+{
+  using Scalar = typename MatrixType::Scalar;
+  assert(center.size() == scale.size() && "the size of center and scale are different");
+
+  // Convert input matrix to dense (handles both sparse and dense matrices)
+  Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> mat = matrix;
+  if(byrow)
+  {
+    mat.colwise() -= center.segment(start, nb);
+    // Scale rows
+    mat = scale.segment(start, nb).asDiagonal() * mat;
+  }
+  else
+  {
+    mat.rowwise() -= center.segment(start, nb).transpose();
+    // Scale cols
+    mat = mat * scale.segment(start, nb).asDiagonal();
   }
 
   return mat;
@@ -87,7 +103,7 @@ private:
 
   ConstGenericMatrix mat;
   Index nrow, ncol;
-  Matrix Omg;
+  Matrix Omg, Ab;
   int k, os, size, rand;
   bool trans; // if matrix is wide then flip the matrix dimension
   bool do_pca = false; // if set center and scale, then do pca
@@ -101,31 +117,31 @@ public:
   RsvdOpOnePass(ConstGenericMatrix & mat_, int k_, int os_ = 10, int rand_ = 1)
   : mat(mat_), k(k_), os(os_), size(k_ + os_), rand(rand_)
   {
-    if(mat.rows() >= mat.cols())
+    trans = mat.rows() >= mat.cols() ? false : true;
+    init();
+  }
+
+  virtual ~RsvdOpOnePass() {}
+  
+  void init()
+  {
+    if(trans == false)
     {
-      trans = false;
       nrow = mat.rows();
       ncol = mat.cols();
     }
     else
     {
-      trans = true;
       nrow = mat.cols();
       ncol = mat.rows();
     }
 
     auto randomEngine = std::default_random_engine{};
     if(rand == 1)
-    {
       Omg = StandardNormalRandom<Matrix, std::default_random_engine>(ncol, size, randomEngine);
-    }
     else
-    {
       Omg = UniformRandom<Matrix, std::default_random_engine>(ncol, size, randomEngine);
-    }
   }
-
-  virtual ~RsvdOpOnePass() {}
 
   Index rows() const
   {
@@ -150,6 +166,8 @@ public:
     scale = std::make_unique<Eigen::Map<Eigen::VectorXd>>(scl, n);
     do_pca = true;
     by_row = byrow;
+    trans = by_row ? false : true;
+    init(); // force re-init
   }
 
   void updateGandH(Matrix & G, Matrix & H)
@@ -169,26 +187,30 @@ public:
     }
     else
     {
-      // do center and scale for pca, will make a new temp matrix
       if(trans)
       {
-        G.noalias() = center_and_scale(mat, *center, *scale, by_row).transpose() * Omg;
-        H.noalias() = center_and_scale(mat, *center, *scale, by_row) * G;
+        G.noalias() = Ab.transpose() * Omg;
+        H.noalias() = Ab * G;
       }
       else
       {
-        G.noalias() = center_and_scale(mat, *center, *scale, by_row) * Omg;
-        H.noalias() = center_and_scale(mat, *center, *scale, by_row).transpose() * G;
+        G.noalias() = Ab * Omg;
+        H.noalias() = Ab.transpose() * G;
       }
     }
   }
 
   void computeGandH(Matrix & G, Matrix & H, uint32_t p)
   {
-    updateGandH(G, H);
-    if(p <= 0) return;
+    if(do_pca)
+    {
+      // do center and scale for pca, will make a new temp matrix
+      // and we only need to do it once for in-memory mode
+      Ab = center_and_scale(mat, *center, *scale, by_row);
+    }
     for(uint32_t pi = 0; pi < p; pi++)
     {
+      updateGandH(G, H);
       if(finder == 1)
       {
         Eigen::HouseholderQR<Eigen::Ref<Matrix>> qr(H);
@@ -204,7 +226,6 @@ public:
       {
         throw std::invalid_argument("finder must be 1 or 2");
       }
-      updateGandH(G, H);
     }
   }
 
@@ -235,24 +256,46 @@ public:
         start = b * blocksize;
         stop = (b + 1) * blocksize >= nrow ? nrow - 1 : (b + 1) * blocksize - 1;
         nb = stop - start + 1;
-        if(trans)
-          G.middleRows(start, nb).noalias() = mat.middleCols(start, nb).transpose() * Omg;
-        else
-          G.middleRows(start, nb).noalias() = mat.middleRows(start, nb) * Omg;
-
-        if(i <= band / 2)
+        if(!do_pca)
         {
           if(trans)
-            H1.noalias() += mat.middleCols(start, nb) * G.middleRows(start, nb);
+          {
+            G.middleRows(start, nb).noalias() = mat.middleCols(start, nb).transpose() * Omg;
+            if(i <= band / 2)
+              H1.noalias() += mat.middleCols(start, nb) * G.middleRows(start, nb);
+            else
+              H2.noalias() += mat.middleCols(start, nb) * G.middleRows(start, nb);
+          }
           else
-            H1.noalias() += mat.middleRows(start, nb).transpose() * G.middleRows(start, nb);
+          {
+            G.middleRows(start, nb).noalias() = mat.middleRows(start, nb) * Omg;
+            if(i <= band / 2)
+              H1.noalias() += mat.middleRows(start, nb).transpose() * G.middleRows(start, nb);
+            else
+              H2.noalias() += mat.middleRows(start, nb).transpose() * G.middleRows(start, nb);
+          }
         }
         else
         {
+          // here we can only trans it if by_row is false
           if(trans)
-            H2.noalias() += mat.middleCols(start, nb) * G.middleRows(start, nb);
+          {
+            Ab = center_and_scale(mat.middleCols(start, nb), *center, *scale, false, start, nb);
+            G.middleRows(start, nb).noalias() = Ab.transpose() * Omg;
+            if(i <= band / 2)
+              H1.noalias() += Ab * G.middleRows(start, nb);
+            else
+              H2.noalias() += Ab * G.middleRows(start, nb);
+          }
           else
-            H2.noalias() += mat.middleRows(start, nb).transpose() * G.middleRows(start, nb);
+          {
+            Ab = center_and_scale(mat.middleRows(start, nb), *center, *scale, true, start, nb);
+            G.middleRows(start, nb).noalias() = Ab * Omg;
+            if(i <= band / 2)
+              H1.noalias() += Ab.transpose() * G.middleRows(start, nb);
+            else
+              H2.noalias() += Ab.transpose() * G.middleRows(start, nb);
+          }
         }
 
         // use the first quarter band of succesive iteration (H1)
