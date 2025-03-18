@@ -11,9 +11,17 @@ x = matrix(rnorm(m * n), m)
 x[sample(m * n, floor( m * n / 2))] = 0
 # General matrices
 gen = list(x,
-           as(x, "dgeMatrix"),
+           ## as(x, "dgeMatrix"),
            as(x, "dgCMatrix"),
            as(x, "dgRMatrix"))
+
+## d <- pcaone(x, k = 10, method = "ssvd", opts = list("center" = TRUE, "scale" = rep(1, 200)) )
+## d <- RSpectra::svds(x, k = 10)
+
+## d <- pcaone(x, k = 10, method = "ssvd", opts = list("center" = TRUE, "scale" = TRUE) )
+## d <- RSpectra::svds(x, k = 10, opts = list("center" = TRUE, "scale" = TRUE) )
+## d <- rsvd::rpca(x, k = 10)
+## str(d)
 
 
 # "true" values
@@ -39,17 +47,17 @@ svd_resid <- function(res, svd0) {
 
 testthat::test_that("Test: winsvd for sparse matrix with nrow > ncol", {
   res <- sapply( lapply( gen, pcaone, k = k, method = "winsvd" ), svd_resid, svd0 = s0 )
-  testthat::expect_identical(sum(as.vector(res) < 0.5), 4L)
+  testthat::expect_identical(sum(as.vector(res) < 0.5), 3L)
 })
 
 testthat::test_that("Test: dashsvd for sparse matrix with nrow > ncol", {
   res <- sapply( lapply( gen, pcaone, k = k, method = "dashsvd" ), svd_resid, svd0 = s0 )
-  testthat::expect_identical(sum(as.vector(res) < 1.0), 4L)
+  testthat::expect_identical(sum(as.vector(res) < 1.0), 3L)
 })
 
 testthat::test_that("Test: ssvd for sparse matrix with nrow > ncol", {
   res <- sapply( lapply( gen, pcaone, k = k, method = "ssvd" ), svd_resid, svd0 = s0 )
-  testthat::expect_identical(sum(as.vector(res) < 2.0), 4L)
+  testthat::expect_identical(sum(as.vector(res) < 2.0), 3L)
 })
 
 

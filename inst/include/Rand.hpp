@@ -9,8 +9,7 @@
 #ifndef UTIL_RAND_H
 #define UTIL_RAND_H
 
-#include <RcppEigen.h>
-// #include <Eigen/Dense>
+#include <Eigen/Dense>
 #include <random>
 
 template<typename MatrixType>

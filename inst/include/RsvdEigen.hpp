@@ -9,48 +9,51 @@
 #ifndef RSVDEIGEN_H_
 #define RSVDEIGEN_H_
 
+#include <RcppEigen.h>
 #include "Rand.hpp"
 #include <stdexcept>
+#include <memory>
 
 namespace PCAone
 {
 
 // Type trait to check if a type is an Eigen sparse matrix
-template<typename T>
-struct is_eigen_sparse : std::false_type
-{
-};
+// template<typename T>
+// struct is_eigen_sparse : std::false_type
+// {
+// };
 
-template<typename Scalar, int Options, typename StorageIndex>
-struct is_eigen_sparse<Eigen::SparseMatrix<Scalar, Options, StorageIndex>> : std::true_type
-{
-};
+// template<typename Scalar, int Options, typename StorageIndex>
+// struct is_eigen_sparse<Eigen::SparseMatrix<Scalar, Options, StorageIndex>> : std::true_type
+// {
+// };
 
 template<typename MatrixType>
 Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> center_and_scale(
   const MatrixType & matrix,
-  const Eigen::VectorXd & center,
-  const Eigen::VectorXd & scale)
+  const Eigen::Map<Eigen::VectorXd> & center,
+  const Eigen::Map<Eigen::VectorXd> & scale,
+  const bool byrow)
 {
   using Scalar = typename MatrixType::Scalar;
   assert(center.size() == scale.size() && "the size of center and scale are different");
 
   // match dimension of matrix to decide how to scale it
-  const bool bycol = center.size() == matrix.cols() ? true : false;
+  // const bool bycol = center.size() == matrix.cols() ? true : false;
 
   // Convert input matrix to dense (handles both sparse and dense matrices)
   Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> mat = matrix;
-  if(bycol)
-  {
-    mat.rowwise() -= center.transpose();
-    // Scale cols
-    mat = mat * scale.asDiagonal();
-  }
-  else
+  if(byrow)
   {
     mat.colwise() -= center;
     // Scale rows
     mat = scale.asDiagonal() * mat;
+  }
+  else
+  {
+    mat.rowwise() -= center.transpose();
+    // Scale cols
+    mat = mat * scale.asDiagonal();
   }
 
   return mat;
@@ -80,8 +83,7 @@ private:
   using Scalar = typename MatrixType::Scalar;
   using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>; // dense matrix
   using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-  // using MapConstVec = Eigen::Ref<Vector>;
-  // std::unique_ptr<Eigen::Map<Eigen::VectorXd>> map_ptr;
+  using PtrMapVec = std::unique_ptr<Eigen::Map<Eigen::VectorXd>>;
 
   ConstGenericMatrix mat;
   Index nrow, ncol;
@@ -89,8 +91,9 @@ private:
   int k, os, size, rand;
   bool trans; // if matrix is wide then flip the matrix dimension
   bool do_pca = false; // if set center and scale, then do pca
-  Vector center;
-  Vector scale;
+  bool by_row = false; // how to scale byrow or bycol
+  PtrMapVec center;
+  PtrMapVec scale;
 
 public:
   int finder = 1;
@@ -141,11 +144,12 @@ public:
     return os;
   }
 
-  void setCenterScale(const Vector & cnt, const Vector & scl)
+  void setCenterScale(int n, double * cnt, double * scl, bool byrow)
   {
-    center = cnt;
-    scale = scl;
-    do_pca = (center.size() && scale.size());
+    center = std::make_unique<Eigen::Map<Eigen::VectorXd>>(cnt, n);
+    scale = std::make_unique<Eigen::Map<Eigen::VectorXd>>(scl, n);
+    do_pca = true;
+    by_row = byrow;
   }
 
   void updateGandH(Matrix & G, Matrix & H)
@@ -168,13 +172,13 @@ public:
       // do center and scale for pca, will make a new temp matrix
       if(trans)
       {
-        G.noalias() = center_and_scale(mat, center, scale).transpose() * Omg;
-        H.noalias() = center_and_scale(mat, center, scale) * G;
+        G.noalias() = center_and_scale(mat, *center, *scale, by_row).transpose() * Omg;
+        H.noalias() = center_and_scale(mat, *center, *scale, by_row) * G;
       }
       else
       {
-        G.noalias() = center_and_scale(mat, center, scale) * Omg;
-        H.noalias() = center_and_scale(mat, center, scale).transpose() * G;
+        G.noalias() = center_and_scale(mat, *center, *scale, by_row) * Omg;
+        H.noalias() = center_and_scale(mat, *center, *scale, by_row).transpose() * G;
       }
     }
   }
@@ -400,9 +404,9 @@ public:
     op->finder = flag;
   }
 
-  inline void setCenterScale(const Vector & cnt, const Vector & scl)
+  inline void setCenterScale(int n, double * cnt, double * scl, bool byrow)
   {
-    op->setCenterScale(cnt, scl);
+    op->setCenterScale(n, cnt, scl, byrow);
   }
 
   inline void compute(uint32_t p, uint32_t batchs = 0)

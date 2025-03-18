@@ -27,8 +27,7 @@ Currently there are 3 versions of RSVD implemented in this package ordered by th
 
 With surports for a number of matrix type including:
 
-- `matrix` in base R
-- `dgeMatrix` in **Matrix** package, for general matrices
+- `matrix` in base R for general dense matrices
 - `dgCMatrix` in **Matrix** package, for column major sparse matrices
 - `dgRMatrix` in **Matrix** package, for row major sparse matrices
 

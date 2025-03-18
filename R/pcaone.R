@@ -59,6 +59,9 @@
 #' @param shuffle logical, optional; \cr
 #'                if shuffle the rows of input tall matrix or not for winsvd (by default \eqn{shuffle=TRUE}).
 #'
+#' @param opts    list, optional; \cr
+#'                options related to PCA, e.g. center, scale and byrow
+#'
 #'@return \code{pcaone} returns a list containing the following three components:
 #'\describe{
 #'\item{d}{  array_like; \cr
@@ -98,16 +101,68 @@
 #' res <- pcaone(A, k = 40, method = "ssvd")
 #' str(res)
 #' @export
-pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE) UseMethod("pcaone")
+pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE, opts = list()) UseMethod("pcaone")
+
+check_pca_opts <- function(A, opts) {
+  pcaopts <- list("dopca" = FALSE, "byrow" = FALSE, "center" = rep(0.0, 1), "scale" = rep(1.0, 1))
+  pcaopts$byrow <- isTRUE(opts$byrow)
+
+  if(isTRUE(opts$center)) {
+    pcaopts$dopca <- TRUE
+    ## center: either colMeans or rowMeans
+    if(pcaopts$byrow) {
+      pcaopts$center <-  rowMeans(A)
+    } else {
+      pcaopts$center <- colMeans(A)
+    }
+  } else if(is.numeric(opts$center)) {
+    pcaopts$dopca <- TRUE
+    n <- length(opts$center)
+    if(byrow && n != nrow(A)) stop("opts$center must be TRUE/FALSE or a vector of length nrow(A) if byrow is TRUE")
+    if(!byrow && n != ncol(A)) stop("opts$center must be TRUE/FALSE or a vector of length ncol(A) if byrow is FALSE")
+    pcaopts$center <- opts$center
+  } else {
+    pcaopts$dopca <- FALSE
+  }
+  
+  if(isTRUE(opts$scale)) {
+    pcaopts$dopca <- TRUE
+    if(pcaopts$byrow) {
+      pcaopts$scale <- sqrt(rowSums(A**2) / (ncol(A)-1))
+    } else {
+      pcaopts$scale <- sqrt(colSums(A**2) / (nrow(A)-1))
+    }
+    pcaopts$scale[pcaopts$scale < 1e-8] <- 1.0
+    ## instead of division, we multiply the inverse
+    pcaopts$scale <- 1.0 / pcaopts$scale
+  } else if(is.numeric(opts$scale)) {
+    pcaopts$dopca <- TRUE
+    n <- length(opts$scale)
+    if(pcaopts$byrow && n != nrow(A)) stop("opts$center must be TRUE/FALSE or a vector of length nrow(A) if byrow is TRUE")
+    if(!pcaopts$byrow && n != ncol(A)) stop("opts$center must be TRUE/FALSE or a vector of length ncol(A) if byrow is FALSE")
+    pcaopts$scale <- opts$scale
+  } else {
+    pcaopts$dopca <- FALSE
+  }
+
+  if(pcaopts$dopca) {
+    if(length(pcaopts$center) != length(pcaopts$center)) stop("opts$center must has same length as scale" )
+  }
+  return(pcaopts)
+}
 
 #' @rdname pcaone
 #' @export
-pcaone.matrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE)
+pcaone.matrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
 {
+  A <- as.matrix(A)
+  pcaopts <- check_pca_opts(A, opts)
+  
   rand <- switch(sdist,
                  normal = 1,
                  unif = 2,
                  stop("Selected sampling distribution is not supported!"))
+  
   isPerm <- (shuffle && method == "winsvd")
   perm <- NULL
   isTall <- ifelse(nrow(A)>ncol(A), TRUE,  FALSE)
@@ -122,15 +177,17 @@ pcaone.matrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd
     }
     
   }
-  
   pcaoneObj <- switch(method,
-                      winsvd = .Call(`_pcaone_winsvd`, A, k, p, s, rand, batchs),
-                      dashsvd = .Call(`_pcaone_dashsvd`, A, k, p, s, rand),
-                      ssvd = .Call(`_pcaone_ssvd`, A, k, p, s, rand),
+                      winsvd = .Call(`_pcaone_winsvd`, A, k, p, s, rand, batchs, pcaopts),
+                      dashsvd = .Call(`_pcaone_dashsvd`, A, k, p, s, rand, pcaopts),
+                      ssvd = .Call(`_pcaone_ssvd`, A, k, p, s, rand, pcaopts),
                       stop("Method is not supported!"))
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
   pcaoneObj$v <- as.matrix(pcaoneObj$v)
+  if(pcaopts$dopca) {
+    pcaoneObj$e <- pcaoneObj$d**2 / ifelse(pcaopts$byrow, ncol(A)-1,nrow(A)-1)
+  }
 
   if(!is.null(perm)) {
     original <- order(perm)
@@ -147,55 +204,10 @@ pcaone.matrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd
 
 #' @rdname pcaone
 #' @export
-pcaone.dgeMatrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE)
+pcaone.dgCMatrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
 {
-  rand <- switch(sdist,
-                 normal = 1,
-                 unif = 2,
-                 stop("Selected sampling distribution is not supported!"))
-  isPerm <- (shuffle && method == "winsvd")
-  perm <- NULL
-  isTall <- ifelse(nrow(A)>ncol(A), TRUE,  FALSE)
+  pcaopts <- check_pca_opts(A, opts)
   
-  if (isPerm) {
-    n <- max(dim(A))
-    perm <- sample(n)
-    if(isTall) {
-      A <- as.matrix(A[perm,])
-    } else {
-      A <- as.matrix(A[,perm])
-    }
-  } else {
-    A <- as.matrix(A)
-  }
-  message("convert dgeMatrix to matrix in base R done" )
-  pcaoneObj <- switch(method,
-                      winsvd = .Call(`_pcaone_winsvd`, A, k, p, s, rand, batchs),
-                      dashsvd = .Call(`_pcaone_dashsvd`, A, k, p, s, rand),
-                      ssvd = .Call(`_pcaone_ssvd`, A, k, p, s, rand),
-                      stop("Method is not supported!"))
-  pcaoneObj$d <- as.vector(pcaoneObj$d)
-  pcaoneObj$u <- as.matrix(pcaoneObj$u)
-  pcaoneObj$v <- as.matrix(pcaoneObj$v)
-
-  if(!is.null(perm)) {
-    original <- order(perm)
-    if(isTall) {
-      pcaoneObj$u <- pcaoneObj$u[original,]
-    } else {
-      pcaoneObj$v <- pcaoneObj$v[original,]
-    }
-  }
-
-  class(pcaoneObj) <- "pcaone"
-  return(pcaoneObj)
-}
-
-
-#' @rdname pcaone
-#' @export
-pcaone.dgCMatrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE)
-{
   rand <- switch(sdist,
                  normal = 1,
                  unif = 2,
@@ -218,8 +230,10 @@ pcaone.dgCMatrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "win
 
 #' @rdname pcaone
 #' @export
-pcaone.dgRMatrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE)
+pcaone.dgRMatrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
 {
+  pcaopts <- check_pca_opts(A, opts)
+  
   rand <- switch(sdist,
                  normal = 1,
                  unif = 2,

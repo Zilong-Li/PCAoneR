@@ -5,8 +5,12 @@ set.seed(1234)
 reconstruct <- function(s) s$u %*% diag(s$d) %*% t(s$v)
 
 load(system.file("extdata", "popgen.rda", package="pcaone") )
+
 A <- popgen - rowMeans(popgen)
 k <- 40
+
+## A <- matrix(popgen, nrow = nrow(popgen))
+## d <- pcaone(A, k = k, method = "ssvd", opts = list("center" = TRUE, "scale" = TRUE, "byrow" = TRUE) )
 
 #*************************************************************************************
 # Test: real tall matrix with population gentic data

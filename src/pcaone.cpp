@@ -10,7 +10,7 @@ using SpMat = Eigen::SparseMatrix<double, Eigen::ColMajor>;
 using SpRMat = Eigen::SparseMatrix<double, Eigen::RowMajor>;
 
 // [[Rcpp::export]]
-Rcpp::List winsvd(SEXP mat, int k, int p, int s, int rand, int batchs) {
+Rcpp::List winsvd(SEXP mat, int k, int p, int s, int rand, int batchs, Rcpp::List params_pca) {
 
   Eigen::Map<Eigen::MatrixXd> A = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(mat);
   PCAone::RsvdOne<Eigen::MatrixXd> rsvd(A, k, s, rand);
@@ -44,12 +44,15 @@ Rcpp::List winsvd_sparse_row(SEXP mat, int k, int p, int s, int rand, int batchs
 }
 
 // [[Rcpp::export]]
-Rcpp::List ssvd(SEXP mat, int k, int p, int s, int rand) {
-
+Rcpp::List ssvd(SEXP mat, int k, int p, int s, int rand, Rcpp::List params_pca) {
+  bool dopca = Rcpp::as<bool>(params_pca["dopca"]);
+  bool byrow = Rcpp::as<bool>(params_pca["byrow"]);
+  Rcpp::NumericVector center  = params_pca["center"];
+  Rcpp::NumericVector scale  = params_pca["scale"];
+  
   Eigen::Map<Eigen::MatrixXd> A = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(mat);
   PCAone::RsvdOne<Eigen::MatrixXd> rsvd(A, k, s, rand);
-  // int finder = 1;
-  // rsvd.setRangeFinder(finder);
+  if(dopca) rsvd.setCenterScale(center.length(), center.begin(), scale.begin(), byrow);
   rsvd.compute(p);
 
   return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
@@ -80,7 +83,7 @@ Rcpp::List ssvd_sparse_row(SEXP mat, int k, int p, int s, int rand) {
 }
 
 // [[Rcpp::export]]
-Rcpp::List dashsvd(SEXP mat, int k, int p, int s, int rand) {
+Rcpp::List dashsvd(SEXP mat, int k, int p, int s, int rand, Rcpp::List params_pca) {
 
   Eigen::Map<Eigen::MatrixXd> A = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(mat);
   PCAone::RsvdDash<Eigen::MatrixXd> rsvd(A, k, s, rand);

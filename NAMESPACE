@@ -2,7 +2,6 @@
 
 S3method(pcaone,dgCMatrix)
 S3method(pcaone,dgRMatrix)
-S3method(pcaone,dgeMatrix)
 S3method(pcaone,matrix)
 export(pcaone)
 importClassesFrom(Matrix,dgCMatrix)

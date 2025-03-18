@@ -3,7 +3,6 @@
 \name{pcaone}
 \alias{pcaone}
 \alias{pcaone.matrix}
-\alias{pcaone.dgeMatrix}
 \alias{pcaone.dgCMatrix}
 \alias{pcaone.dgRMatrix}
 \title{Randomized Singular Value Decomposition Algorithm with Window-based Power Iterations from PCAone (Li et al 2022).}
@@ -16,7 +15,8 @@ pcaone(
   sdist = "normal",
   method = "winsvd",
   batchs = 64,
-  shuffle = TRUE
+  shuffle = TRUE,
+  opts = list()
 )
 
 \method{pcaone}{matrix}(
@@ -27,18 +27,8 @@ pcaone(
   sdist = "normal",
   method = "winsvd",
   batchs = 64,
-  shuffle = TRUE
-)
-
-\method{pcaone}{dgeMatrix}(
-  A,
-  k = NULL,
-  p = 7,
-  s = 10,
-  sdist = "normal",
-  method = "winsvd",
-  batchs = 64,
-  shuffle = TRUE
+  shuffle = TRUE,
+  opts = list()
 )
 
 \method{pcaone}{dgCMatrix}(
@@ -49,7 +39,8 @@ pcaone(
   sdist = "normal",
   method = "winsvd",
   batchs = 64,
-  shuffle = TRUE
+  shuffle = TRUE,
+  opts = list()
 )
 
 \method{pcaone}{dgRMatrix}(
@@ -60,7 +51,8 @@ pcaone(
   sdist = "normal",
   method = "winsvd",
   batchs = 64,
-  shuffle = TRUE
+  shuffle = TRUE,
+  opts = list()
 )
 }
 \arguments{
@@ -92,6 +84,9 @@ the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{ba
 
 \item{shuffle}{logical, optional; \cr
 if shuffle the rows of input tall matrix or not for winsvd (by default \eqn{shuffle=TRUE}).}
+
+\item{opts}{list, optional; \cr
+options related to PCA, e.g. center, scale and byrow}
 }
 \value{
 \code{pcaone} returns a list containing the following three components:
