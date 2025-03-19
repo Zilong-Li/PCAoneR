@@ -7,8 +7,8 @@ k <- 10
 
 ## Set up test matrices
 set.seed(123)
-x = matrix(rnorm(m * n), n)  ### wide
 x = matrix(rnorm(m * n), m)  ### tall
+x = matrix(rnorm(m * n), n)  ### wide
 x[sample(m * n, floor( m * n / 2))] = 0
 
 # General matrices
@@ -47,7 +47,6 @@ svd_resid <- function(res, svd0) {
   return(maxerr)
 }
 
-d <- pcaone(gen[[2]],  k = k )
 
 testthat::test_that("Test: winsvd for sparse matrix with nrow > ncol", {
   res <- sapply( lapply( gen, pcaone, k = k, method = "winsvd" ), svd_resid, svd0 = s0 )
