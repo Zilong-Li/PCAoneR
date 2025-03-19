@@ -18,64 +18,6 @@ namespace PCAone
 {
 
 template<typename MatrixType>
-Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> center_and_scale(
-  const MatrixType & matrix,
-  const Eigen::Map<Eigen::VectorXd> & center,
-  const Eigen::Map<Eigen::VectorXd> & scale,
-  const bool byrow)
-{
-  using Scalar = typename MatrixType::Scalar;
-  assert(center.size() == scale.size() && "the size of center and scale are different");
-
-  // Convert input matrix to dense (handles both sparse and dense matrices)
-  Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> mat = matrix;
-  if(byrow)
-  {
-    mat.colwise() -= center;
-    // Scale rows
-    mat = scale.asDiagonal() * mat;
-  }
-  else
-  {
-    mat.rowwise() -= center.transpose();
-    // Scale cols
-    mat = mat * scale.asDiagonal();
-  }
-
-  return mat;
-}
-
-template<typename MatrixType>
-Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> center_and_scale(
-  const MatrixType & matrix,
-  const Eigen::Map<Eigen::VectorXd> & center,
-  const Eigen::Map<Eigen::VectorXd> & scale,
-  const bool byrow,
-  const int start,
-  const int nb)
-{
-  using Scalar = typename MatrixType::Scalar;
-  assert(center.size() == scale.size() && "the size of center and scale are different");
-
-  // Convert input matrix to dense (handles both sparse and dense matrices)
-  Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> mat = matrix;
-  if(byrow)
-  {
-    mat.colwise() -= center.segment(start, nb);
-    // Scale rows
-    mat = scale.segment(start, nb).asDiagonal() * mat;
-  }
-  else
-  {
-    mat.rowwise() -= center.segment(start, nb).transpose();
-    // Scale cols
-    mat = mat * scale.segment(start, nb).asDiagonal();
-  }
-
-  return mat;
-}
-
-template<typename MatrixType>
 void flipOmg(MatrixType & Omg2, MatrixType & Omg)
 {
   for(Eigen::Index i = 0; i < Omg.cols(); ++i)
@@ -208,9 +150,9 @@ public:
       // and we only need to do it once for in-memory mode
       Ab = center_and_scale(mat, *center, *scale, by_row);
     }
-    for(uint32_t pi = 0; pi < p; pi++)
+    updateGandH(G, H);
+    for(uint32_t pi = 1; pi < p; pi++)
     {
-      updateGandH(G, H);
       if(finder == 1)
       {
         Eigen::HouseholderQR<Eigen::Ref<Matrix>> qr(H);
@@ -226,6 +168,7 @@ public:
       {
         throw std::invalid_argument("finder must be 1 or 2");
       }
+      updateGandH(G, H);
     }
   }
 

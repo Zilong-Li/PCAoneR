@@ -69,4 +69,64 @@ inline MatrixType StandardNormalRandom(const Eigen::Index numRows,
         numRows, numCols, engine);
 }
 
+template<typename MatrixType>
+Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> center_and_scale(
+  const MatrixType & matrix,
+  const Eigen::Map<Eigen::VectorXd> & center,
+  const Eigen::Map<Eigen::VectorXd> & scale,
+  const bool byrow)
+{
+  using Scalar = typename MatrixType::Scalar;
+  assert(center.size() == scale.size() && "the size of center and scale are different");
+
+  // Convert input matrix to dense (handles both sparse and dense matrices)
+  Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> mat = matrix;
+  if(byrow)
+  {
+    mat.colwise() -= center;
+    // Scale rows
+    mat = scale.asDiagonal() * mat;
+  }
+  else
+  {
+    mat.rowwise() -= center.transpose();
+    // Scale cols
+    mat = mat * scale.asDiagonal();
+  }
+
+  return mat;
+}
+
+
+
+template<typename MatrixType>
+Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> center_and_scale(
+  const MatrixType & matrix,
+  const Eigen::Map<Eigen::VectorXd> & center,
+  const Eigen::Map<Eigen::VectorXd> & scale,
+  const bool byrow,
+  const int start,
+  const int nb)
+{
+  using Scalar = typename MatrixType::Scalar;
+  assert(center.size() == scale.size() && "the size of center and scale are different");
+
+  // Convert input matrix to dense (handles both sparse and dense matrices)
+  Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> mat = matrix;
+  if(byrow)
+  {
+    mat.colwise() -= center.segment(start, nb);
+    // Scale rows
+    mat = scale.segment(start, nb).asDiagonal() * mat;
+  }
+  else
+  {
+    mat.rowwise() -= center.segment(start, nb).transpose();
+    // Scale cols
+    mat = mat * scale.segment(start, nb).asDiagonal();
+  }
+
+  return mat;
+}
+
 #endif // UTIL_RAND_H

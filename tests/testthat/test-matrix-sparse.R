@@ -7,7 +7,8 @@ k <- 10
 
 ## Set up test matrices
 set.seed(123)
-x = matrix(rnorm(m * n), n)
+x = matrix(rnorm(m * n), n)  ### wide
+x = matrix(rnorm(m * n), m)  ### tall
 x[sample(m * n, floor( m * n / 2))] = 0
 
 # General matrices
@@ -19,11 +20,11 @@ gen = list(x,
 ## d <- pcaone(x, k = 10, method = "ssvd", opts = list("center" = TRUE, "scale" = rep(1, 200)) )
 ## d <- RSpectra::svds(x, k = 10)
 
-d <- pcaone(x, k = 10, method = "ssvd", opts = list("center" = TRUE, "scale" = TRUE) )
-d <- pcaone(x, k = 10, method = "winsvd", opts = list("center" = TRUE, "scale" = TRUE) )
-d <- RSpectra::svds(x, k = 10, opts = list("center" = TRUE, "scale" = TRUE) )
-d <- rsvd::rpca(x, k = 10, q = 10)
-str(d)
+## d <- pcaone(x, k = 10, method = "ssvd", opts = list("center" = TRUE, "scale" = TRUE) )
+## d <- pcaone(x, k = 10, method = "winsvd", opts = list("center" = TRUE, "scale" = TRUE) )
+## d <- RSpectra::svds(x, k = 10, opts = list("center" = TRUE, "scale" = TRUE) )
+## d <- rsvd::rpca(x, k = 10, q = 10)
+## str(d)
 
 
 # "true" values
@@ -42,10 +43,11 @@ svd_resid <- function(res, svd0) {
     v_resid <- abs(svd0$v[, 1:ncol(res$v)]) - abs(res$v)
   mabs <- function(x) max(abs(x))
   maxerr <- max(mabs(d_resid), mabs(u_resid), mabs(v_resid))
-  message(paste("max residual <", format(maxerr, digits = 5)))
+  message(paste("residual <", format(maxerr, digits = 5)))
   return(maxerr)
 }
 
+d <- pcaone(gen[[2]],  k = k )
 
 testthat::test_that("Test: winsvd for sparse matrix with nrow > ncol", {
   res <- sapply( lapply( gen, pcaone, k = k, method = "winsvd" ), svd_resid, svd0 = s0 )
