@@ -42,11 +42,6 @@
 #' @param s       integer, optional; \cr
 #'                oversampling parameter (by default \eqn{s=10}).
 #'
-#' @param sdist   string \eqn{c( 'unif', 'normal')}, optional; \cr
-#'                specifies the sampling distribution of the random test matrix: \cr
-#'                		\eqn{'unif'} :  Uniform `[-1,1]`. \cr
-#'                		\eqn{'normal'} (default) : Normal `~N(0,1)`. \cr
-#'
 #' @param method  string \eqn{c( 'winsvd', 'ssvd', 'winsvd')}, optional; \cr
 #'                specifies the different variation of the randomized singular value decomposition : \cr
 #'                		\eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
@@ -60,7 +55,7 @@
 #'                if shuffle the rows of input tall matrix or not for winsvd (by default \eqn{shuffle=TRUE}).
 #'
 #' @param opts    list, optional; \cr
-#'                options related to PCA, e.g. center, scale and byrow
+#'                options related to PCA, e.g. center, scale and byrow, sdist
 #'
 #'@return \code{pcaone} returns a list containing the following three components:
 #'\describe{
@@ -101,11 +96,16 @@
 #' res <- pcaone(A, k = 40, method = "ssvd")
 #' str(res)
 #' @export
-pcaone <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE, opts = list()) UseMethod("pcaone")
+pcaone <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, shuffle = TRUE, opts = list()) UseMethod("pcaone")
 
 check_pca_opts <- function(A, opts) {
-  pcaopts <- list("dopca" = FALSE, "byrow" = FALSE, "center" = rep(0.0, 1), "scale" = rep(1.0, 1))
+  pcaopts <- list(rand = 1L,"dopca" = FALSE, "byrow" = FALSE, "center" = rep(0.0, 1), "scale" = rep(1.0, 1))
   pcaopts$byrow <- isTRUE(opts$byrow)
+  if(is.null(opts$sdist)) opts$sdist <- "normal"
+  pcaopts$rand <- switch(opts$sdist,
+                         normal = 1L,
+                         unif = 2L,
+                         stop("Selected sampling distribution is not supported!"))
 
   if(isTRUE(opts$center)) {
     pcaopts$dopca <- TRUE
@@ -155,13 +155,14 @@ check_pca_opts <- function(A, opts) {
 #' @export
 pcaone.matrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
 {
-  A <- as.matrix(A)
+  ## A <- as.matrix(A)
   pcaopts <- check_pca_opts(A, opts)
   
-  rand <- switch(sdist,
-                 normal = 1,
-                 unif = 2,
-                 stop("Selected sampling distribution is not supported!"))
+  pcaopts$method <- switch(method,
+                           winsvd = 1L,
+                           ssvd = 2L,
+                           dashsvd = 3L,
+                           stop("Method is not supported!"))
   
   isPerm <- (shuffle && method == "winsvd")
   perm <- NULL
@@ -177,11 +178,8 @@ pcaone.matrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd
     }
     
   }
-  pcaoneObj <- switch(method,
-                      winsvd = .Call(`_pcaone_winsvd`, A, k, p, s, rand, batchs, pcaopts),
-                      dashsvd = .Call(`_pcaone_dashsvd`, A, k, p, s, rand, pcaopts),
-                      ssvd = .Call(`_pcaone_ssvd`, A, k, p, s, rand, pcaopts),
-                      stop("Method is not supported!"))
+
+  pcaoneObj <- .Call(`_pcaone_svd_dense`, A, k, p, s, batchs, pcaopts)
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
   pcaoneObj$v <- as.matrix(pcaoneObj$v)
@@ -204,22 +202,17 @@ pcaone.matrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd
 
 #' @rdname pcaone
 #' @export
-pcaone.dgCMatrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
+pcaone.dgCMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
 {
-  pcaopts <- check_pca_opts(A, opts)
-  
-  rand <- switch(sdist,
-                 normal = 1,
-                 unif = 2,
-                 stop("Selected sampling distribution is not supported!"))
-
   message("pcaone for sparse matrix in column major [dgCMatrix]" )
+  pcaopts <- check_pca_opts(A, opts)
+  pcaopts$method <- switch(method,
+                           winsvd = 1L,
+                           ssvd = 2L,
+                           dashsvd = 3L,
+                           stop("Method is not supported!"))
   
-  pcaoneObj <- switch(method,
-                      winsvd = .Call(`_pcaone_winsvd_sparse_col`, A, k, p, s, rand, batchs),
-                      dashsvd = .Call(`_pcaone_dashsvd_sparse_col`, A, k, p, s, rand),
-                      ssvd = .Call(`_pcaone_ssvd_sparse_col`, A, k, p, s, rand),
-                      stop("Method is not supported!"))
+  pcaoneObj <- .Call(`_pcaone_svd_sparse_col`, A, k, p, s, batchs, pcaopts)
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
   pcaoneObj$v <- as.matrix(pcaoneObj$v)
@@ -230,22 +223,17 @@ pcaone.dgCMatrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "win
 
 #' @rdname pcaone
 #' @export
-pcaone.dgRMatrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
+pcaone.dgRMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
 {
-  pcaopts <- check_pca_opts(A, opts)
-  
-  rand <- switch(sdist,
-                 normal = 1,
-                 unif = 2,
-                 stop("Selected sampling distribution is not supported!"))
-
   message("pcaone for sparse matrix in row major [dgRMatrix]" )
+  pcaopts <- check_pca_opts(A, opts)
+  pcaopts$method <- switch(method,
+                           winsvd = 1L,
+                           ssvd = 2L,
+                           dashsvd = 3L,
+                           stop("Method is not supported!"))
   
-  pcaoneObj <- switch(method,
-                      winsvd = .Call(`_pcaone_winsvd_sparse_row`, A, k, p, s, rand, batchs),
-                      dashsvd = .Call(`_pcaone_dashsvd_sparse_row`, A, k, p, s, rand),
-                      ssvd = .Call(`_pcaone_ssvd_sparse_row`, A, k, p, s, rand),
-                      stop("Method is not supported!"))
+  pcaoneObj <- .Call(`_pcaone_svd_sparse_row`, A, k, p, s, batchs, pcaopts)
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
   pcaoneObj$v <- as.matrix(pcaoneObj$v)

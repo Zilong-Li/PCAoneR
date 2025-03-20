@@ -12,7 +12,6 @@ pcaone(
   k = NULL,
   p = 7,
   s = 10,
-  sdist = "normal",
   method = "winsvd",
   batchs = 64,
   shuffle = TRUE,
@@ -36,7 +35,6 @@ pcaone(
   k = NULL,
   p = 7,
   s = 10,
-  sdist = "normal",
   method = "winsvd",
   batchs = 64,
   shuffle = TRUE,
@@ -48,7 +46,6 @@ pcaone(
   k = NULL,
   p = 7,
   s = 10,
-  sdist = "normal",
   method = "winsvd",
   batchs = 64,
   shuffle = TRUE,
@@ -68,11 +65,6 @@ number of additional power iterations (by default \eqn{p=7}).}
 \item{s}{integer, optional; \cr
 oversampling parameter (by default \eqn{s=10}).}
 
-\item{sdist}{string \eqn{c( 'unif', 'normal')}, optional; \cr
-specifies the sampling distribution of the random test matrix: \cr
-\eqn{'unif'} :  Uniform \verb{[-1,1]}. \cr
-\eqn{'normal'} (default) : Normal \code{~N(0,1)}. \cr}
-
 \item{method}{string \eqn{c( 'winsvd', 'ssvd', 'winsvd')}, optional; \cr
 specifies the different variation of the randomized singular value decomposition : \cr
 \eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
@@ -86,7 +78,7 @@ the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{ba
 if shuffle the rows of input tall matrix or not for winsvd (by default \eqn{shuffle=TRUE}).}
 
 \item{opts}{list, optional; \cr
-options related to PCA, e.g. center, scale and byrow}
+options related to PCA, e.g. center, scale and byrow, sdist}
 }
 \value{
 \code{pcaone} returns a list containing the following three components:

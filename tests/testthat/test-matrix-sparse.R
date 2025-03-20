@@ -8,7 +8,6 @@ k <- 10
 ## Set up test matrices
 set.seed(123)
 x = matrix(rnorm(m * n), m)  ### tall
-x = matrix(rnorm(m * n), n)  ### wide
 x[sample(m * n, floor( m * n / 2))] = 0
 
 # General matrices
@@ -27,10 +26,6 @@ gen = list(x,
 ## str(d)
 
 
-# "true" values
-s0 <- svd(x)
-
-
 ## Follow RSpectra
 ## Test whether the calculated (d, u, v) are consistent with svd()
 ## Return the largest residual
@@ -47,6 +42,8 @@ svd_resid <- function(res, svd0) {
   return(maxerr)
 }
 
+# "true" values
+s0 <- svd(x)
 
 testthat::test_that("Test: winsvd for sparse matrix with nrow > ncol", {
   res <- sapply( lapply( gen, pcaone, k = k, method = "winsvd" ), svd_resid, svd0 = s0 )
@@ -64,5 +61,32 @@ testthat::test_that("Test: ssvd for sparse matrix with nrow > ncol", {
 })
 
 
+##### wide matrix
+x = matrix(rnorm(m * n), n)  ### wide
+x[sample(m * n, floor( m * n / 2))] = 0
 
+# General matrices
+gen = list(x,
+           ## as(x, "dgeMatrix"),
+           as(x, "dgCMatrix"),
+           as(x, "dgRMatrix"))
+
+
+# "true" values
+s0 <- svd(x)
+
+testthat::test_that("Test: winsvd for sparse matrix with nrow < ncol", {
+  res <- sapply( lapply( gen, pcaone, k = k, method = "winsvd" ), svd_resid, svd0 = s0 )
+  testthat::expect_identical(sum(as.vector(res) < 0.5), 3L)
+})
+
+testthat::test_that("Test: dashsvd for sparse matrix with nrow < ncol", {
+  res <- sapply( lapply( gen, pcaone, k = k, method = "dashsvd" ), svd_resid, svd0 = s0 )
+  testthat::expect_identical(sum(as.vector(res) < 1.0), 3L)
+})
+
+testthat::test_that("Test: ssvd for sparse matrix with nrow < ncol", {
+  res <- sapply( lapply( gen, pcaone, k = k, method = "ssvd" ), svd_resid, svd0 = s0 )
+  testthat::expect_identical(sum(as.vector(res) < 2.0), 3L)
+})
 
