@@ -11,16 +11,17 @@ using SpRMat = Eigen::SparseMatrix<double, Eigen::RowMajor>;
 
 // [[Rcpp::export]]
 Rcpp::List svd_dense(SEXP mat, int k, int p, int s, int batchs, Rcpp::List params_pca) {
+  Eigen::Map<Eigen::MatrixXd> A = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(mat);
+  Eigen::Map<Eigen::VectorXd> center = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(params_pca["center"]);
+  Eigen::Map<Eigen::VectorXd> scale = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(params_pca["scale"]);
+
   int  rand  = Rcpp::as<int>(params_pca["rand"]);
   int  method= Rcpp::as<int>(params_pca["method"]);
   bool dopca = Rcpp::as<bool>(params_pca["dopca"]);
   bool byrow = Rcpp::as<bool>(params_pca["byrow"]);
-  Rcpp::NumericVector center  = params_pca["center"];
-  Rcpp::NumericVector scale  = params_pca["scale"];
-  Eigen::Map<Eigen::MatrixXd> A = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(mat);
 
   if(method == 3) {
-    PCAone::RsvdDash<Eigen::MatrixXd> rsvd(A, k, s, rand);
+    PCAone::RsvdDash<Eigen::MatrixXd> rsvd(A, k, s, rand, byrow, center, scale);
     rsvd.compute(p);
     return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
                               Rcpp::Named("u") = Rcpp::wrap(rsvd.matrixU()),
@@ -28,8 +29,7 @@ Rcpp::List svd_dense(SEXP mat, int k, int p, int s, int batchs, Rcpp::List param
   }
   
   if(method == 2) batchs = 0;  // ssvd
-  PCAone::RsvdOne<Eigen::MatrixXd> rsvd(A, k, s, rand);
-  if(dopca) rsvd.setCenterScale(center.length(), center.begin(), scale.begin(), byrow);
+  PCAone::RsvdOne<Eigen::MatrixXd> rsvd(A, k, s, rand, byrow, center, scale);
   rsvd.compute(p, batchs);
 
   return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
@@ -40,16 +40,17 @@ Rcpp::List svd_dense(SEXP mat, int k, int p, int s, int batchs, Rcpp::List param
 
 // [[Rcpp::export]]
 Rcpp::List svd_sparse_col(SEXP mat, int k, int p, int s, int batchs, Rcpp::List params_pca) {
+  Eigen::Map<SpMat> A = Rcpp::as<Eigen::Map<SpMat>>(mat);
+  Eigen::Map<Eigen::VectorXd> center = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(params_pca["center"]);
+  Eigen::Map<Eigen::VectorXd> scale = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(params_pca["scale"]);
+
   int  rand  = Rcpp::as<int>(params_pca["rand"]);
   int  method= Rcpp::as<int>(params_pca["method"]);
   bool dopca = Rcpp::as<bool>(params_pca["dopca"]);
   bool byrow = Rcpp::as<bool>(params_pca["byrow"]);
-  Rcpp::NumericVector center  = params_pca["center"];
-  Rcpp::NumericVector scale  = params_pca["scale"];
-  Eigen::Map<SpMat> A = Rcpp::as<Eigen::Map<SpMat>>(mat);
 
   if(method == 3) {
-    PCAone::RsvdDash<SpMat> rsvd(A, k, s, rand);
+    PCAone::RsvdDash<SpMat> rsvd(A, k, s, rand, byrow, center, scale);
     rsvd.compute(p);
     return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
                               Rcpp::Named("u") = Rcpp::wrap(rsvd.matrixU()),
@@ -57,8 +58,7 @@ Rcpp::List svd_sparse_col(SEXP mat, int k, int p, int s, int batchs, Rcpp::List 
   }
   
   if(method == 2) batchs = 0;  // ssvd
-  PCAone::RsvdOne<SpMat> rsvd(A, k, s, rand);
-  if(dopca) rsvd.setCenterScale(center.length(), center.begin(), scale.begin(), byrow);
+  PCAone::RsvdOne<SpMat> rsvd(A, k, s, rand, byrow, center, scale);
   rsvd.compute(p, batchs);
 
   return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
@@ -88,11 +88,11 @@ Rcpp::List svd_sparse_row(Rcpp::S4 mat, int k, int p, int s, int batchs, Rcpp::L
   int  method= Rcpp::as<int>(params_pca["method"]);
   bool dopca = Rcpp::as<bool>(params_pca["dopca"]);
   bool byrow = Rcpp::as<bool>(params_pca["byrow"]);
-  Rcpp::NumericVector center  = params_pca["center"];
-  Rcpp::NumericVector scale  = params_pca["scale"];
+  Eigen::Map<Eigen::VectorXd> center = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(params_pca["center"]);
+  Eigen::Map<Eigen::VectorXd> scale = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(params_pca["scale"]);
 
   if(method == 3) {
-    PCAone::RsvdDash<SpRMat> rsvd(A, k, s, rand);
+    PCAone::RsvdDash<SpRMat> rsvd(A, k, s, rand, byrow, center, scale);
     rsvd.compute(p);
     return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
                               Rcpp::Named("u") = Rcpp::wrap(rsvd.matrixU()),
@@ -100,8 +100,7 @@ Rcpp::List svd_sparse_row(Rcpp::S4 mat, int k, int p, int s, int batchs, Rcpp::L
   }
   
   if(method == 2) batchs = 0;  // ssvd
-  PCAone::RsvdOne<SpRMat> rsvd(A, k, s, rand);
-  if(dopca) rsvd.setCenterScale(center.length(), center.begin(), scale.begin(), byrow);
+  PCAone::RsvdOne<SpRMat> rsvd(A, k, s, rand, byrow, center, scale);
   rsvd.compute(p, batchs);
 
   return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),

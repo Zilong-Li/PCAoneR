@@ -48,9 +48,9 @@ mat <- matrix(rnorm(100*5000), 5000, 100)
 res <- pcaone(mat, k = 10)
 str(res)
 #> List of 3
-#>  $ d: num [1:10] 80 80 79.4 78.9 78.6 ...
-#>  $ u: num [1:5000, 1:10] -0.0049 0.0192 -0.01689 0.00352 -0.00502 ...
-#>  $ v: num [1:100, 1:10] -0.07187 -0.19122 -0.01924 -0.08518 0.00784 ...
+#>  $ d: num [1:10] 80.4 79.5 79.4 79.1 78.9 ...
+#>  $ u: num [1:5000, 1:10] 0.019381 0.010966 -0.009693 0.018944 -0.000348 ...
+#>  $ v: num [1:100, 1:10] -0.2278 0.0592 -0.04 -0.0487 0.0197 ...
 #>  - attr(*, "class")= chr "pcaone"
 ```
 
@@ -70,19 +70,19 @@ A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
 #>    user  system elapsed 
-#>  28.748   5.671   1.461
+#>  26.914   4.168   1.306
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))  ## the number of epochs is two times of power iters, 4*2=8
 #>    user  system elapsed 
-#>   8.630  13.607   1.017
+#>   8.255  12.983   0.971
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 7))   ## the number of epochs is 1 + p
 #>    user  system elapsed 
-#>  17.099  34.516   3.563
+#>   6.061   4.614   0.449
 system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 7)) ## the number of epochs is 1 + p
 #>    user  system elapsed 
-#>  37.849 108.382   7.642
+#>   8.752   8.286   0.848
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6))## the number of epochs is 2 + p
 #>    user  system elapsed 
-#>   5.980   5.223   0.608
+#>   5.531   1.456   0.324
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -100,13 +100,13 @@ to reach the accuracy of `winSVD`.
 ``` r
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 20))  ## the number of epochs is 4*20=40
 #>    user  system elapsed 
-#>  32.674  45.492   3.436
+#>  31.978  42.848   3.278
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 20))
 #>    user  system elapsed 
-#>  27.644  45.689   4.485
+#>  15.154   6.766   0.922
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 18))
 #>    user  system elapsed 
-#>  17.600  22.493   1.869
+#>  13.916   3.112   0.749
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 2), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -133,12 +133,18 @@ timing <- microbenchmark(
   times=10)
 print(timing, unit='s')
 #> Unit: seconds
-#>            expr      min       lq     mean   median       uq      max neval
-#>        RSpectra 1.358759 1.380365 1.435317 1.399599 1.482455 1.623507    10
-#>            rSVD 3.187601 3.323361 3.780321 3.444072 3.952823 6.216385    10
-#>   pcaone.winsvd 7.563812 7.686590 8.090203 7.754446 7.763387 9.718475    10
-#>     pcaone.ssvd 4.397840 4.474974 5.183663 4.576512 5.532823 8.190743    10
-#>  pcaone.dashsvd 1.233052 1.280503 1.304921 1.309903 1.332356 1.354250    10
+#>            expr       min        lq      mean    median        uq       max
+#>        RSpectra 1.2721098 1.2735628 1.3933036 1.3329853 1.4005392 1.7924020
+#>            rSVD 3.1887692 3.3161313 3.4782575 3.3836211 3.4952563 4.2439350
+#>   pcaone.winsvd 0.8374542 0.8566613 1.1154431 0.9666981 1.2562832 1.6893506
+#>     pcaone.ssvd 0.8350991 0.8794522 0.9673625 0.9448867 0.9890868 1.3330392
+#>  pcaone.dashsvd 0.7244634 0.7668619 0.7763800 0.7694945 0.7848710 0.8789617
+#>  neval
+#>     10
+#>     10
+#>     10
+#>     10
+#>     10
 ```
 
 ## References
@@ -148,7 +154,3 @@ print(timing, unit='s')
     data](https://genome.cshlp.org/content/33/9/1599)
   - [Feng et al. 2024. Algorithm 1043: Faster Randomized SVD with
     Dynamic Shifts](https://dl.acm.org/doi/10.1145/3660629)
-
-## Todo
-
-  - [ ] add `center` and `scale` method

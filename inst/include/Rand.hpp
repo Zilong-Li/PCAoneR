@@ -72,8 +72,8 @@ inline MatrixType StandardNormalRandom(const Eigen::Index numRows,
 template<typename MatrixType>
 Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> center_and_scale(
   const MatrixType & matrix,
-  const Eigen::Map<Eigen::VectorXd> & center,
-  const Eigen::Map<Eigen::VectorXd> & scale,
+  const Eigen::Ref<const Eigen::VectorXd> & center,
+  const Eigen::Ref<const Eigen::VectorXd> & scale,
   const bool byrow)
 {
   using Scalar = typename MatrixType::Scalar;
@@ -102,8 +102,8 @@ Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> cente
 template<typename MatrixType>
 Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> center_and_scale(
   const MatrixType & matrix,
-  const Eigen::Map<Eigen::VectorXd> & center,
-  const Eigen::Map<Eigen::VectorXd> & scale,
+  const Eigen::Ref<const Eigen::VectorXd> & center,
+  const Eigen::Ref<const Eigen::VectorXd> & scale,
   const bool byrow,
   const int start,
   const int nb)

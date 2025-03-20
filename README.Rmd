@@ -115,6 +115,3 @@ print(timing, unit='s')
 * [Zilong Li, Jonas Meisner, Anders Albrechtsen (2023). Fast and accurate out-of-core PCA framework for large scale biobank data](https://genome.cshlp.org/content/33/9/1599)
 * [Feng et al. 2024. Algorithm 1043: Faster Randomized SVD with Dynamic Shifts](https://dl.acm.org/doi/10.1145/3660629)
 
-## Todo
-
-- [ ] add ```center``` and ```scale``` method

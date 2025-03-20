@@ -41,25 +41,28 @@ private:
   using Scalar = typename MatrixType::Scalar;
   using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>; // dense matrix
   using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-  using PtrMapVec = std::unique_ptr<Eigen::Map<Eigen::VectorXd>>;
+  using MapConstVec = const Eigen::Ref<const Vector>;
 
   ConstGenericMatrix mat;
-  Index nrow, ncol;
+  const uint32_t k, os, size, rand;
+  const bool by_row; // how to scale byrow or bycol
+  MapConstVec center;
+  MapConstVec scale;
+  
+  Index nrow, ncol;  // can change
   Matrix Omg, Ab;
-  int k, os, size, rand;
-  bool trans; // if matrix is wide then flip the matrix dimension
+  bool trans; // if matrix is wide then swap the matrix dimension
   bool do_pca = false; // if set center and scale, then do pca
-  bool by_row = false; // how to scale byrow or bycol
-  PtrMapVec center;
-  PtrMapVec scale;
 
 public:
   int finder = 1;
 
-  RsvdOpOnePass(ConstGenericMatrix & mat_, int k_, int os_ = 10, int rand_ = 1)
-  : mat(mat_), k(k_), os(os_), size(k_ + os_), rand(rand_)
+  RsvdOpOnePass(ConstGenericMatrix & mat_, uint32_t k_, uint32_t os_, uint32_t rand_, bool byrow_, MapConstVec & ctr, MapConstVec& scl)
+  : mat(mat_), k(k_), os(os_), size(k_ + os_), rand(rand_), by_row(byrow_), center(ctr), scale(scl)
   {
     trans = mat.rows() >= mat.cols() ? false : true;
+    if(center.size() > 1 && scale.size() > 1) do_pca = true;
+    if(do_pca) trans = by_row ? false : true;
     init();
   }
 
@@ -89,27 +92,20 @@ public:
   {
     return nrow;
   }
+  
   Index cols() const
   {
     return ncol;
   }
+  
   Index ranks() const
   {
     return k;
   }
+  
   Index oversamples() const
   {
     return os;
-  }
-
-  void setCenterScale(int n, double * cnt, double * scl, bool byrow)
-  {
-    center = std::make_unique<Eigen::Map<Eigen::VectorXd>>(cnt, n);
-    scale = std::make_unique<Eigen::Map<Eigen::VectorXd>>(scl, n);
-    do_pca = true;
-    by_row = byrow;
-    trans = by_row ? false : true;
-    init(); // force re-init
   }
 
   void updateGandH(Matrix & G, Matrix & H)
@@ -144,12 +140,10 @@ public:
 
   void computeGandH(Matrix & G, Matrix & H, uint32_t p)
   {
-    if(do_pca)
-    {
-      // do center and scale for pca, will make a new temp matrix
-      // and we only need to do it once for in-memory mode
-      Ab = center_and_scale(mat, *center, *scale, by_row);
-    }
+    // do center and scale for pca, will make a new temp matrix
+    // and we only need to do it once for in-memory mode
+    if(do_pca) Ab = center_and_scale(mat, center, scale, by_row);
+    
     updateGandH(G, H);
     for(uint32_t pi = 1; pi < p; pi++)
     {
@@ -223,7 +217,7 @@ public:
           // here we can only trans it if by_row is false
           if(trans)
           {
-            Ab = center_and_scale(mat.middleCols(start, nb), *center, *scale, false, start, nb);
+            Ab = center_and_scale(mat.middleCols(start, nb), center, scale, false, start, nb);
             G.middleRows(start, nb).noalias() = Ab.transpose() * Omg;
             if(i <= band / 2)
               H1.noalias() += Ab * G.middleRows(start, nb);
@@ -232,7 +226,7 @@ public:
           }
           else
           {
-            Ab = center_and_scale(mat.middleRows(start, nb), *center, *scale, true, start, nb);
+            Ab = center_and_scale(mat.middleRows(start, nb), center, scale, true, start, nb);
             G.middleRows(start, nb).noalias() = Ab * Omg;
             if(i <= band / 2)
               H1.noalias() += Ab.transpose() * G.middleRows(start, nb);
@@ -359,23 +353,27 @@ private:
   using Scalar = typename MatrixType::Scalar;
   using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>; // dense matrix
   using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+  using MapConstVec = const Eigen::Ref<const Vector>;
 
   ConstGenericMatrix mat;
   const uint32_t k, os, rand;
+  const bool by_row;
+  MapConstVec center;
+  MapConstVec scale;
   bool trans;
 
   RsvdOpOnePass<MatrixType> * op;
   RsvdOnePass<MatrixType, RsvdOpOnePass<MatrixType>> * rsvd;
 
 public:
-  RsvdOne(ConstGenericMatrix & mat_, uint32_t k_, uint32_t os_ = 10, uint32_t rand_ = 1)
-  : mat(mat_), k(k_), os(os_), rand(rand_)
+  RsvdOne(ConstGenericMatrix & mat_, uint32_t k_, uint32_t os_, uint32_t rand_, bool byrow_, MapConstVec & ctr, MapConstVec& scl)
+  : mat(mat_), k(k_), os(os_), rand(rand_), by_row(byrow_), center(ctr), scale(scl)
   {
     if(mat.rows() >= mat.cols())
       trans = false;
     else
       trans = true;
-    op = new RsvdOpOnePass<MatrixType>(mat, k, os, rand);
+    op = new RsvdOpOnePass<MatrixType>(mat, k, os, rand, by_row, center, scale);
     rsvd = new RsvdOnePass<MatrixType, RsvdOpOnePass<MatrixType>>(*op);
   }
 
@@ -388,11 +386,6 @@ public:
   inline void setRangeFinder(int flag)
   {
     op->finder = flag;
-  }
-
-  inline void setCenterScale(int n, double * cnt, double * scl, bool byrow)
-  {
-    op->setCenterScale(n, cnt, scl, byrow);
   }
 
   inline void compute(uint32_t p, uint32_t batchs = 0)
@@ -425,19 +418,24 @@ private:
   using Scalar = typename MatrixType::Scalar;
   using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
   using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-
+  using MapConstVec = const Eigen::Ref<const Vector>;
+  
   ConstGenericMatrix mat;
   const uint32_t k, os, size, rand;
   const Index nrow, ncol;
+  const bool by_row;
   bool tall;
-  Matrix Omg;
+  bool do_pca = false;
+  MapConstVec center;
+  MapConstVec scale;
+  Matrix Omg, Ab;
   Matrix b_leftSingularVectors;
   Vector b_singularValues;
   Matrix b_rightSingularVectors;
-
+  
 public:
-  RsvdDash(ConstGenericMatrix & mat_, uint32_t k_, uint32_t os_ = 10, uint32_t rand_ = 1)
-  : mat(mat_), k(k_), os(os_), size(k_ + os_), rand(rand_), nrow(mat_.rows()), ncol(mat_.cols())
+  RsvdDash(ConstGenericMatrix & mat_, uint32_t k_, uint32_t os_, uint32_t rand_, bool byrow_, MapConstVec & ctr, MapConstVec& scl)
+  : mat(mat_), k(k_), os(os_), size(k_ + os_), rand(rand_), nrow(mat_.rows()), ncol(mat_.cols()), by_row(byrow_), center(ctr), scale(scl)
   {
     if(size > nrow || size > ncol)
       throw std::runtime_error("k(pc) + s(oversampling) must be not greater than the dimension of data");
@@ -454,6 +452,10 @@ public:
     b_leftSingularVectors = Matrix::Zero(nrow, size);
     b_rightSingularVectors = Matrix::Zero(ncol, size);
     b_singularValues = Vector::Zero(size);
+    if(center.size() > 1 && scale.size() > 1) {
+      do_pca = true;
+      Ab = center_and_scale(mat, center, scale, by_row);
+    }
   }
 
   ~RsvdDash() {}
@@ -472,31 +474,55 @@ public:
 
   void compute_tall(uint32_t p)
   {
-    Omg = mat.transpose() * Omg;
+    if(do_pca) {
+      Omg = Ab.transpose() * Omg;
+    } else {
+      Omg = mat.transpose() * Omg;
+    }
     eigSVD(Omg, b_rightSingularVectors, b_singularValues, b_leftSingularVectors);
     double alpha = 0.0;
     for(uint32_t i = 0; i < p; i++)
     {
-      Omg.noalias() = mat.transpose() * (mat * b_rightSingularVectors) - alpha * b_rightSingularVectors;
+      if(do_pca) {
+        Omg.noalias() = Ab.transpose() * (Ab * b_rightSingularVectors) - alpha * b_rightSingularVectors;
+      } else {
+        Omg.noalias() = mat.transpose() * (mat * b_rightSingularVectors) - alpha * b_rightSingularVectors;
+      }
       eigSVD(Omg, b_rightSingularVectors, b_singularValues, b_leftSingularVectors);
       if(b_singularValues[size - 1] > alpha) alpha = (alpha + b_singularValues[size - 1]) / 2.0;
     }
-    eigSVD(mat * b_rightSingularVectors, b_leftSingularVectors, b_singularValues, Omg);
+    if(do_pca) {
+      eigSVD(Ab * b_rightSingularVectors, b_leftSingularVectors, b_singularValues, Omg);
+    } else {
+      eigSVD(mat * b_rightSingularVectors, b_leftSingularVectors, b_singularValues, Omg);
+    }
     b_rightSingularVectors = b_rightSingularVectors * Omg;
   }
 
   void compute_wide(uint32_t p)
   {
-    Omg = mat * Omg;
+    if(do_pca) {
+      Omg = Ab * Omg;
+    } else {
+      Omg = mat * Omg;
+    }
     eigSVD(Omg, b_leftSingularVectors, b_singularValues, b_rightSingularVectors);
     double alpha = 0.0;
     for(uint32_t i = 0; i < p; i++)
     {
-      Omg.noalias() = mat * (mat.transpose() * b_leftSingularVectors) - alpha * b_leftSingularVectors;
+      if(do_pca) {
+        Omg.noalias() = Ab * (Ab.transpose() * b_leftSingularVectors) - alpha * b_leftSingularVectors;
+      } else {
+        Omg.noalias() = mat * (mat.transpose() * b_leftSingularVectors) - alpha * b_leftSingularVectors;
+      }
       eigSVD(Omg, b_leftSingularVectors, b_singularValues, b_rightSingularVectors);
       if(b_singularValues[size - 1] > alpha) alpha = (alpha + b_singularValues[size - 1]) / 2.0;
     }
-    eigSVD(mat.transpose() * b_leftSingularVectors, b_rightSingularVectors, b_singularValues, Omg);
+    if(do_pca) {
+      eigSVD(Ab.transpose() * b_leftSingularVectors, b_rightSingularVectors, b_singularValues, Omg);
+    } else {
+      eigSVD(mat.transpose() * b_leftSingularVectors, b_rightSingularVectors, b_singularValues, Omg);
+    }
     b_leftSingularVectors = b_leftSingularVectors * Omg;
   }
 
