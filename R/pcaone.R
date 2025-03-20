@@ -55,7 +55,7 @@
 #'                if shuffle the rows of input tall matrix or not for winsvd (by default \eqn{shuffle=TRUE}).
 #'
 #' @param opts    list, optional; \cr
-#'                options related to PCA, e.g. center, scale and byrow, sdist
+#'                options related to PCA, e.g. center and scale. See details
 #'
 #'@return \code{pcaone} returns a list containing the following three components:
 #'\describe{
@@ -100,6 +100,7 @@ pcaone <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, shuffle
 
 check_pca_opts <- function(A, opts) {
   pcaopts <- list(rand = 1L,"dopca" = FALSE, "byrow" = FALSE, "center" = rep(0.0, 1), "scale" = rep(1.0, 1))
+  if(is.null(opts$byrow)) opts$byrow <- FALSE
   pcaopts$byrow <- isTRUE(opts$byrow)
   if(is.null(opts$sdist)) opts$sdist <- "normal"
   pcaopts$rand <- switch(opts$sdist,
@@ -153,7 +154,7 @@ check_pca_opts <- function(A, opts) {
 
 #' @rdname pcaone
 #' @export
-pcaone.matrix <- function(A, k=NULL, p=7, s=10, sdist="normal", method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
+pcaone.matrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
 {
   ## A <- as.matrix(A)
   pcaopts <- check_pca_opts(A, opts)
@@ -216,6 +217,9 @@ pcaone.dgCMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 6
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
   pcaoneObj$v <- as.matrix(pcaoneObj$v)
+  if(pcaopts$dopca) {
+    pcaoneObj$e <- pcaoneObj$d**2 / ifelse(pcaopts$byrow, ncol(A)-1,nrow(A)-1)
+  }
 
   class(pcaoneObj) <- "pcaone"
   return(pcaoneObj)
@@ -237,6 +241,9 @@ pcaone.dgRMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 6
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
   pcaoneObj$v <- as.matrix(pcaoneObj$v)
+  if(pcaopts$dopca) {
+    pcaoneObj$e <- pcaoneObj$d**2 / ifelse(pcaopts$byrow, ncol(A)-1,nrow(A)-1)
+  }
 
   class(pcaoneObj) <- "pcaone"
   return(pcaoneObj)

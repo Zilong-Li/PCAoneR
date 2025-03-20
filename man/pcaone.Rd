@@ -23,7 +23,6 @@ pcaone(
   k = NULL,
   p = 7,
   s = 10,
-  sdist = "normal",
   method = "winsvd",
   batchs = 64,
   shuffle = TRUE,
@@ -78,7 +77,7 @@ the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{ba
 if shuffle the rows of input tall matrix or not for winsvd (by default \eqn{shuffle=TRUE}).}
 
 \item{opts}{list, optional; \cr
-options related to PCA, e.g. center, scale and byrow, sdist}
+options related to PCA, e.g. center and scale. See details}
 }
 \value{
 \code{pcaone} returns a list containing the following three components:
