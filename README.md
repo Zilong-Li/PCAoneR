@@ -80,7 +80,7 @@ system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 7))   ## the number of e
 system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 7)) ## the number of epochs is 1 + p
 #>    user  system elapsed 
 #>   8.752   8.286   0.848
-system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6))## the number of epochs is 2 + p
+system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6)) ## the number of epochs is 2 + p
 #>    user  system elapsed 
 #>   5.531   1.456   0.324
 

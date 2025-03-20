@@ -14,8 +14,13 @@ if echo "${R_BLAS_LIBS}" | grep -qi 'mkl'; then
     echo "Using Intel MKL backend for Eigen";
     echo "PKG_CXXFLAGS = -DEIGEN_USE_MKL_ALL -DNDEBUG -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS" >> src/Makevars
 else
-    echo "Using BLAS/LAPACK backend for Eigen";
-    echo "PKG_CXXFLAGS = -DEIGEN_USE_BLAS -DEIGEN_USE_LAPACK -DNDEBUG -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS" >> src/Makevars
+    if [ "$(uname)" = "Darwin" ]; then
+        echo "Without backends on MacOS for Eigen";
+        echo "PKG_CXXFLAGS = -DNDEBUG -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS" >> src/Makevars
+    else
+        echo "Using BLAS/LAPACK backend on Linux for Eigen";
+        echo "PKG_CXXFLAGS =  -DEIGEN_USE_BLAS -DEIGEN_USE_LAPACK -DNDEBUG -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS" >> src/Makevars
+    fi
 fi
 
 

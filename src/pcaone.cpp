@@ -17,7 +17,6 @@ Rcpp::List svd_dense(SEXP mat, int k, int p, int s, int batchs, Rcpp::List param
 
   int  rand  = Rcpp::as<int>(params_pca["rand"]);
   int  method= Rcpp::as<int>(params_pca["method"]);
-  bool dopca = Rcpp::as<bool>(params_pca["dopca"]);
   bool byrow = Rcpp::as<bool>(params_pca["byrow"]);
 
   if(method == 3) {
@@ -46,7 +45,6 @@ Rcpp::List svd_sparse_col(SEXP mat, int k, int p, int s, int batchs, Rcpp::List 
 
   int  rand  = Rcpp::as<int>(params_pca["rand"]);
   int  method= Rcpp::as<int>(params_pca["method"]);
-  bool dopca = Rcpp::as<bool>(params_pca["dopca"]);
   bool byrow = Rcpp::as<bool>(params_pca["byrow"]);
 
   if(method == 3) {
@@ -86,7 +84,6 @@ Rcpp::List svd_sparse_row(Rcpp::S4 mat, int k, int p, int s, int batchs, Rcpp::L
   // Extract pca opts
   int  rand  = Rcpp::as<int>(params_pca["rand"]);
   int  method= Rcpp::as<int>(params_pca["method"]);
-  bool dopca = Rcpp::as<bool>(params_pca["dopca"]);
   bool byrow = Rcpp::as<bool>(params_pca["byrow"]);
   Eigen::Map<Eigen::VectorXd> center = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(params_pca["center"]);
   Eigen::Map<Eigen::VectorXd> scale = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(params_pca["scale"]);
