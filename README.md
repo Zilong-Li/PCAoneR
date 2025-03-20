@@ -14,18 +14,18 @@ Randomized SVD algorithms other than the basic
 Currently there are 3 versions of RSVD implemented in this package
 ordered by their accuracy in below.
 
-  - **winSVD**: [window based randomized singular value
-    decomposition](https://genome.cshlp.org/content/33/9/1599)
-  - **dashSVD**: [dynamic shifts based randomized singular value
-    decomposition](https://dl.acm.org/doi/10.1145/3660629)
-  - **sSVD**: [single pass randomized singular value decomposition with
-    power iterations](https://genome.cshlp.org/content/33/9/1599)
+- **winSVD**: [window based randomized singular value
+  decomposition](https://genome.cshlp.org/content/33/9/1599)
+- **dashSVD**: [dynamic shifts based randomized singular value
+  decomposition](https://dl.acm.org/doi/10.1145/3660629)
+- **sSVD**: [single pass randomized singular value decomposition with
+  power iterations](https://genome.cshlp.org/content/33/9/1599)
 
 With surports for a number of matrix type including:
 
-  - `matrix` in base R for general dense matrices
-  - `dgCMatrix` in **Matrix** package, for column major sparse matrices
-  - `dgRMatrix` in **Matrix** package, for row major sparse matrices
+- `matrix` in base R for general dense matrices
+- `dgCMatrix` in **Matrix** package, for column major sparse matrices
+- `dgRMatrix` in **Matrix** package, for row major sparse matrices
 
 <!-- badges: start -->
 
@@ -48,9 +48,9 @@ mat <- matrix(rnorm(100*5000), 5000, 100)
 res <- pcaone(mat, k = 10)
 str(res)
 #> List of 3
-#>  $ d: num [1:10] 80.4 79.5 79.4 79.1 78.9 ...
-#>  $ u: num [1:5000, 1:10] 0.019381 0.010966 -0.009693 0.018944 -0.000348 ...
-#>  $ v: num [1:100, 1:10] -0.2278 0.0592 -0.04 -0.0487 0.0197 ...
+#>  $ d: num [1:10] 80.4 79.6 79.4 78.8 78.8 ...
+#>  $ u: num [1:5000, 1:10] -0.00662 0.01066 -0.02651 0.01647 0.00542 ...
+#>  $ v: num [1:100, 1:10] 0.0128 -0.1413 0.033 -0.1198 -0.0105 ...
 #>  - attr(*, "class")= chr "pcaone"
 ```
 
@@ -70,19 +70,19 @@ A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
 #>    user  system elapsed 
-#>  26.914   4.168   1.306
+#>   4.719   0.012   4.733
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))  ## the number of epochs is two times of power iters, 4*2=8
 #>    user  system elapsed 
-#>   8.255  12.983   0.971
+#>   5.945   0.041   5.999
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 7))   ## the number of epochs is 1 + p
 #>    user  system elapsed 
-#>   6.061   4.614   0.449
+#>   0.732   0.021   0.753
 system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 7)) ## the number of epochs is 1 + p
 #>    user  system elapsed 
-#>   8.752   8.286   0.848
-system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6)) ## the number of epochs is 2 + p
+#>   0.869   0.012   0.881
+system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6))## the number of epochs is 2 + p
 #>    user  system elapsed 
-#>   5.531   1.456   0.324
+#>   0.670   0.025   0.695
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -100,13 +100,13 @@ to reach the accuracy of `winSVD`.
 ``` r
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 20))  ## the number of epochs is 4*20=40
 #>    user  system elapsed 
-#>  31.978  42.848   3.278
+#>  24.871   0.152  25.072
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 20))
 #>    user  system elapsed 
-#>  15.154   6.766   0.922
+#>   1.919   0.045   1.965
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 18))
 #>    user  system elapsed 
-#>  13.916   3.112   0.749
+#>   1.738   0.059   1.797
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 2), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -131,26 +131,28 @@ timing <- microbenchmark(
   'pcaone.ssvd' = pcaone(A, k=k, p = 20, method = "ssvd"),
   'pcaone.dashsvd' = pcaone(A, k=k, p = 18, method = "dashsvd"),
   times=10)
+#> Warning in microbenchmark(RSpectra = svds(A, k = k), rSVD = rsvd(A, k = k, :
+#> less accurate nanosecond times to avoid potential integer overflows
 print(timing, unit='s')
 #> Unit: seconds
-#>            expr       min        lq      mean    median        uq       max
-#>        RSpectra 1.2721098 1.2735628 1.3933036 1.3329853 1.4005392 1.7924020
-#>            rSVD 3.1887692 3.3161313 3.4782575 3.3836211 3.4952563 4.2439350
-#>   pcaone.winsvd 0.8374542 0.8566613 1.1154431 0.9666981 1.2562832 1.6893506
-#>     pcaone.ssvd 0.8350991 0.8794522 0.9673625 0.9448867 0.9890868 1.3330392
-#>  pcaone.dashsvd 0.7244634 0.7668619 0.7763800 0.7694945 0.7848710 0.8789617
-#>  neval
-#>     10
-#>     10
-#>     10
-#>     10
-#>     10
+#>            expr        min         lq       mean    median         uq
+#>        RSpectra  4.7370844  4.7719100  4.8737781  4.913402  4.9283583
+#>            rSVD 24.4685143 24.8870395 25.1024225 25.084026 25.2256136
+#>   pcaone.winsvd  0.8668585  0.8703966  0.8771507  0.878141  0.8805611
+#>     pcaone.ssvd  1.9454805  1.9495978  1.9992212  1.974393  2.0068966
+#>  pcaone.dashsvd  1.7590869  1.7630143  1.7682542  1.767234  1.7730361
+#>         max neval
+#>   4.9584275    10
+#>  25.6295077    10
+#>   0.8913624    10
+#>   2.1490443    10
+#>   1.7807355    10
 ```
 
 ## References
 
-  - [Zilong Li, Jonas Meisner, Anders Albrechtsen (2023). Fast and
-    accurate out-of-core PCA framework for large scale biobank
-    data](https://genome.cshlp.org/content/33/9/1599)
-  - [Feng et al. 2024. Algorithm 1043: Faster Randomized SVD with
-    Dynamic Shifts](https://dl.acm.org/doi/10.1145/3660629)
+- [Zilong Li, Jonas Meisner, Anders Albrechtsen (2023). Fast and
+  accurate out-of-core PCA framework for large scale biobank
+  data](https://genome.cshlp.org/content/33/9/1599)
+- [Feng et al. 2024. Algorithm 1043: Faster Randomized SVD with Dynamic
+  Shifts](https://dl.acm.org/doi/10.1145/3660629)
