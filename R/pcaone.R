@@ -132,7 +132,10 @@ pcaone.matrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, 
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
   pcaoneObj$v <- as.matrix(pcaoneObj$v)
   if(pcaopts$dopca) {
-    pcaoneObj$e <- pcaoneObj$d**2 / ifelse(pcaopts$byrow, ncol(A)-1,nrow(A)-1)
+    if(pcaopts$byrow)
+      pcaoneObj$e <- pcaoneObj$d**2 / (ncol(A) - 1)
+    else
+      pcaoneObj$e <- pcaoneObj$d**2 / (nrow(A) - 1)
   }
 
   if(!is.null(perm)) {
@@ -165,7 +168,10 @@ pcaone.dgCMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 6
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
   pcaoneObj$v <- as.matrix(pcaoneObj$v)
   if(pcaopts$dopca) {
-    pcaoneObj$e <- pcaoneObj$d**2 / ifelse(pcaopts$byrow, ncol(A)-1,nrow(A)-1)
+    if(pcaopts$byrow)
+      pcaoneObj$e <- pcaoneObj$d**2 / (ncol(A) - 1)
+    else
+      pcaoneObj$e <- pcaoneObj$d**2 / (nrow(A) - 1)
   }
 
   class(pcaoneObj) <- "pcaone"
@@ -189,7 +195,10 @@ pcaone.dgRMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 6
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
   pcaoneObj$v <- as.matrix(pcaoneObj$v)
   if(pcaopts$dopca) {
-    pcaoneObj$e <- pcaoneObj$d**2 / ifelse(pcaopts$byrow, ncol(A)-1,nrow(A)-1)
+    if(pcaopts$byrow)
+      pcaoneObj$e <- pcaoneObj$d**2 / (ncol(A) - 1)
+    else
+      pcaoneObj$e <- pcaoneObj$d**2 / (nrow(A) - 1)
   }
 
   class(pcaoneObj) <- "pcaone"
@@ -217,8 +226,8 @@ check_pca_opts <- function(A, opts) {
   } else if(is.numeric(opts$center)) {
     pcaopts$dopca <- TRUE
     n <- length(opts$center)
-    if(byrow && n != nrow(A)) stop("opts$center must be TRUE/FALSE or a vector of length nrow(A) if byrow is TRUE")
-    if(!byrow && n != ncol(A)) stop("opts$center must be TRUE/FALSE or a vector of length ncol(A) if byrow is FALSE")
+    if(pcaopts$byrow && n != nrow(A)) stop("opts$center must be TRUE/FALSE or a vector of length nrow(A) if byrow is TRUE")
+    if(!pcaopts$byrow && n != ncol(A)) stop("opts$center must be TRUE/FALSE or a vector of length ncol(A) if byrow is FALSE")
     pcaopts$center <- opts$center
   } else {
     pcaopts$dopca <- FALSE
