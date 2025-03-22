@@ -1,13 +1,13 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Accurate Randomized SVD with window-based power iteration
+# Accurate and pass-efficient randomized SVD in R
 
 ## Introduction
 
 This repo initially implements the algorithm so-called window-based
 Randomized SVD in the [PCAone](https://github.com/Zilong-Li/PCAone)
-paper. **The aim of the package is to implement state-of-the-art
+paper. **Now the aim of the package is to implement state-of-the-art
 Randomized SVD algorithms other than the basic
 [rsvd](https://github.com/erichson/rSVD) for R community.**
 
@@ -23,7 +23,8 @@ ordered by their accuracy in below.
 
 With surports for a number of matrix type including:
 
-- `matrix` in base R for general dense matrices
+- `matrix` in base R for general dense matrices. or other types can be
+  casted e.g. `dgeMatrix`
 - `dgCMatrix` in **Matrix** package, for column major sparse matrices
 - `dgRMatrix` in **Matrix** package, for row major sparse matrices
 
@@ -48,9 +49,9 @@ mat <- matrix(rnorm(100*5000), 5000, 100)
 res <- pcaone(mat, k = 10)
 str(res)
 #> List of 3
-#>  $ d: num [1:10] 80.4 79.6 79.4 78.8 78.8 ...
-#>  $ u: num [1:5000, 1:10] -0.00662 0.01066 -0.02651 0.01647 0.00542 ...
-#>  $ v: num [1:100, 1:10] 0.0128 -0.1413 0.033 -0.1198 -0.0105 ...
+#>  $ d: num [1:10] 80.2 79.8 79.3 78.9 78.7 ...
+#>  $ u: num [1:5000, 1:10] -0.00311 0.00884 -0.01069 0.0206 -0.00773 ...
+#>  $ v: num [1:100, 1:10] -0.02423 -0.08213 0.02153 0.00621 0.07479 ...
 #>  - attr(*, "class")= chr "pcaone"
 ```
 
@@ -70,19 +71,19 @@ A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
 #>    user  system elapsed 
-#>   4.719   0.012   4.733
+#>   4.663   0.010   4.673
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))  ## the number of epochs is two times of power iters, 4*2=8
 #>    user  system elapsed 
-#>   5.945   0.041   5.999
+#>   5.892   0.033   6.195
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 7))   ## the number of epochs is 1 + p
 #>    user  system elapsed 
-#>   0.732   0.021   0.753
+#>   0.697   0.020   0.717
 system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 7)) ## the number of epochs is 1 + p
 #>    user  system elapsed 
-#>   0.869   0.012   0.881
+#>   0.823   0.012   0.834
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6))## the number of epochs is 2 + p
 #>    user  system elapsed 
-#>   0.670   0.025   0.695
+#>   0.638   0.019   0.657
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -100,13 +101,13 @@ to reach the accuracy of `winSVD`.
 ``` r
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 20))  ## the number of epochs is 4*20=40
 #>    user  system elapsed 
-#>  24.871   0.152  25.072
+#>  24.600   0.115  24.717
 system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 20))
 #>    user  system elapsed 
-#>   1.919   0.045   1.965
+#>   1.870   0.044   1.914
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 18))
 #>    user  system elapsed 
-#>   1.738   0.059   1.797
+#>   1.692   0.050   1.742
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 2), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
@@ -135,18 +136,18 @@ timing <- microbenchmark(
 #> less accurate nanosecond times to avoid potential integer overflows
 print(timing, unit='s')
 #> Unit: seconds
-#>            expr        min         lq       mean    median         uq
-#>        RSpectra  4.7370844  4.7719100  4.8737781  4.913402  4.9283583
-#>            rSVD 24.4685143 24.8870395 25.1024225 25.084026 25.2256136
-#>   pcaone.winsvd  0.8668585  0.8703966  0.8771507  0.878141  0.8805611
-#>     pcaone.ssvd  1.9454805  1.9495978  1.9992212  1.974393  2.0068966
-#>  pcaone.dashsvd  1.7590869  1.7630143  1.7682542  1.767234  1.7730361
+#>            expr        min         lq       mean     median         uq
+#>        RSpectra  4.6391060  4.6595379  4.7083525  4.6899738  4.7352504
+#>            rSVD 24.3571732 24.3856144 24.4975993 24.4484750 24.4853403
+#>   pcaone.winsvd  0.8603859  0.8650354  0.8687725  0.8688332  0.8714363
+#>     pcaone.ssvd  1.9299811  1.9394407  1.9481555  1.9439759  1.9547296
+#>  pcaone.dashsvd  1.7514591  1.7543524  1.7583468  1.7574516  1.7608106
 #>         max neval
-#>   4.9584275    10
-#>  25.6295077    10
-#>   0.8913624    10
-#>   2.1490443    10
-#>   1.7807355    10
+#>   4.9189169    10
+#>  25.0868312    10
+#>   0.8829495    10
+#>   1.9822730    10
+#>   1.7674187    10
 ```
 
 ## References

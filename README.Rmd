@@ -13,11 +13,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Accurate Randomized SVD with window-based power iteration
+# Accurate and pass-efficient randomized SVD in R
 
 ## Introduction
 
-This repo initially implements the algorithm so-called window-based Randomized SVD in the [PCAone](https://github.com/Zilong-Li/PCAone) paper. **The aim of the package is to implement state-of-the-art Randomized SVD algorithms other than the basic [rsvd](https://github.com/erichson/rSVD) for R community.**
+This repo initially implements the algorithm so-called window-based Randomized SVD in the [PCAone](https://github.com/Zilong-Li/PCAone) paper. **Now the aim of the package is to implement state-of-the-art Randomized SVD algorithms other than the basic [rsvd](https://github.com/erichson/rSVD) for R community.**
 
 Currently there are 3 versions of RSVD implemented in this package ordered by their accuracy in below.
 
@@ -27,7 +27,7 @@ Currently there are 3 versions of RSVD implemented in this package ordered by th
 
 With surports for a number of matrix type including:
 
-- `matrix` in base R for general dense matrices
+- `matrix` in base R for general dense matrices. or other types can be casted e.g. `dgeMatrix`
 - `dgCMatrix` in **Matrix** package, for column major sparse matrices
 - `dgRMatrix` in **Matrix** package, for row major sparse matrices
 
