@@ -64,10 +64,9 @@ number of additional power iterations (by default \eqn{p=7}).}
 \item{s}{integer, optional; \cr
 oversampling parameter (by default \eqn{s=10}).}
 
-\item{method}{string \eqn{c( 'winsvd', 'ssvd', 'winsvd')}, optional; \cr
+\item{method}{string \eqn{c( 'winsvd', 'dashsvd')}, optional; \cr
 specifies the different variation of the randomized singular value decomposition : \cr
 \eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
-\eqn{'ssvd'} : single-pass RSVD with power iterations in PCAone paper. \cr
 \eqn{'dashsvd'} : dynamic shifts based RSVD with  by Feng et al. 2024. \cr}
 
 \item{batchs}{integer, optional; \cr
@@ -137,8 +136,6 @@ A <- popgen - rowMeans(popgen)
 res <- pcaone(A, k = 40, method = "winsvd")
 str(res)
 res <- pcaone(A, k = 40, method = "dashsvd")
-str(res)
-res <- pcaone(A, k = 40, method = "ssvd")
 str(res)
 }
 \references{

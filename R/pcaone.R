@@ -42,10 +42,9 @@
 #' @param s       integer, optional; \cr
 #'                oversampling parameter (by default \eqn{s=10}).
 #'
-#' @param method  string \eqn{c( 'winsvd', 'ssvd', 'winsvd')}, optional; \cr
+#' @param method  string \eqn{c( 'winsvd', 'dashsvd')}, optional; \cr
 #'                specifies the different variation of the randomized singular value decomposition : \cr
 #'                		\eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
-#'                		\eqn{'ssvd'} : single-pass RSVD with power iterations in PCAone paper. \cr
 #'                		\eqn{'dashsvd'} : dynamic shifts based RSVD with  by Feng et al. 2024. \cr
 #'
 #' @param batchs integer, optional; \cr
@@ -93,8 +92,6 @@
 #' str(res)
 #' res <- pcaone(A, k = 40, method = "dashsvd")
 #' str(res)
-#' res <- pcaone(A, k = 40, method = "ssvd")
-#' str(res)
 #' @export
 pcaone <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, shuffle = TRUE, opts = list()) UseMethod("pcaone")
 
@@ -108,8 +105,7 @@ pcaone.matrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, 
   
   pcaopts$method <- switch(method,
                            winsvd = 1L,
-                           ssvd = 2L,
-                           dashsvd = 3L,
+                           dashsvd = 2L,
                            stop("Method is not supported!"))
   
   isPerm <- (shuffle && method == "winsvd")
@@ -159,8 +155,7 @@ pcaone.dgCMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 6
   pcaopts <- check_pca_opts(A, opts)
   pcaopts$method <- switch(method,
                            winsvd = 1L,
-                           ssvd = 2L,
-                           dashsvd = 3L,
+                           dashsvd = 2L,
                            stop("Method is not supported!"))
   
   pcaoneObj <- .Call(`_pcaone_svd_sparse_col`, A, k, p, s, batchs, pcaopts)
@@ -186,8 +181,7 @@ pcaone.dgRMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 6
   pcaopts <- check_pca_opts(A, opts)
   pcaopts$method <- switch(method,
                            winsvd = 1L,
-                           ssvd = 2L,
-                           dashsvd = 3L,
+                           dashsvd = 2L,
                            stop("Method is not supported!"))
   
   pcaoneObj <- .Call(`_pcaone_svd_sparse_row`, A, k, p, s, batchs, pcaopts)

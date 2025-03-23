@@ -19,7 +19,7 @@ Rcpp::List svd_dense(SEXP mat, int k, int p, int s, int batchs, Rcpp::List param
   int  method= Rcpp::as<int>(params_pca["method"]);
   bool byrow = Rcpp::as<bool>(params_pca["byrow"]);
 
-  if(method == 3) {
+  if(method == 2) {
     PCAone::RsvdDash<Eigen::MatrixXd> rsvd(A, k, s, rand, byrow, center, scale);
     rsvd.compute(p);
     return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
@@ -27,7 +27,6 @@ Rcpp::List svd_dense(SEXP mat, int k, int p, int s, int batchs, Rcpp::List param
                               Rcpp::Named("v") = Rcpp::wrap(rsvd.matrixV()));
   }
   
-  if(method == 2) batchs = 0;  // ssvd
   PCAone::RsvdOne<Eigen::MatrixXd> rsvd(A, k, s, rand, byrow, center, scale);
   rsvd.compute(p, batchs);
 
@@ -47,7 +46,7 @@ Rcpp::List svd_sparse_col(SEXP mat, int k, int p, int s, int batchs, Rcpp::List 
   int  method= Rcpp::as<int>(params_pca["method"]);
   bool byrow = Rcpp::as<bool>(params_pca["byrow"]);
 
-  if(method == 3) {
+  if(method == 2) {
     PCAone::RsvdDash<SpMat> rsvd(A, k, s, rand, byrow, center, scale);
     rsvd.compute(p);
     return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
@@ -55,7 +54,6 @@ Rcpp::List svd_sparse_col(SEXP mat, int k, int p, int s, int batchs, Rcpp::List 
                               Rcpp::Named("v") = Rcpp::wrap(rsvd.matrixV()));
   }
   
-  if(method == 2) batchs = 0;  // ssvd
   PCAone::RsvdOne<SpMat> rsvd(A, k, s, rand, byrow, center, scale);
   rsvd.compute(p, batchs);
 
@@ -88,7 +86,7 @@ Rcpp::List svd_sparse_row(Rcpp::S4 mat, int k, int p, int s, int batchs, Rcpp::L
   Eigen::Map<Eigen::VectorXd> center = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(params_pca["center"]);
   Eigen::Map<Eigen::VectorXd> scale = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(params_pca["scale"]);
 
-  if(method == 3) {
+  if(method == 2) {
     PCAone::RsvdDash<SpRMat> rsvd(A, k, s, rand, byrow, center, scale);
     rsvd.compute(p);
     return Rcpp::List::create(Rcpp::Named("d") = Rcpp::wrap(rsvd.singularValues()),
@@ -96,7 +94,6 @@ Rcpp::List svd_sparse_row(Rcpp::S4 mat, int k, int p, int s, int batchs, Rcpp::L
                               Rcpp::Named("v") = Rcpp::wrap(rsvd.matrixV()));
   }
   
-  if(method == 2) batchs = 0;  // ssvd
   PCAone::RsvdOne<SpRMat> rsvd(A, k, s, rand, byrow, center, scale);
   rsvd.compute(p, batchs);
 

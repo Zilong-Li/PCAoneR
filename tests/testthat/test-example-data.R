@@ -11,7 +11,7 @@ A <- sweep(popgen, 1, rowMeans(popgen), FUN = "-")
 k <- 40
 
 ## A <- matrix(popgen, nrow = nrow(popgen))
-d <- pcaone(A, k = k, method = "ssvd", opts = list("center" = TRUE, "scale" = TRUE, "byrow" = FALSE) )
+d <- pcaone(A, k = k, opts = list("center" = TRUE, "scale" = TRUE, "byrow" = TRUE) )
 ## d <- pcaone(A, k = k, method = "winsvd", opts = list("center" = TRUE, "scale" = TRUE, "byrow" = TRUE) )
 
 #*************************************************************************************
@@ -44,17 +44,6 @@ testthat::test_that("Test: dashSVD with nrow > ncol", {
   testthat::expect_true(max_e < 2.5)
 })
 
-system.time(s3 <- pcaone(A, k = k, method = "ssvd"))
-
-
-max_d <- max(s0$d-s3$d)
-Ae <- reconstruct(s3)
-max_e <- max(abs(A-Ae))
-
-testthat::test_that("Test: sSVD with nrow > ncol", {
-  testthat::expect_true(max_d < 5)
-  testthat::expect_true(max_e < 2.5)
-})
 
 #*************************************************************************************
 # Test: real wide matrix with population gentic data
@@ -89,15 +78,4 @@ testthat::test_that("Test: dashSVD with nrow > ncol", {
   testthat::expect_true(max_e < 2.5)
 })
 
-system.time(s3 <- pcaone(A, k = k, method = "ssvd"))
-
-
-max_d <- max(s0$d-s3$d)
-Ae <- reconstruct(s3)
-max_e <- max(abs(A-Ae))
-
-testthat::test_that("Test: sSVD with nrow > ncol", {
-  testthat::expect_true(max_d < 5)
-  testthat::expect_true(max_e < 2.5)
-})
 

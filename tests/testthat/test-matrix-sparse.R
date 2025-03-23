@@ -55,11 +55,6 @@ testthat::test_that("Test: dashsvd for sparse matrix with nrow > ncol", {
   testthat::expect_identical(sum(as.vector(res) < 1.0), 3L)
 })
 
-testthat::test_that("Test: ssvd for sparse matrix with nrow > ncol", {
-  res <- sapply( lapply( gen, pcaone, k = k, method = "ssvd" ), svd_resid, svd0 = s0 )
-  testthat::expect_identical(sum(as.vector(res) < 2.0), 3L)
-})
-
 
 ##### wide matrix
 x = matrix(rnorm(m * n), n)  ### wide
@@ -83,10 +78,5 @@ testthat::test_that("Test: winsvd for sparse matrix with nrow < ncol", {
 testthat::test_that("Test: dashsvd for sparse matrix with nrow < ncol", {
   res <- sapply( lapply( gen, pcaone, k = k, method = "dashsvd" ), svd_resid, svd0 = s0 )
   testthat::expect_identical(sum(as.vector(res) < 1.0), 3L)
-})
-
-testthat::test_that("Test: ssvd for sparse matrix with nrow < ncol", {
-  res <- sapply( lapply( gen, pcaone, k = k, method = "ssvd" ), svd_resid, svd0 = s0 )
-  testthat::expect_identical(sum(as.vector(res) < 2.0), 3L)
 })
 

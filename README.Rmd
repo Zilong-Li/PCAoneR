@@ -19,11 +19,10 @@ knitr::opts_chunk$set(
 
 This repo initially implements the algorithm so-called window-based Randomized SVD in the [PCAone](https://github.com/Zilong-Li/PCAone) paper. **Now the aim of the package is to implement state-of-the-art Randomized SVD algorithms other than the basic [rsvd](https://github.com/erichson/rSVD) for R community.**
 
-Currently there are 3 versions of RSVD implemented in this package ordered by their accuracy in below.
+Currently there are 2 versions of RSVD implemented in this package ordered by their accuracy in below.
 
 - **winSVD**: [window based randomized singular value decomposition](https://genome.cshlp.org/content/33/9/1599)
 - **dashSVD**: [dynamic shifts based randomized singular value decomposition](https://dl.acm.org/doi/10.1145/3660629)
-- **sSVD**: [single pass randomized singular value decomposition with power iterations](https://genome.cshlp.org/content/33/9/1599)
 
 With surports for a number of matrix type including:
 
@@ -66,34 +65,28 @@ A <- popgen - rowMeans(popgen) ## center
 k <- 40
 system.time(s0 <- RSpectra::svds(A, k = k) )
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 4))  ## the number of epochs is two times of power iters, 4*2=8
-system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 7))   ## the number of epochs is 1 + p
 system.time(s3 <- pcaone(A, k = k, method = "winsvd", p = 7)) ## the number of epochs is 1 + p
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 6))## the number of epochs is 2 + p
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 10), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
-points(s0$d-s2$d, col = "orange", cex = 1.5)
 points(s0$d-s3$d, col = "red", cex = 1.5)
 points(s0$d-s4$d, col = "blue", cex = 1.5)
-legend("top", legend = c("rSVD", "sSVD", "dashSVD", "winSVD"), pch = 16,col = c("black", "orange", "blue", "red"), horiz = T, cex = 1.2, bty = "n" )
+legend("top", legend = c("rSVD", "dashSVD", "winSVD"), pch = 16,col = c("black", "blue", "red"), horiz = T, cex = 1.2, bty = "n" )
 ```
 
 Now let's see how many epochs we need for `rSVD`, `sSVD` and `dashSVD`  to reach the accuracy of `winSVD`.
 
 ```{r acc2}
 system.time(s1 <- rsvd::rsvd(A, k = k, q = 20))  ## the number of epochs is 4*20=40
-system.time(s2 <- pcaone(A, k = k, method = "ssvd", p = 20))
 system.time(s4 <- pcaone(A, k = k, method = "dashsvd", p = 18))
 
 par(mar = c(5, 5, 2, 1))
 plot(s0$d-s1$d, ylim = c(0, 2), xlab = "PC index", ylab = "Error of singular values", cex = 1.5, cex.lab = 2)
-points(s0$d-s2$d, col = "orange", cex = 1.5)
 points(s0$d-s3$d, col = "red", cex = 1.5)
 points(s0$d-s4$d, col = "blue", cex = 1.5)
-legend("top", legend = c("rSVD", "sSVD", "dashSVD", "winSVD"), pch = 16,col = c("black", "orange", "blue", "red"), horiz = T, cex = 1.2, bty = "n" )
+legend("top", legend = c("rSVD", "dashSVD", "winSVD"), pch = 16,col = c("black", "blue", "red"), horiz = T, cex = 1.2, bty = "n" )
 ```
-
-
 ## Benchmarking of speed
 
 Let's see the performance of ```pcaone``` compared to the other packages. 
@@ -104,7 +97,6 @@ timing <- microbenchmark(
   'RSpectra' = svds(A,k = k),
   'rSVD' = rsvd(A, k=k, q = 20),
   'pcaone.winsvd' = pcaone(A, k=k, p = 7),
-  'pcaone.ssvd' = pcaone(A, k=k, p = 20, method = "ssvd"),
   'pcaone.dashsvd' = pcaone(A, k=k, p = 18, method = "dashsvd"),
   times=10)
 print(timing, unit='s')
