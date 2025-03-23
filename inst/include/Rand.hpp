@@ -100,7 +100,8 @@ Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> cente
 
 
 template<typename MatrixType>
-Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> center_and_scale(
+void center_and_scale(
+  Eigen::MatrixXd & mat,
   const MatrixType & matrix,
   const Eigen::Ref<const Eigen::VectorXd> & center,
   const Eigen::Ref<const Eigen::VectorXd> & scale,
@@ -108,11 +109,10 @@ Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> cente
   const int start,
   const int nb)
 {
-  using Scalar = typename MatrixType::Scalar;
   assert(center.size() == scale.size() && "the size of center and scale are different");
 
   // Convert input matrix to dense (handles both sparse and dense matrices)
-  Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> mat = matrix;
+  mat = matrix;
   if(byrow)
   {
     mat.colwise() -= center.segment(start, nb);
@@ -126,7 +126,6 @@ Eigen::Matrix<typename MatrixType::Scalar, Eigen::Dynamic, Eigen::Dynamic> cente
     mat = mat * scale.segment(start, nb).asDiagonal();
   }
 
-  return mat;
 }
 
 #endif // UTIL_RAND_H

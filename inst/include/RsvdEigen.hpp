@@ -50,6 +50,7 @@ private:
   MapConstVec scale;
   
   Index nrow, ncol;  // can change
+  uint32_t batch_size;
   Matrix Omg, Ab;
   bool trans; // if matrix is wide then swap the matrix dimension
   bool do_pca = false; // if set center and scale, then do pca
@@ -170,8 +171,9 @@ public:
   {
     if(batchs % 2 != 0) throw std::runtime_error("batchs must be a power of 2, i.e. batchs=2^x.\n");
     if(std::pow(2, p) < batchs) throw std::runtime_error("pow(2, p) >= batchs is not true\n");
-    uint32_t blocksize = (unsigned int)std::ceil((double)nrow / batchs);
-    if(blocksize < batchs) throw std::runtime_error("window size is smaller than number of batchs \n");
+    // nrow of a tall matrix is used for sliding window 
+    batch_size = (unsigned int)std::ceil((double)nrow / batchs);
+    if(batch_size < batchs) throw std::runtime_error("window size is smaller than number of batchs \n");
 
     uint32_t start, stop, nb;
     Matrix H1 = Matrix::Zero(ncol, size);
@@ -190,8 +192,8 @@ public:
       band = std::fmin(band * 2, batchs);
       for(uint32_t b = 0, i = 1, j = 1; b < batchs; ++b, ++i, ++j)
       {
-        start = b * blocksize;
-        stop = (b + 1) * blocksize >= nrow ? nrow - 1 : (b + 1) * blocksize - 1;
+        start = b * batch_size;
+        stop = (b + 1) * batch_size >= nrow ? nrow - 1 : (b + 1) * batch_size - 1;
         nb = stop - start + 1;
         if(!do_pca)
         {
@@ -217,7 +219,7 @@ public:
           // here we can only trans it if by_row is false
           if(trans)
           {
-            Ab = center_and_scale(mat.middleCols(start, nb), center, scale, false, start, nb);
+            center_and_scale(Ab, mat.middleCols(start, nb), center, scale, false, start, nb);
             G.middleRows(start, nb).noalias() = Ab.transpose() * Omg;
             if(i <= band / 2)
               H1.noalias() += Ab * G.middleRows(start, nb);
@@ -226,7 +228,7 @@ public:
           }
           else
           {
-            Ab = center_and_scale(mat.middleRows(start, nb), center, scale, true, start, nb);
+            center_and_scale(Ab, mat.middleRows(start, nb), center, scale, true, start, nb);
             G.middleRows(start, nb).noalias() = Ab * Omg;
             if(i <= band / 2)
               H1.noalias() += Ab.transpose() * G.middleRows(start, nb);
