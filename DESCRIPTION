@@ -1,6 +1,6 @@
 Package: pcaone
 Title: Fast and Accurate Randomized Singular Value Decomposition Algorithms with 'PCAone'
-Version: 2.0.0
+Version: 1.5.0
 Date: 2025-03-01
 Authors@R: person(given = "Zilong", family = "Li", role = c("aut", "cre"), email = "zilong.dk@gmail.com")
 Description: Fast and Accurate Randomized Singular Value Decomposition (RSVD) methods proposed in the 'PCAone' paper by Li (2023) <https://genome.cshlp.org/content/33/9/1599>.
@@ -16,7 +16,8 @@ SystemRequirements: C++17, GNU make
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    BPCells (>= 0.3.0)
 Config/testthat/edition: 3
 URL: https://github.com/Zilong-Li/PCAoneR
 BugReports: https://github.com/Zilong-Li/PCAoneR/issues
