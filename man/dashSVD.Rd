@@ -6,11 +6,33 @@
 \usage{
 dashSVD(A, k, p = 10, s = 10)
 }
+\arguments{
+\item{A}{array_like; \cr
+a real/complex \eqn{(m, n)} input matrix (or data frame) to be decomposed.}
+
+\item{k}{integer; \cr
+the target rank for the low-rank decomposition. \eqn{k} should satisfy \eqn{k << min(m,n)}.}
+
+\item{p}{integer, optional; \cr
+number of additional power iterations (by default \eqn{p=7}).}
+
+\item{s}{integer, optional; \cr
+oversampling parameter (by default \eqn{s=10}).}
+}
 \description{
-Dynamic shifted Randomized SVD
+dashSVD implements the Dynamic shifted Randomized SVD proposed by Feng et al. 2024
 }
 \examples{
 mat <- matrix(rnorm(100*20000), 20000, 100)
 res <- dashSVD(mat, k = 10)
 str(res)
+}
+\references{
+\itemize{
+\item Feng, Xu and Yu, Wenjian and Xie, Yuyang and Tang, Jie. "Algorithm 1043: Faster Randomized SVD with Dynamic Shifts" (2024)
+\doi{10.1145/3660629}.
+}
+}
+\author{
+Zilong Li \email{zilong.dk@gmail.com}
 }

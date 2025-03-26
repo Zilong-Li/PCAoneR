@@ -1,6 +1,6 @@
 #' @title Window-based Randomized SVD
 #' 
-#' @description winSVD implements the window-based Randomized SVD proposed by Li et al. 2024
+#' @description winSVD implements the window-based Randomized SVD proposed by Li et al. 2023
 #' 
 #' @param A       array_like; \cr
 #'                a real \eqn{(m, n)} input matrix to be decomposed.

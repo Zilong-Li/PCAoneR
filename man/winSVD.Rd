@@ -45,7 +45,7 @@ right singular vectors; \eqn{(n, k)} or \eqn{(n, nv)} dimensional array. \cr
 }
 }
 \description{
-winSVD implements the window-based Randomized SVD proposed by Li et al. 2024
+winSVD implements the window-based Randomized SVD proposed by Li et al. 2023
 }
 \note{
 The singular vectors are not unique and only defined up to sign.
