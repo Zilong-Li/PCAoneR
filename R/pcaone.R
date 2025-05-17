@@ -37,18 +37,19 @@
 #'                the target rank for the low-rank decomposition. \eqn{k} should satisfy \eqn{k << min(m,n)}.
 #'
 #' @param p       integer, optional; \cr
-#'                number of additional power iterations (by default \eqn{p=7}).
+#'                number of power iterations (by default \eqn{p=10}).
 #'
 #' @param s       integer, optional; \cr
 #'                oversampling parameter (by default \eqn{s=10}).
 #'
 #' @param method  string \eqn{c( 'winsvd', 'dashsvd')}, optional; \cr
 #'                specifies the different variation of the randomized singular value decomposition : \cr
-#'                		\eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
+#'                		\eqn{'auto'} (default): automatically choose the method based on size of input matrix. \cr
+#'                		\eqn{'winsvd'} : window based RSVD in PCAone paper. \cr
 #'                		\eqn{'dashsvd'} : dynamic shifts based RSVD with  by Feng et al. 2024. \cr
 #'
-#' @param batchs integer, optional; \cr
-#'                the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{batchs=64}).
+#' @param B       integer, optional; \cr
+#'                the number of batchs for 'winsvd' method. must be a power of 2 (by default \eqn{B=64}).
 #'
 #' @param shuffle logical, optional; \cr
 #'                if shuffle the rows of input tall matrix or not for winsvd (by default \eqn{shuffle=TRUE}).
@@ -93,15 +94,27 @@
 #' res <- pcaone(A, k = 40, method = "dashsvd")
 #' str(res)
 #' @export
-pcaone <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, shuffle = TRUE, opts = list()) UseMethod("pcaone")
-
+pcaone <- function(A, k=NULL, p=10, s=20, method = "auto", B = 64, shuffle = TRUE, opts = list()) UseMethod("pcaone")
+dim(A)
 
 #' @rdname pcaone
 #' @export
-pcaone.matrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
+pcaone.matrix <- function(A, k=NULL, p=10, s=20, method = "auto", B = 64, shuffle = TRUE, opts = list())
 {
   ## A <- as.matrix(A)
   pcaopts <- check_pca_opts(A, opts)
+  
+  if(nrow(A)>1e4 || ncol(A)>1e4) {
+    if(method == "auto")
+      method <- "winsvd"
+    else
+      message("recommend using winsvd method for large matrix" )
+  } else {
+    if(method == "auto")
+      method <- "dashsvd"
+    else
+      message("recommend using dashsvd method for small matrix" )
+  }
   
   pcaopts$method <- switch(method,
                            winsvd = 1L,
@@ -123,7 +136,7 @@ pcaone.matrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, 
     
   }
 
-  pcaoneObj <- .Call(`_pcaone_svd_dense`, A, k, p, s, batchs, pcaopts)
+  pcaoneObj <- .Call(`_pcaone_svd_dense`, A, k, p-1, s, B, pcaopts) ## 0-based
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
   pcaoneObj$v <- as.matrix(pcaoneObj$v)
@@ -149,16 +162,28 @@ pcaone.matrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, 
 
 #' @rdname pcaone
 #' @export
-pcaone.dgCMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
+pcaone.dgCMatrix <- function(A, k=NULL, p=10, s=20, method = "auto", B = 64, shuffle = TRUE, opts = list())
 {
-  message("pcaone for sparse matrix in column major [dgCMatrix]" )
   pcaopts <- check_pca_opts(A, opts)
+
+  if(nrow(A)>1e4 || ncol(A)>1e4) {
+    if(method == "auto")
+      method <- "winsvd"
+    else
+      message("recommend using winsvd method for large matrix" )
+  } else {
+    if(method == "auto")
+      method <- "dashsvd"
+    else
+      message("recommend using dashsvd method for small matrix" )
+  }
+
   pcaopts$method <- switch(method,
                            winsvd = 1L,
                            dashsvd = 2L,
                            stop("Method is not supported!"))
   
-  pcaoneObj <- .Call(`_pcaone_svd_sparse_col`, A, k, p, s, batchs, pcaopts)
+  pcaoneObj <- .Call(`_pcaone_svd_sparse_col`, A, k, p-1, s, B, pcaopts)
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
   pcaoneObj$v <- as.matrix(pcaoneObj$v)
@@ -175,16 +200,28 @@ pcaone.dgCMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 6
 
 #' @rdname pcaone
 #' @export
-pcaone.dgRMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", batchs = 64, shuffle = TRUE, opts = list())
+pcaone.dgRMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", B = 64, shuffle = TRUE, opts = list())
 {
-  message("pcaone for sparse matrix in row major [dgRMatrix]" )
   pcaopts <- check_pca_opts(A, opts)
+
+  if(nrow(A)>1e4 || ncol(A)>1e4) {
+    if(method == "auto")
+      method <- "winsvd"
+    else
+      message("recommend using winsvd method for large matrix" )
+  } else {
+    if(method == "auto")
+      method <- "dashsvd"
+    else
+      message("recommend using dashsvd method for small matrix" )
+  }
+
   pcaopts$method <- switch(method,
                            winsvd = 1L,
                            dashsvd = 2L,
                            stop("Method is not supported!"))
   
-  pcaoneObj <- .Call(`_pcaone_svd_sparse_row`, A, k, p, s, batchs, pcaopts)
+  pcaoneObj <- .Call(`_pcaone_svd_sparse_row`, A, k, p-1, s, B, pcaopts)
   pcaoneObj$d <- as.vector(pcaoneObj$d)
   pcaoneObj$u <- as.matrix(pcaoneObj$u)
   pcaoneObj$v <- as.matrix(pcaoneObj$v)

@@ -304,7 +304,7 @@ public:
     }
     eigSVD(Omg, b_rightSingularVectors, b_singularValues, b_leftSingularVectors);
     double alpha = 0.0;
-    for(uint32_t i = 0; i < p; i++)
+    for(uint32_t i = 0; i <= p; i++)
     {
       if(dopca) {
         Omg.noalias() = Ab.transpose() * (Ab * b_rightSingularVectors) - alpha * b_rightSingularVectors;

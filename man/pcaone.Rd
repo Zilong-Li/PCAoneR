@@ -10,10 +10,10 @@
 pcaone(
   A,
   k = NULL,
-  p = 7,
-  s = 10,
-  method = "winsvd",
-  batchs = 64,
+  p = 10,
+  s = 20,
+  method = "auto",
+  B = 64,
   shuffle = TRUE,
   opts = list()
 )
@@ -21,10 +21,10 @@ pcaone(
 \method{pcaone}{matrix}(
   A,
   k = NULL,
-  p = 7,
-  s = 10,
-  method = "winsvd",
-  batchs = 64,
+  p = 10,
+  s = 20,
+  method = "auto",
+  B = 64,
   shuffle = TRUE,
   opts = list()
 )
@@ -32,10 +32,10 @@ pcaone(
 \method{pcaone}{dgCMatrix}(
   A,
   k = NULL,
-  p = 7,
-  s = 10,
-  method = "winsvd",
-  batchs = 64,
+  p = 10,
+  s = 20,
+  method = "auto",
+  B = 64,
   shuffle = TRUE,
   opts = list()
 )
@@ -46,7 +46,7 @@ pcaone(
   p = 7,
   s = 10,
   method = "winsvd",
-  batchs = 64,
+  B = 64,
   shuffle = TRUE,
   opts = list()
 )
@@ -59,18 +59,19 @@ a real/complex \eqn{(m, n)} input matrix (or data frame) to be decomposed.}
 the target rank for the low-rank decomposition. \eqn{k} should satisfy \eqn{k << min(m,n)}.}
 
 \item{p}{integer, optional; \cr
-number of additional power iterations (by default \eqn{p=7}).}
+number of power iterations (by default \eqn{p=10}).}
 
 \item{s}{integer, optional; \cr
 oversampling parameter (by default \eqn{s=10}).}
 
 \item{method}{string \eqn{c( 'winsvd', 'dashsvd')}, optional; \cr
 specifies the different variation of the randomized singular value decomposition : \cr
-\eqn{'winsvd'} (default): window based RSVD in PCAone paper. \cr
+\eqn{'auto'} (default): automatically choose the method based on size of input matrix. \cr
+\eqn{'winsvd'} : window based RSVD in PCAone paper. \cr
 \eqn{'dashsvd'} : dynamic shifts based RSVD with  by Feng et al. 2024. \cr}
 
-\item{batchs}{integer, optional; \cr
-the number of batchs for 'alg2' method. must be a power of 2 (by default \eqn{batchs=64}).}
+\item{B}{integer, optional; \cr
+the number of batchs for 'winsvd' method. must be a power of 2 (by default \eqn{B=64}).}
 
 \item{shuffle}{logical, optional; \cr
 if shuffle the rows of input tall matrix or not for winsvd (by default \eqn{shuffle=TRUE}).}
