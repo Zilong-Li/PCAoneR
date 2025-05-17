@@ -95,7 +95,7 @@
 #' str(res)
 #' @export
 pcaone <- function(A, k=NULL, p=10, s=20, method = "auto", B = 64, shuffle = TRUE, opts = list()) UseMethod("pcaone")
-dim(A)
+
 
 #' @rdname pcaone
 #' @export
