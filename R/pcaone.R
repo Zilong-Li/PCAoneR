@@ -37,7 +37,7 @@
 #'                the target rank for the low-rank decomposition. \eqn{k} should satisfy \eqn{k << min(m,n)}.
 #'
 #' @param p       integer, optional; \cr
-#'                number of power iterations (by default \eqn{p=10}).
+#'                number of power iterations (by default \eqn{p=8}).
 #'
 #' @param s       integer, optional; \cr
 #'                oversampling parameter (by default \eqn{s=10}).
@@ -89,9 +89,7 @@
 #' library('pcaone')
 #' load(system.file("extdata", "popgen.rda", package="pcaone") )
 #' A <- popgen - rowMeans(popgen)
-#' res <- pcaone(A, k = 40, method = "winsvd")
-#' str(res)
-#' res <- pcaone(A, k = 40, method = "dashsvd")
+#' res <- pcaone(A, k = 40)
 #' str(res)
 #' @export
 pcaone <- function(A, k=NULL, p=10, s=20, method = "auto", B = 64, shuffle = TRUE, opts = list()) UseMethod("pcaone")
@@ -103,18 +101,8 @@ pcaone.matrix <- function(A, k=NULL, p=10, s=20, method = "auto", B = 64, shuffl
 {
   ## A <- as.matrix(A)
   pcaopts <- check_pca_opts(A, opts)
-  
-  if(nrow(A)>1e4 || ncol(A)>1e4) {
-    if(method == "auto")
-      method <- "winsvd"
-    else
-      message("recommend using winsvd method for large matrix" )
-  } else {
-    if(method == "auto")
-      method <- "dashsvd"
-    else
-      message("recommend using dashsvd method for small matrix" )
-  }
+
+  method <- check_method_opts(A, method, p, s)
   
   pcaopts$method <- switch(method,
                            winsvd = 1L,
@@ -166,18 +154,8 @@ pcaone.dgCMatrix <- function(A, k=NULL, p=10, s=20, method = "auto", B = 64, shu
 {
   pcaopts <- check_pca_opts(A, opts)
 
-  if(nrow(A)>1e4 || ncol(A)>1e4) {
-    if(method == "auto")
-      method <- "winsvd"
-    else
-      message("recommend using winsvd method for large matrix" )
-  } else {
-    if(method == "auto")
-      method <- "dashsvd"
-    else
-      message("recommend using dashsvd method for small matrix" )
-  }
-
+  method <- check_method_opts(A, method, p, s)
+  
   pcaopts$method <- switch(method,
                            winsvd = 1L,
                            dashsvd = 2L,
@@ -204,17 +182,7 @@ pcaone.dgRMatrix <- function(A, k=NULL, p=7, s=10, method = "winsvd", B = 64, sh
 {
   pcaopts <- check_pca_opts(A, opts)
 
-  if(nrow(A)>1e4 || ncol(A)>1e4) {
-    if(method == "auto")
-      method <- "winsvd"
-    else
-      message("recommend using winsvd method for large matrix" )
-  } else {
-    if(method == "auto")
-      method <- "dashsvd"
-    else
-      message("recommend using dashsvd method for small matrix" )
-  }
+  method <- check_method_opts(A, method, p, s)
 
   pcaopts$method <- switch(method,
                            winsvd = 1L,
@@ -289,4 +257,22 @@ check_pca_opts <- function(A, opts) {
       stop("opts$center must has same length as scale" )
   }
   return(pcaopts)
+}
+
+check_method_opts <- function(A, method, p, s) {
+  if(p < 1) stop("p must be greater than 1")
+  if(s < 0) stop("s must be greater than 0")
+  
+  if(nrow(A)>1e4 || ncol(A)>1e4) {
+    if(method == "auto")
+      method <- "winsvd"
+    else
+      message("recommend using winsvd method for large matrix" )
+  } else {
+    if(method == "auto")
+      method <- "dashsvd"
+    else
+      message("recommend using dashsvd method for small matrix" )
+  }
+  method
 }

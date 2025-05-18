@@ -19,7 +19,7 @@ testMat <- testMat[,1:n]
 svd_out <- svd(testMat)
 
 #Randomized SVD k=k
-rsvd_out <- pcaone(testMat, k = k, p = 0, s = 0, method = "dashsvd")
+rsvd_out <- pcaone(testMat, k = k, p = 1, s = 0, method = "dashsvd")
 testMat.re <- rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
 testthat::test_that("Test 2: dashSVD k=k, p=0, q=0", {
               testthat::expect_equal(svd_out$d[1:k], rsvd_out$d[1:k])

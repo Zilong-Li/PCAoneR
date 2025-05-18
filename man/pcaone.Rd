@@ -59,7 +59,7 @@ a real/complex \eqn{(m, n)} input matrix (or data frame) to be decomposed.}
 the target rank for the low-rank decomposition. \eqn{k} should satisfy \eqn{k << min(m,n)}.}
 
 \item{p}{integer, optional; \cr
-number of power iterations (by default \eqn{p=10}).}
+number of power iterations (by default \eqn{p=8}).}
 
 \item{s}{integer, optional; \cr
 oversampling parameter (by default \eqn{s=10}).}
@@ -134,9 +134,7 @@ gives an equivalent decomposition.
 library('pcaone')
 load(system.file("extdata", "popgen.rda", package="pcaone") )
 A <- popgen - rowMeans(popgen)
-res <- pcaone(A, k = 40, method = "winsvd")
-str(res)
-res <- pcaone(A, k = 40, method = "dashsvd")
+res <- pcaone(A, k = 40)
 str(res)
 }
 \references{

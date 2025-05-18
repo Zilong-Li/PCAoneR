@@ -34,7 +34,7 @@ testMat <- testMat[,1:n]
 svd_out <- svd(testMat)
 
 #Randomized SVD k=n
-rsvd_out <- pcaone(testMat, k = n, batchs = 8, p = 3, method = "winsvd")
+rsvd_out <- pcaone(testMat, k = n, B = 8, p = 4, method = "winsvd")
 testMat.re <- rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
 testthat::test_that("Test 1: winSVD k=n", {
               testthat::expect_equal(svd_out$d, rsvd_out$d)
@@ -42,7 +42,7 @@ testthat::test_that("Test 1: winSVD k=n", {
           })
 
 #Randomized SVD k=k
-rsvd_out <- pcaone(testMat, k = k, batchs = 8, p = 3, method = "winsvd")
+rsvd_out <- pcaone(testMat, k = k, B = 8, p = 4, method = "winsvd")
 testMat.re <- rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
 testthat::test_that("Test 2: winSVD k=k", {
               testthat::expect_equal(svd_out$d[1:k], rsvd_out$d[1:k])
@@ -59,7 +59,7 @@ testMat <- t(testMat)
 svd_out <- svd(testMat)
 
 #Randomized SVD k=n
-rsvd_out <- pcaone(testMat, k = n, batchs = 8, p = 3, method = "winsvd")
+rsvd_out <- pcaone(testMat, k = n, B = 8, p = 4, method = "winsvd")
 testMat.re <- rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
 testthat::test_that("Test 1: winSVD k=n", {
               testthat::expect_equal(svd_out$d, rsvd_out$d)
@@ -67,7 +67,7 @@ testthat::test_that("Test 1: winSVD k=n", {
           })
 
 #Randomized SVD k=k
-rsvd_out <- pcaone(testMat, k = k, batchs = 8, p = 3, method = "winsvd")
+rsvd_out <- pcaone(testMat, k = k, B = 8, p = 4, method = "winsvd")
 testMat.re = rsvd_out$u %*% diag(rsvd_out$d) %*% t(rsvd_out$v)
 testthat::test_that("Test 2: winSVD k=k", {
               testthat::expect_equal(svd_out$d[1:k], rsvd_out$d[1:k])
